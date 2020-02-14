@@ -21,10 +21,7 @@ namespace Rooms
         {
             services.AddCors();
             services.AddControllers();
-            services.AddSpaStaticFiles(config =>
-            {
-                config.RootPath = "client/build";
-            });
+            services.AddSpaStaticFiles(config => config.RootPath = "client/build");
             var key = Encoding.ASCII.GetBytes(Configuration.GetValue<string>("secret"));
             services.AddAuthentication(opts =>
             {
