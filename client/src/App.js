@@ -14,10 +14,6 @@ export default class App extends Component {
                 name: "Arthur",
                 email: "inveterate.coder@gmail.com",
                 icon: "man",
-                filters: {
-                    en: "English",
-                    ru: "Русский"
-                }
             },
             room: {
                 name: "",
@@ -27,10 +23,13 @@ export default class App extends Component {
                 limit: 20
             },
             lang: "en",
-            notifs: false
+            filters: {
+                en: "English",
+                ru: "Русский"
+            }
         }
     }
-    changeCredentials = (data, password) => {
+    changeCredentials = data => {
         //newpassword to be considered
         this.setState({
             creds: {
@@ -41,17 +40,16 @@ export default class App extends Component {
             }
         });
     }
-    changeRoom = (data, password) => {
+    changeFilters = filters => {
+        this.setState(filters);
+    }
+    changeRoom = data => {
         //room change here
         this.setState({ room: data });
     }
     setLanguage = lang => {
         //todo save state in memory
         this.setState({ lang: lang });
-    }
-    setNotifications = status => {
-        //todo processing
-        this.setState({ notifs: status });
     }
     signOut = () => {
         this.setState({
@@ -62,8 +60,8 @@ export default class App extends Component {
     render() {
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
-            notifs: this.state.notifs, creds: this.state.creds, room: this.state.room,
-            setNotifications: this.setNotifications, signOut: this.signOut,
+            filters: this.state.filters, creds: this.state.creds, room: this.state.room,
+            signOut: this.signOut, changeFilters: this.changeFilters,
             setLanguage: this.setLanguage, changeCredentials: this.changeCredentials,
             changeRoom: this.changeRoom
         }}>

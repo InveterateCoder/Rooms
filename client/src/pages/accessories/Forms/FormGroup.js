@@ -25,11 +25,6 @@ export function FormGroup(props) {
                         }
                     </datalist>
                 </>
-            case "switch":
-                return <div className="custom-control custom-switch">
-                    <input spellCheck={false} onChange={props.toggleNotif} type="checkbox" className="custom-control-input" id="notif_switch" />
-                    <label className="custom-control-label" htmlFor="notif_switch">{props.switchlabel}</label>
-                </div>
             case "select":
                 return <select className="form-control" value={props.lang} onChange={props.selectLanguage}>
                     {

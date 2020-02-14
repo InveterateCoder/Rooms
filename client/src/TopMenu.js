@@ -56,8 +56,9 @@ export function TopMenu(props) {
     const applySearch = () => {
         if (search === val) return;
         if (searchError) alert(searchError);
-        else props.history.push(props.location.pathname + "?q=" + search.trim());
+        else props.history.push("/lobby/1" + "?q=" + search.trim());
     }
+    let page = props.location.pathname.startsWith("/lobby/") ? Number(props.location.pathname.substring(7)) : 1;
     text.setLanguage(context.lang);
     return <Navbar bg="dark" variant="dark" expand="md" sticky="top"
         expanded={navExpanded}
@@ -76,7 +77,7 @@ export function TopMenu(props) {
         <Navbar.Toggle />
         <Navbar.Collapse>
             <Nav className="ml-auto">
-                <Nav.Link className="m-auto" as={NavLink} to={`/lobby/1${search ? "?q=" + search.trim() : ""}`} activeClassName="active">
+                <Nav.Link className="m-auto" as={NavLink} to={`/lobby/${page}${search ? "?q=" + search.trim() : ""}`} activeClassName="active">
                     <FontAwesomeIcon icon={faSearch} /> {text.Lobby}</Nav.Link>
                 {
                     context.registered

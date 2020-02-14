@@ -3,7 +3,7 @@ import { Context } from "../data/Context";
 import { Avatar } from "./accessories/Forms/Avatar";
 import { FormGroup } from "./accessories/Forms/FormGroup";
 import { PasswordGroup } from "./accessories/Forms/PasswordGroup";
-import {FilterGroup} from "./accessories/Forms/FilterGroup";
+import { FilterGroup } from "./accessories/Forms/FilterGroup";
 import validator from "../utils/validator";
 import LocalizedStrings from "react-localization";
 
@@ -48,9 +48,9 @@ export function Account(props) {
         icon: context.creds.icon,
         email: context.creds.email,
         name: context.creds.name,
-        newpassword: "",
-        filters: context.creds.filters
+        newpassword: ""
     });
+    const [filters, setFilters] = useState(context.filters);
     const [errors, setErrors] = useState({
         email: "",
         name: ""
@@ -71,24 +71,26 @@ export function Account(props) {
         });
     }
     const newPasswordChanged = pswd => {
-        if(form.newpassword !== pswd)
+        if (form.newpassword !== pswd)
             setForm({
                 ...form,
-                newpassword:pswd
+                newpassword: pswd
             });
     }
     const addFilter = (key, value) => {
-        setForm({...form, filters:{...form.filters, [key]: value}});
+        let temp = {}
+        temp = { ...filters, [key]: value };
+        context.changeFilters(temp);
+        setFilters(temp);
     }
     const deleteFilter = key => {
         let temp = {}
-        for (let kkey in form.filters)
-            if(kkey !== key) temp[kkey] = form.filters[kkey];
-        setForm({...form, filters:temp})
+        for (let kkey in filters)
+            if (kkey !== key) temp[kkey] = filters[kkey];
+        context.changeFilters(temp);
+        setFilters(temp);
     }
 
-    const toggleNotif = () => context.setNotifications(!context.notifs);
-    
     const selectLanguage = ev => {
         let value = ev.target.value;
         setErrors({
@@ -97,19 +99,8 @@ export function Account(props) {
         });
         context.setLanguage(value);
     }
-    const filtersChanged = () => {
-        let locf = Object.keys(form.filters);
-        let sysf = Object.keys(context.creds.filters);
-        if(locf.length !== sysf.length)
-            return true;
-        for(let lockey of locf){
-            if(!sysf.includes(lockey))
-                return true;
-        }
-        return false;
-    }
     const hasFormChanged = () => {
-        if (form.newpassword !== "" || filtersChanged() || form.email !== context.creds.email ||
+        if (form.newpassword !== "" || form.email !== context.creds.email ||
             form.name !== context.creds.name || form.icon !== context.creds.icon)
             return true;
         return false;
@@ -125,8 +116,7 @@ export function Account(props) {
             icon: context.creds.icon,
             email: context.creds.email,
             name: context.creds.name,
-            newpassword: "",
-            filters: context.creds.filters
+            newpassword: ""
         });
         setErrors({
             email: "",
@@ -139,10 +129,9 @@ export function Account(props) {
                 email: form.email !== context.creds.email ? form.email : null,
                 name: form.name !== context.creds.name ? form.name : null,
                 icon: form.icon !== context.creds.icon ? form.icon : null,
-                newpassword: form.newpassword ? form.newpassword : null,
-                filters: filtersChanged() ? form.filters : null
+                newpassword: form.newpassword ? form.newpassword : null
             });
-            setForm({...form, newpassword:""});
+            setForm({ ...form, newpassword: "" });
         }
     }
     text.setLanguage(context.lang);
@@ -154,17 +143,16 @@ export function Account(props) {
             inputChanged={inputChanged} error={errors.name} />
         <PasswordGroup type="password" lang={context.lang} newpassword={form.newpassword}
             onChange={newPasswordChanged} />
-        <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add}
-            addFilter={addFilter} deleteFilter={deleteFilter} filters={form.filters} />
         <div id="conf_acc_change" className={`${hasFormChanged() ? "" : "invisible"}`}>
             <button className="btn btn-outline-secondary mr-2" onClick={cancelChanges}>{text.cancel}</button>
             <button onClick={apply} disabled={!isValid()}
                 className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
-                    {text.submit}</button>
+                {text.submit}</button>
         </div>
         <hr />
-        <FormGroup type="switch" label={text.notifications} toggleNotif={toggleNotif}
-            switchlabel={text.notifs[context.notifs]} />
         <FormGroup type="select" label={text.language} lang={context.lang} selectLanguage={selectLanguage} />
+        <br/>
+        <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add}
+            addFilter={addFilter} deleteFilter={deleteFilter} filters={filters} />
     </div>
 }
