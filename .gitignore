@@ -1,0 +1,5 @@
+/.vscode
+/bin
+/obj
+/client/node_modules
+/wwwroot/img
