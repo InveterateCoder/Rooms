@@ -10,10 +10,9 @@ export default class App extends Component {
         this.state = {
             jwt: "some",
             registered: true,
-            creds: {
+            user: {
                 name: "Arthur",
                 email: "inveterate.coder@gmail.com",
-                icon: "man",
             },
             room: {
                 name: "",
@@ -26,18 +25,22 @@ export default class App extends Component {
             filters: {
                 en: "English",
                 ru: "Русский"
-            }
+            },
+            icon: "user"
         }
     }
-    changeCredentials = data => {
+    changeUser = data => {
         //newpassword to be considered
         this.setState({
-            creds: {
+            user: {
                 name: data.name ? data.name : this.state.creds.name,
-                email: data.email ? data.email : this.state.creds.email,
-                icon: data.icon ? data.icon : this.state.creds.icon,
-                filters: data.filters ? data.filters : this.state.creds.filters
+                email: data.email ? data.email : this.state.creds.email
             }
+        });
+    }
+    changeIcon = icon => {
+        this.setState({
+            icon: icon
         });
     }
     changeFilters = filters => {
@@ -60,10 +63,10 @@ export default class App extends Component {
     render() {
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
-            filters: this.state.filters, creds: this.state.creds, room: this.state.room,
-            signOut: this.signOut, changeFilters: this.changeFilters,
-            setLanguage: this.setLanguage, changeCredentials: this.changeCredentials,
-            changeRoom: this.changeRoom
+            filters: this.state.filters, user: this.state.user, room: this.state.room,
+            signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
+            setLanguage: this.setLanguage, changeUser: this.changeUser,
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon
         }}>
             <Router>
                 <Switch>

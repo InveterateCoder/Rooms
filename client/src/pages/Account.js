@@ -45,9 +45,8 @@ const text = new LocalizedStrings({
 export function Account(props) {
     const context = useContext(Context);
     const [form, setForm] = useState({
-        icon: context.creds.icon,
-        email: context.creds.email,
-        name: context.creds.name,
+        email: context.user.email,
+        name: context.user.name,
         newpassword: ""
     });
     const [filters, setFilters] = useState(context.filters);
@@ -55,9 +54,6 @@ export function Account(props) {
         email: "",
         name: ""
     });
-    const selectIcon = name => {
-        setForm({ ...form, icon: name });
-    }
     const inputChanged = ev => {
         let name = ev.target.name;
         let value = ev.target.value;
@@ -100,8 +96,8 @@ export function Account(props) {
         context.setLanguage(value);
     }
     const hasFormChanged = () => {
-        if (form.newpassword !== "" || form.email !== context.creds.email ||
-            form.name !== context.creds.name || form.icon !== context.creds.icon)
+        if (form.newpassword !== "" || form.email !== context.user.email ||
+            form.name !== context.user.name)
             return true;
         return false;
     }
@@ -113,9 +109,8 @@ export function Account(props) {
 
     const cancelChanges = () => {
         setForm({
-            icon: context.creds.icon,
-            email: context.creds.email,
-            name: context.creds.name,
+            email: context.user.email,
+            name: context.user.name,
             newpassword: ""
         });
         setErrors({
@@ -126,9 +121,8 @@ export function Account(props) {
     const apply = () => {
         if (isValid() && hasFormChanged()) {
             context.changeCredentials({
-                email: form.email !== context.creds.email ? form.email : null,
-                name: form.name !== context.creds.name ? form.name : null,
-                icon: form.icon !== context.creds.icon ? form.icon : null,
+                email: form.email !== context.user.email ? form.email : null,
+                name: form.name !== context.user.name ? form.name : null,
                 newpassword: form.newpassword ? form.newpassword : null
             });
             setForm({ ...form, newpassword: "" });
@@ -136,7 +130,7 @@ export function Account(props) {
     }
     text.setLanguage(context.lang);
     return <div className="container formpage">
-        <Avatar image={form.icon} selectImage={selectIcon} />
+        <Avatar image={context.icon} selectImage={name => context.changeIcon(name)} />
         <FormGroup type="text" label={text.email} value={form.email} name="email"
             inputChanged={inputChanged} error={errors.email} />
         <FormGroup type="text" label={text.name} value={form.name} name="name"

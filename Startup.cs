@@ -22,7 +22,10 @@ namespace Rooms
             services.AddCors();
             services.AddControllers();
             services.AddSpaStaticFiles(config => config.RootPath = "client/build");
-            var key = Encoding.ASCII.GetBytes(Configuration.GetValue<string>("secret"));
+            var settingsSection = Configuration.GetSection("Settings");
+            services.Configure<Settings>(settingsSection);
+            var settings = settingsSection.Get<Settings>();
+            var key = Encoding.ASCII.GetBytes(settings.Secret);
             services.AddAuthentication(opts =>
             {
                 opts.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

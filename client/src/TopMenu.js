@@ -56,7 +56,7 @@ export function TopMenu(props) {
     const applySearch = () => {
         if (search === val) return;
         if (searchError) alert(searchError);
-        else props.history.push("/lobby/1" + "?q=" + search.trim());
+        else props.history.push("/lobby/1?q=" + search.trim());
     }
     let page = props.location.pathname.startsWith("/lobby/") ? Number(props.location.pathname.substring(7)) : 1;
     text.setLanguage(context.lang);
