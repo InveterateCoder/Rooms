@@ -1,7 +1,15 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
 namespace Rooms.Models
 {
+    public class RoomsDBContext : DbContext {
+        public RoomsDBContext(DbContextOptions<RoomsDBContext> opts) : base(opts) {}
+        public DbSet<User> Users {get;set;}
+        public DbSet<Room> Rooms {get;set;}
+        public DbSet<Message> Messages {get;set;}
+    }
     public class User
     {
         public int UserId {get;set;}

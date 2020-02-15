@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Rooms.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Rooms
 {
@@ -25,6 +27,7 @@ namespace Rooms
             var settingsSection = Configuration.GetSection("Settings");
             services.Configure<Settings>(settingsSection);
             var settings = settingsSection.Get<Settings>();
+            services.AddDbContext<RoomsDBContext>(opts => opts.UseMySql(settings.DBString));
             var key = Encoding.ASCII.GetBytes(settings.Secret);
             services.AddAuthentication(opts =>
             {
