@@ -13,18 +13,19 @@ namespace Rooms.Models
     public class User
     {
         public int UserId {get;set;}
-        [MaxLength(320)]
+        [Required, MaxLength(320)]
         public string Email {get;set;}
-        [MaxLength(40)]
+        [Required, MaxLength(40)]
         public string Name {get;set;}
-        [MaxLength(16)]
+        [Required, MaxLength(16)]
         public string Password {get;set;}
+        [Required]
         public Room Room {get;set;}
     }
     public class Room
     {
         public int RoomId {get;set;}
-        [MaxLength(2)]
+        [Required, MaxLength(2)]
         public string Country {get;set;}
         [MaxLength(40)]
         public string Name {get;set;}
@@ -32,19 +33,24 @@ namespace Rooms.Models
         public string Description {get;set;}
         [MaxLength(16)]
         public string Password {get;set;}
+        [Required]
         public byte MaxUsers {get;set;}
         public List<Message> Messages {get;set;}
     }
     public class Message
     {
         public int MessageId {get;set;}
+        [Required]
         public long TimeStamp {get;set;}
+        [Required]
         public int UserId {get;set;}
-        [MaxLength(5)]
+        [Required, MaxLength(5)]
         public string Icon {get;set;}
         public List<User> To {get;set;}
         public string ToJson {get;set;}
+        [Required, MaxLength(10000)]
         public string Text {get;set;}
+        [Required]
         public bool Encrypted {get;set;}
     }
 }
