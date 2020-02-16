@@ -33,10 +33,13 @@ export default class App extends Component {
         //newpassword to be considered
         this.setState({
             user: {
-                name: data.name ? data.name : this.state.creds.name,
-                email: data.email ? data.email : this.state.creds.email
+                name: data.name ? data.name : this.state.user.name,
+                email: data.email ? data.email : this.state.user.email
             }
         });
+    }
+    deleteUser = () => {
+        alert("Deleting")
     }
     changeIcon = icon => {
         this.setState({
@@ -66,7 +69,7 @@ export default class App extends Component {
             filters: this.state.filters, user: this.state.user, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
             setLanguage: this.setLanguage, changeUser: this.changeUser,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser
         }}>
             <Router>
                 <Switch>

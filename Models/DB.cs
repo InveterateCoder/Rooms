@@ -9,6 +9,15 @@ namespace Rooms.Models
         public DbSet<User> Users {get;set;}
         public DbSet<Room> Rooms {get;set;}
         public DbSet<Message> Messages {get;set;}
+        public DbSet<RegQueueEntity> RegQueue {get;set;}
+        protected override void OnModelCreating(ModelBuilder modelBuilder){
+            modelBuilder.Entity<Room>()
+                .HasIndex(r => r.Slug)
+                .IsUnique();
+            modelBuilder.Entity<RegQueueEntity>()
+                .HasIndex(e => e.Key)
+                .IsUnique();
+        }
     }
     public class User
     {
@@ -19,7 +28,6 @@ namespace Rooms.Models
         public string Name {get;set;}
         [Required, MaxLength(16)]
         public string Password {get;set;}
-        [Required]
         public Room Room {get;set;}
     }
     public class Room
@@ -27,8 +35,10 @@ namespace Rooms.Models
         public int RoomId {get;set;}
         [Required, MaxLength(2)]
         public string Country {get;set;}
-        [MaxLength(40)]
+        [Required, MaxLength(40)]
         public string Name {get;set;}
+        [Required, MaxLength(40)]
+        public string Slug {get;set;}
         [MaxLength(200)]
         public string Description {get;set;}
         [MaxLength(16)]
@@ -43,7 +53,7 @@ namespace Rooms.Models
         [Required]
         public long TimeStamp {get;set;}
         [Required]
-        public int UserId {get;set;}
+        public int User {get;set;}
         [Required, MaxLength(5)]
         public string Icon {get;set;}
         public List<User> To {get;set;}
@@ -52,5 +62,17 @@ namespace Rooms.Models
         public string Text {get;set;}
         [Required]
         public bool Encrypted {get;set;}
+    }
+    public class RegQueueEntity
+    {
+        public int Id {get;set;}
+        [Required, MaxLength(10)]
+        public string Key {get;set;}
+        [Required, MaxLength(40)]
+        public string Name {get;set;}
+        [Required, MaxLength(320)]
+        public string Email {get;set;}
+        [MaxLength(16)]
+        public string Password {get;set;}
     }
 }

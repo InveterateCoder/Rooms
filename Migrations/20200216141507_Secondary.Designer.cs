@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rooms.Models;
 
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    partial class RoomsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20200216141507_Secondary")]
+    partial class Secondary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,39 +55,6 @@ namespace Rooms.Migrations
                     b.HasIndex("RoomId");
 
                     b.ToTable("Messages");
-                });
-
-            modelBuilder.Entity("Rooms.Models.RegQueueEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("varchar(320) CHARACTER SET utf8mb4")
-                        .HasMaxLength(320);
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("varchar(10) CHARACTER SET utf8mb4")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
-                        .HasMaxLength(40);
-
-                    b.Property<string>("Password")
-                        .HasColumnType("varchar(16) CHARACTER SET utf8mb4")
-                        .HasMaxLength(16);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("RegQueue");
                 });
 
             modelBuilder.Entity("Rooms.Models.Room", b =>

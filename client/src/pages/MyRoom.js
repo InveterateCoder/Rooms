@@ -4,6 +4,7 @@ import validator from "../utils/validator";
 import { FlagGroup } from "./accessories/Forms/FlagGroup";
 import { FormGroup } from "./accessories/Forms/FormGroup";
 import { PasswordGroup } from "./accessories/Forms/PasswordGroup";
+import { Delete } from "./accessories/Forms/Delete";
 import LocalizedStrings from "react-localization";
 
 const text = new LocalizedStrings({
@@ -17,7 +18,8 @@ const text = new LocalizedStrings({
         cancel: "Cancel",
         apply: "Apply",
         create: "Create",
-        delete: "Delete"
+        delete: "Delete",
+        confirm: "Are you sure you want to delete your room?"
     },
     ru: {
         choose: "Выберите страну",
@@ -29,7 +31,8 @@ const text = new LocalizedStrings({
         cancel: "Отмена",
         apply: "Применить",
         create: "Создать",
-        delete: "Удалить"
+        delete: "Удалить",
+        confirm: "Вы уверены, что хотите удалить вашу комнату?"
     }
 })
 
@@ -127,8 +130,7 @@ export function MyRoom(props) {
             <button onClick={cancelChanges} className="btn btn-outline-secondary mr-2">{text.cancel}</button>
             {
                 context.room.name && !rname
-                    ? <button onClick={apply}
-                        className="btn btn-danger">{text.delete}</button>
+                    ? <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={apply} />
                     : <button disabled={!isValid()} onClick={apply}
                         className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
                         {context.room.name ? text.apply : text.create}</button>

@@ -4,6 +4,7 @@ import { Avatar } from "./accessories/Forms/Avatar";
 import { FormGroup } from "./accessories/Forms/FormGroup";
 import { PasswordGroup } from "./accessories/Forms/PasswordGroup";
 import { FilterGroup } from "./accessories/Forms/FilterGroup";
+import { Delete } from "./accessories/Forms/Delete";
 import validator from "../utils/validator";
 import LocalizedStrings from "react-localization";
 
@@ -22,7 +23,9 @@ const text = new LocalizedStrings({
             false: "Off"
         },
         language: "Language",
-        cancel: "Cancel"
+        cancel: "Cancel",
+        delete: "Delete",
+        confirm: "Are you sure you want to delete your account?"
     },
     ru: {
         email: "Эл. почта",
@@ -38,7 +41,9 @@ const text = new LocalizedStrings({
             false: "Выкл."
         },
         language: "Язык",
-        cancel: "Отмена"
+        cancel: "Отмена",
+        delete: "Удалить",
+        confirm: "Вы уверены, что хотите удалить свой аккаунт?"
     }
 });
 
@@ -120,7 +125,7 @@ export function Account(props) {
     }
     const apply = () => {
         if (isValid() && hasFormChanged()) {
-            context.changeCredentials({
+            context.changeUser({
                 email: form.email !== context.user.email ? form.email : null,
                 name: form.name !== context.user.name ? form.name : null,
                 newpassword: form.newpassword ? form.newpassword : null
@@ -139,9 +144,13 @@ export function Account(props) {
             onChange={newPasswordChanged} />
         <div id="conf_acc_change" className={`${hasFormChanged() ? "" : "invisible"}`}>
             <button className="btn btn-outline-secondary mr-2" onClick={cancelChanges}>{text.cancel}</button>
-            <button onClick={apply} disabled={!isValid()}
-                className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
-                {text.submit}</button>
+            {
+                form.name
+                    ?   <button onClick={apply} disabled={!isValid()}
+                            className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
+                                {text.submit}</button>
+                    :   <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={context.deleteUser} />
+            }
         </div>
         <hr />
         <FormGroup type="select" label={text.language} lang={context.lang} selectLanguage={selectLanguage} />

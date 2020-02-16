@@ -21,13 +21,13 @@ namespace Rooms
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
             services.AddControllers();
             services.AddSpaStaticFiles(config => config.RootPath = "client/build");
             var settingsSection = Configuration.GetSection("Settings");
             services.Configure<Settings>(settingsSection);
             var settings = settingsSection.Get<Settings>();
             services.AddDbContext<RoomsDBContext>(opts => opts.UseMySql(settings.DBString));
+            services.AddCors();
             var key = Encoding.ASCII.GetBytes(settings.Secret);
             services.AddAuthentication(opts =>
             {
