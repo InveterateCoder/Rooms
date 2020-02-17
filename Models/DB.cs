@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,9 @@ namespace Rooms.Models
         public DbSet<Message> Messages {get;set;}
         public DbSet<RegQueueEntity> RegQueue {get;set;}
         protected override void OnModelCreating(ModelBuilder modelBuilder){
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
             modelBuilder.Entity<Room>()
                 .HasIndex(r => r.Slug)
                 .IsUnique();
@@ -53,11 +57,13 @@ namespace Rooms.Models
         [Required]
         public long TimeStamp {get;set;}
         [Required]
-        public int User {get;set;}
+        public User User {get;set;}
+        [Required, MaxLength(40)]
+        public string From {get;set;}
         [Required, MaxLength(5)]
         public string Icon {get;set;}
         public List<User> To {get;set;}
-        public string ToJson {get;set;}
+        public string ToNamesJson {get;set;}
         [Required, MaxLength(10000)]
         public string Text {get;set;}
         [Required]
@@ -66,6 +72,8 @@ namespace Rooms.Models
     public class RegQueueEntity
     {
         public int Id {get;set;}
+        [Required]
+        public long Date {get;set;}
         [Required, MaxLength(10)]
         public string Key {get;set;}
         [Required, MaxLength(40)]

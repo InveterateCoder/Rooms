@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rooms.Models;
 
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    partial class RoomsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20200217105315_Migration_4")]
+    partial class Migration_4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,9 +168,6 @@ namespace Rooms.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("UserId");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.HasIndex("MessageId");
 

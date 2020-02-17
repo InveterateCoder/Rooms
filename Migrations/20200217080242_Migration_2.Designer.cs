@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rooms.Models;
 
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    partial class RoomsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20200217080242_Migration_2")]
+    partial class Migration_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,11 +27,6 @@ namespace Rooms.Migrations
 
                     b.Property<bool>("Encrypted")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("From")
-                        .IsRequired()
-                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
-                        .HasMaxLength(40);
 
                     b.Property<string>("Icon")
                         .IsRequired()
@@ -47,17 +44,15 @@ namespace Rooms.Migrations
                     b.Property<long>("TimeStamp")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ToNamesJson")
+                    b.Property<string>("ToJson")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("User")
                         .HasColumnType("int");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("RoomId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
@@ -167,9 +162,6 @@ namespace Rooms.Migrations
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
                     b.HasIndex("MessageId");
 
                     b.HasIndex("RoomId");
@@ -182,12 +174,6 @@ namespace Rooms.Migrations
                     b.HasOne("Rooms.Models.Room", null)
                         .WithMany("Messages")
                         .HasForeignKey("RoomId");
-
-                    b.HasOne("Rooms.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Rooms.Models.User", b =>

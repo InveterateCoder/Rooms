@@ -7,9 +7,13 @@ import { Pager } from "./Pager";
 export default class App extends Component {
     constructor(props) {
         super(props);
+        let filters = localStorage.getItem("filters");
+        filters = filters ? JSON.parse(filters) : {};
+        //en: "English",
+        //ru: "Русский"
         this.state = {
-            jwt: "some",
-            registered: true,
+            jwt: localStorage.getItem("jwt"),
+            registered: localStorage.getItem("registered"),
             user: {
                 name: "Arthur",
                 email: "inveterate.coder@gmail.com",
@@ -21,13 +25,24 @@ export default class App extends Component {
                 password: "",
                 limit: 20
             },
-            lang: "en",
-            filters: {
-                en: "English",
-                ru: "Русский"
-            },
-            icon: "user"
+            lang: localStorage.getItem("lang") || this.bestLang(),
+            filters: filters,
+            icon: localStorage.getItem("icon") || "user"
         }
+    }
+    bestLang = () => {
+        let navlang = navigator.language.toLowerCase();
+        if (navlang === "kk" || navlang === "ky" ||
+            navlang === "be" || navlang === "uk" ||
+            navlang === "uz" || navlang === "mo" ||
+            navlang === "tk" || navlang === "tg" ||
+            navlang === "ab" || navlang === "oc" ||
+            navlang === "hy" || navlang === "az")
+            return "ru";
+        else return "en";
+    }
+    signInAsGuest = jwt => {
+        alert("trying");
     }
     changeUser = data => {
         //newpassword to be considered
@@ -42,11 +57,13 @@ export default class App extends Component {
         alert("Deleting")
     }
     changeIcon = icon => {
+        localStorage.setItem("icon", icon);
         this.setState({
             icon: icon
         });
     }
     changeFilters = filters => {
+        localStorage.setItem("filters", JSON.stringify(filters));
         this.setState(filters);
     }
     changeRoom = data => {
@@ -54,10 +71,12 @@ export default class App extends Component {
         this.setState({ room: data });
     }
     setLanguage = lang => {
-        //todo save state in memory
+        localStorage.setItem("lang", lang);
         this.setState({ lang: lang });
     }
     signOut = () => {
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("registered");
         this.setState({
             jwt: null,
             registered: false
@@ -69,7 +88,8 @@ export default class App extends Component {
             filters: this.state.filters, user: this.state.user, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
             setLanguage: this.setLanguage, changeUser: this.changeUser,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser,
+            signInAsGuest: this.signInAsGuest
         }}>
             <Router>
                 <Switch>

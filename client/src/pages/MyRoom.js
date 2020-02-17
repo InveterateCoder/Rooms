@@ -45,7 +45,7 @@ export function MyRoom(props) {
         description: context.room.description,
         error: validator.description(context.room.description, context.lang)
     }));
-    const [rnameError, setRNameError] = useState(() => validator.name(rname, context.lang));
+    const [rnameError, setRNameError] = useState(() => validator.groupname(rname, context.lang));
     const [rlimit, setRLimit] = useState(context.room.limit);
     const setCountry = code => {
         if (rcountry !== code)
@@ -54,7 +54,7 @@ export function MyRoom(props) {
     const nameChanged = ev => {
         if (rname !== ev.target.value) {
             setRName(ev.target.value);
-            setRNameError(validator.name(ev.target.value, context.lang));
+            setRNameError(validator.groupname(ev.target.value, context.lang));
         }
     }
     const descriptionChanged = ev => {
@@ -93,7 +93,7 @@ export function MyRoom(props) {
             description: context.room.description,
             error: validator.description(context.room.description, context.lang)
         });
-        setRNameError(validator.name(context.room.name, context.lang));
+        setRNameError(validator.groupname(context.room.name, context.lang));
         setRLimit(context.room.limit);
     }
     const apply = () => {

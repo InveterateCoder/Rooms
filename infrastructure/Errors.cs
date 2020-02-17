@@ -2,7 +2,8 @@ namespace Rooms.Infrastructure
 {
     public static class Errors
     {
-        public static string NameTaken = "1";
-        public static string EmailTaken = "2";
+        public static string EmailTaken = "emailTaken";
+        public static string ConfEmailNotFound = "confEmailNotFound";
+        public static string EmailOrPassInc = "emailOrPassInc";
     }
 }

@@ -10,7 +10,8 @@ const errors = new LocalizedStrings({
             junk: "Only dots, dashes and spaces are allowed.",
             first: "First character must be alphanumeric.",
             punctuation: "Incorrect punctuation.",
-            continue: "Please continue."
+            continue: "Please continue.",
+            space: "Name can't start or end with a space."
         },
         confirm: "Not confirmed.",
         description: "Maximum length is 200 characters."
@@ -24,7 +25,8 @@ const errors = new LocalizedStrings({
             junk: "Допускаются только точки, тире и пробелы.",
             first: "Первый символ должен быть буквой или цифрой.",
             punctuation: "Неправильная пунктуация.",
-            continue: "Продолжайте, пожалуйста."
+            continue: "Продолжайте, пожалуйста.",
+            space: "Имя не может начинаться или заканчиваться пробелом."
         },
         confirm: "Не подтверждён.",
         description: "Максимальная длина 200 символов."
@@ -32,7 +34,15 @@ const errors = new LocalizedStrings({
 })
 
 export default class {
-    static name(data, lang, search = false) {
+    static name(data, lang){
+        errors.setLanguage(lang);
+        if(data.length < 4 || data.length > 40)
+            return errors.name.length;
+        if((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
+            return errors.name.space;
+
+    }
+    static groupname(data, lang, search = false) {
         errors.setLanguage(lang);
         if (search) {
             if (!data) return false;
@@ -63,7 +73,6 @@ export default class {
                 marks = char + marks;
             else {
                 if (marks.length) {
-                    debugger;
                     let ret = verify(marks);
                     if (ret) return ret;
                     else marks = "";
@@ -72,12 +81,10 @@ export default class {
         }
         if (!(/^[\p{L}\d.\- ]+$/gu).test(data))
             return errors.name.junk;
-        let firstchar = data[0];
-        if (firstchar === '.' || firstchar === ' ' || firstchar === '-')
+        if (data[0] === '.' || data[0] === ' ' || data[0] === '-')
             return errors.name.first;
         if (!search) {
-            let lastchar = data[data.length - 1];
-            if (lastchar === ' ' || lastchar === '-')
+            if (data[data.length - 1] === ' ' || data[data.length - 1] === '-')
                 return errors.name.continue;
         }
         if (!search)

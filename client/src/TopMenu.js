@@ -38,7 +38,7 @@ export function TopMenu(props) {
     else if (props.location.search.startsWith("?q=")) {
         val = props.location.search.substring(3).replace("%20", ' ');
         if(val.length === 0) refresh = true;
-        else error = validator.name(val, context.lang, true);
+        else error = validator.groupname(val, context.lang, true);
     } else refresh = true;
     if(refresh){
         let newlocation = {};
@@ -51,7 +51,7 @@ export function TopMenu(props) {
     if(refresh) return null;
     const searchChanged = ev => {
         setSearch(ev.target.value);
-        setSearchError(validator.name(ev.target.value, context.lang, true));
+        setSearchError(validator.groupname(ev.target.value, context.lang, true));
     }
     const applySearch = () => {
         if (search === val) return;

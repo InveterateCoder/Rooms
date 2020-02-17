@@ -12,14 +12,14 @@ const text = new LocalizedStrings({
         placeholder: "Guestname",
         submit: "Sign In",
         alertHeader: "Be advised to register",
-        alertBody: "As a guest you will not be able to create your own group, receive notifications, and change the language. Consider registering and logging in as a user."
+        alertBody: "As a guest you will not be able to create your own group, choose filters and change the language. Consider registering and logging in as a user."
     },
     ru: {
         header: "Войти как Гость",
         placeholder: "Имя гостя",
         submit: "Войти",
         alertHeader: "Рекомендуем зарегистрироваться",
-        alertBody: "В качестве гостя вы не сможете создать собственную группу, получать уведомления и изменять язык. Рассмотрите возможность регистрации и входа в систему как пользователь."
+        alertBody: "В качестве гостя вы не сможете создать собственную группу, выбрать фильтры и изменять язык. Рассмотрите возможность регистрации и входа в систему как пользователь."
     }
 })
 
@@ -37,7 +37,7 @@ export function AsGuestForm(props) {
         if (newError)
             setError(newError);
         else {
-            //send request
+            context.signInAsGuest(input.current.value);
         }
     }
     const keyPressed = ev => {

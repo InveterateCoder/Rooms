@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rooms.Models;
 
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    partial class RoomsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20200217110357_Migration_5")]
+    partial class Migration_5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
