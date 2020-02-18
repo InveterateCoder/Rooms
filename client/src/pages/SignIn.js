@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext} from "react";
 import { Context } from "../data/Context";
 import { Link, Route, Switch, Redirect } from "react-router-dom";
 import { AsGuestForm } from "./accessories/Login/AsGuestForm";
@@ -41,28 +41,26 @@ export function SignIn(props) {
         <h2 className="display-4 font-weight-bold">Rooms</h2>
         <p className="text-info">{text.msg}</p>
     </div>
-
+    const switchall = <Switch>
+        <Route path="/signin/guest" exact={true} component={AsGuestForm} />
+        <Route path="/signin/user/:action" exact={true} component={AsUserForm} />
+        <Redirect to="/signin/guest" />
+    </Switch>
+    const switchreg = <Switch>
+        <Route path="/signin/user/:action(register)" exact={true} component={AsUserForm} />
+        <Redirect to="/signin/user/register" />
+    </Switch>
     if (!context.jwt && !context.registered)
         return <div className="container">
             {jumbo}
             {nav}
-            <Switch>
-                <Route path="/signin/guest" exact={true} component={AsGuestForm} />
-                <Route path="/signin/user/:action" exact={true} component={AsUserForm} />
-                <Redirect to="/signin/guest" />
-            </Switch>
+            {switchall}
         </div>
     else if (context.jwt && !context.registered)
         return <div className="container">
             {jumbo}
-            <Switch>
-                <Route path="/signin/user/:action(register)" exact={true} component={AsUserForm} />
-                <Redirect to="/signin/user/register" />
-            </Switch>
+            {switchreg}
         </div>
-    else if (context.jwt && context.registered)
-        props.history.replace("/lobby");
-    else
-        context.signOut();
+    props.history.replace("/lobby/1");
     return null;
 }

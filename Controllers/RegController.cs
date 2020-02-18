@@ -84,7 +84,15 @@ namespace Rooms.Controllers
                 });
                 _context.RegQueue.Remove(entity);
                 await _context.SaveChangesAsync();
-                return Ok(GetToken(user.Entity.UserId.ToString()));
+                return Ok(new
+                {
+                    jwt = GetToken(user.Entity.UserId.ToString()),
+                    user = new
+                    {
+                        name = user.Entity.Name,
+                        email = user.Entity.Email
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -99,7 +107,26 @@ namespace Rooms.Controllers
                 var user = _context.Users.FirstOrDefault(u => u.Email == form.Email);
                 if (user == null || user.Password != form.Password)
                     return BadRequest(Errors.EmailOrPassInc);
-                return Ok(GetToken(user.UserId.ToString()));
+                object room = null;
+                if(user.Room != null){
+                    room = new
+                    {
+                        name = user.Room.Name,
+                        description = user.Room.Description,
+                        country = user.Room.Country,
+                        password = user.Room.Password,
+                        limit = user.Room.Limit
+                    };
+                }
+                return Ok(new {
+                    jwt = GetToken(user.UserId.ToString()),
+                    user = new
+                    {
+                        name = user.Name,
+                        email = user.Email
+                    },
+                    room = room
+                });
             }
             catch (Exception ex)
             {
@@ -107,12 +134,14 @@ namespace Rooms.Controllers
             }
         }
         [HttpGet("sign/guest")]
-        public IActionResult SignInGuest([Required, StringLength(10, MinimumLength = 4)]string name){
-            if(!isRightName(name)) return BadRequest(Errors.BadName);
+        public IActionResult SignInGuest([Required, StringLength(10, MinimumLength = 4)]string name)
+        {
+            if (!isRightName(name)) return BadRequest(Errors.BadName);
             return Ok(GetToken(name + Guid.NewGuid().ToString()));
         }
-        private bool isRightName(string name){
-            if(new Regex(@"^\s+").IsMatch(name) || new Regex(@"\s+$").IsMatch(name))
+        private bool isRightName(string name)
+        {
+            if (new Regex(@"^\s+").IsMatch(name) || new Regex(@"\s+$").IsMatch(name))
                 return false;
             return true;
         }

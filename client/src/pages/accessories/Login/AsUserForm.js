@@ -5,6 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt, faUserPlus, faKey } from "@fortawesome/free-solid-svg-icons";
 import LocalizedStrings from "react-localization";
 import validator from "../../../utils/validator";
+import { Post } from "../../../utils/requests";
+import urls from "../../../utils/Urls";
+import { Loading } from "../../../Loading";
 
 const text = new LocalizedStrings({
     en: {
@@ -65,6 +68,7 @@ export function AsUserForm(props) {
         confirm: "",
         confirmError: validator.confirm("","", context.lang)
     });
+    const [loading, setLoading] = useState(false);
     const inputChange = ev => {
         let value = ev.target.value;
         let name = ev.target.name;
@@ -102,11 +106,28 @@ export function AsUserForm(props) {
             default:;
         }
         if(isValid){
-            // send request
+            setLoading(true);
+            switch(props.match.params.action){
+                case "register":
+                    break;
+                case "sign":
+                    Post(urls.signInAsUser,
+                        { email: state.email, password: state.password}, context.lang)
+                            .then(data => {
+                                if(data){
+                                    context.signInAsUser(data);
+                                    props.history.replace("/lobby/1");
+                                } else setLoading(false);
+                            }).catch(() => props.history.push("/fatal"));
+                    break;
+                case "recover":
+                    break;
+                default:;
+            }
         }
     }
     const keyPressed = ev => {
-        if(ev.which === 13 && ev.target.nodeName === "INPUT")
+        if(ev.which === 13)
             submit()
     }
     if (props.match.params.action !== "sign" &&
@@ -116,9 +137,9 @@ export function AsUserForm(props) {
         return null;
     }
     text.setLanguage(context.lang);
-    return <div className="loginframe">
+    return <div className="loginframe" onKeyPress={keyPressed} tabIndex="-1">
         <h5 className="text-secondary text-center mb-3">{text.header[props.match.params.action]}</h5>
-        <div id="userbox" onKeyPress={keyPressed} className="signbox">
+        <div id="userbox" className="signbox">
             {
                 text.inputs[props.match.params.action].map(([place, name]) =>
                     <div key={name}>
@@ -141,5 +162,8 @@ export function AsUserForm(props) {
                     )
             }
         </div>
+        {
+            loading && <Loading />
+        }
     </div>
 }

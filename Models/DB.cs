@@ -48,7 +48,7 @@ namespace Rooms.Models
         [MaxLength(16)]
         public string Password {get;set;}
         [Required]
-        public byte MaxUsers {get;set;}
+        public byte Limit {get;set;}
         public List<Message> Messages {get;set;}
     }
     public class Message

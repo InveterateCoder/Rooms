@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import { Context } from "./data/Context";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from "react-router-dom";
+import { Lobby } from "./pages/Lobby";
+import { Account } from "./pages/Account";
+import { MyRoom } from "./pages/MyRoom";
+import { TopMenu } from "./TopMenu";
 import { SignIn } from "./pages/SignIn";
-import { Pager } from "./Pager";
+import { Fatal } from "./Fatal";
+import { EConfirm } from "./EConfirm";
+
+const TopMenuWithRouter = withRouter(TopMenu);
 
 export default class App extends Component {
     constructor(props) {
@@ -43,7 +50,26 @@ export default class App extends Component {
     }
     signInAsGuest = jwt => {
         localStorage.setItem("jwt", jwt);
-        this.setState({jwt});
+        this.setState({ jwt });
+    }
+    signInAsUser = data => {
+        localStorage.setItem("jwt", data.jwt);
+        localStorage.setItem("registered", true);
+        this.setState({
+            jwt: data.jwt,
+            registered: true,
+            user: data.user,
+            room: data.room ? data.room : this.state.room
+        });
+    }
+    userRegistered = data => {
+        localStorage.setItem("jwt", data.jwt);
+        localStorage.setItem("registered", true);
+        this.setState({
+            jwt: data.jwt,
+            registered: true,
+            user: data.user
+        });
     }
     changeUser = data => {
         //newpassword to be considered
@@ -81,22 +107,39 @@ export default class App extends Component {
         this.setState({
             jwt: null,
             registered: false
-        })
+        });
     }
     render() {
+        let routes = [];
+        if(this.state.jwt){
+            routes.push(<Route key="lobby" path="/lobby/:page(\d+)" exact={true} component={Lobby} />);
+            if(this.state.registered){
+                routes.push(<Route key="account" path="/account" exact={true} component={Account} />);
+                routes.push(<Route key="myroom" path="/myroom" exact={true} component={MyRoom} />);
+            }
+            routes.push(<Redirect key="tolobby" to="/lobby/1" />);
+        } else routes.push(<Redirect key="tosign" to="/signin/guest" />);
+
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
             filters: this.state.filters, user: this.state.user, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
             setLanguage: this.setLanguage, changeUser: this.changeUser,
             changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser,
+            userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
             signInAsGuest: this.signInAsGuest
         }}>
             <Router>
+                {
+                    this.state.jwt && <TopMenuWithRouter />
+                }
                 <Switch>
-                    <Route path="/signin/:as" component={SignIn} />} />
-                    <Route path="/fatal" component={()=><h1>Error</h1>}/>
-                    <Route path="/" component={Pager} />
+                    {
+                        !this.state.registered && <Route path="/signin/:as" component={SignIn} />
+                    }
+                    <Route path="/fatal" component={Fatal} />
+                    <Route path="/econfirm/:number(\d{9})" exact={true} strict={true} component={EConfirm} />
+                    {routes}
                 </Switch>
             </Router>
         </Context.Provider>

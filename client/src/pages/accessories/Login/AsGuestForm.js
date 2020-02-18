@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import LocalizedStrings from "react-localization";
 import {Get} from "../../../utils/requests";
+import urls from "../../../utils/Urls";
+import { Loading } from "../../../Loading";
 
 const text = new LocalizedStrings({
     en: {
@@ -24,11 +26,10 @@ const text = new LocalizedStrings({
     }
 })
 
-const url = "/api/reg/sign/guest?name=";
-
 export function AsGuestForm(props) {
     const context = useContext(Context);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const input = useRef(null);
 
     const clearError = () => {
@@ -40,11 +41,12 @@ export function AsGuestForm(props) {
         if (newError)
             setError(newError);
         else {
-            Get(url + input.current.value, context.lang).then(jwt => {
+            setLoading(true);
+            Get(urls.signInAsGuest + input.current.value, context.lang).then(jwt => {
                 if(jwt) {
                     context.signInAsGuest(jwt);
                     props.history.replace("/lobby/1");
-                }
+                } else setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }
     }
@@ -75,5 +77,8 @@ export function AsGuestForm(props) {
                 <p>{text.alertBody}</p>
             </div>
         </div>
+        {
+            loading && <Loading />
+        }
     </div>
 }
