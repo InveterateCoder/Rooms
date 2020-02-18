@@ -13,6 +13,8 @@ using Rooms.Infrastructure;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace Rooms.Controllers
 {
@@ -57,13 +59,12 @@ namespace Rooms.Controllers
                 string content = $"Hello {data.Name}. Please follow the link to confirm your email addresss.\n{_settings.EmailConfirmAddr + key}";
                 if (!await SendMail(data.Email, content))
                     throw new Exception("Failed to send a confirmation email.");
+                return Ok();
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
-
-            return Ok();
         }
         [HttpPost("confirm")]
         public async Task<IActionResult> ConfirmEmail([FromBody]string key)
@@ -106,9 +107,15 @@ namespace Rooms.Controllers
             }
         }
         [HttpGet("sign/guest")]
-        public IActionResult SignInGuest([Required, StringLength(40, MinimumLength = 4)]string name)
-            => Ok(GetToken("g_" + name));
-
+        public IActionResult SignInGuest([Required, StringLength(10, MinimumLength = 4)]string name){
+            if(!isRightName(name)) return BadRequest(Errors.BadName);
+            return Ok(GetToken(name + Guid.NewGuid().ToString()));
+        }
+        private bool isRightName(string name){
+            if(new Regex(@"^\s+").IsMatch(name) || new Regex(@"\s+$").IsMatch(name))
+                return false;
+            return true;
+        }
         private string GetToken(string id)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

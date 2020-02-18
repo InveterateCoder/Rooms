@@ -5,6 +5,7 @@ import { Alert } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import LocalizedStrings from "react-localization";
+import {Get} from "../../../utils/requests";
 
 const text = new LocalizedStrings({
     en: {
@@ -23,6 +24,8 @@ const text = new LocalizedStrings({
     }
 })
 
+const url = "/api/reg/sign/guest?name=";
+
 export function AsGuestForm(props) {
     const context = useContext(Context);
     const [error, setError] = useState("");
@@ -33,11 +36,16 @@ export function AsGuestForm(props) {
             setError("");
     }
     const submit = () => {
-        let newError = validate.name(input.current.value, context.lang);
+        let newError = validate.guestname(input.current.value, context.lang);
         if (newError)
             setError(newError);
         else {
-            context.signInAsGuest(input.current.value);
+            Get(url + input.current.value, context.lang).then(jwt => {
+                if(jwt) {
+                    context.signInAsGuest(jwt);
+                    props.history.replace("/lobby/1");
+                }
+            }).catch(() => props.history.push("/fatal"));
         }
     }
     const keyPressed = ev => {

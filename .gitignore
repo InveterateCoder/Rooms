@@ -1,5 +1,6 @@
 /.vscode
 /bin
 /obj
+/appsettings.json
 /client/node_modules
 /wwwroot/img

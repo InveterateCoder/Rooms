@@ -6,7 +6,8 @@ const errors = new LocalizedStrings({
         email: "Invalid email address.",
         password: "Password length must be between 6 and 16 characters.",
         name: {
-            length: "Name length must be between 4 and 40 characters.",
+            length: "Name length must be between 4 and 34 characters.",
+            guestlength: "Guest name length must be between 4 and 10 characters.",
             junk: "Only dots, dashes and spaces are allowed.",
             first: "First character must be alphanumeric.",
             punctuation: "Incorrect punctuation.",
@@ -21,7 +22,8 @@ const errors = new LocalizedStrings({
         email: "Неверный адрес электронной почты.",
         password: "Длина пароля должна быть от 6 до 16 символов.",
         name: {
-            length: "Длина имени должна быть от 4 до 40 символов.",
+            length: "Длина имени должна быть от 4 до 34 символов.",
+            guestlength: "Длина имени гостя должна быть от 4 до 10 символов.",
             junk: "Допускаются только точки, тире и пробелы.",
             first: "Первый символ должен быть буквой или цифрой.",
             punctuation: "Неправильная пунктуация.",
@@ -34,35 +36,41 @@ const errors = new LocalizedStrings({
 })
 
 export default class {
-    static name(data, lang){
+    static name(data, lang) {
         errors.setLanguage(lang);
-        if(data.length < 4 || data.length > 40)
+        if (data.length < 4 || data.length > 34)
             return errors.name.length;
-        if((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
+        if ((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
             return errors.name.space;
-
+    }
+    static guestname(data, lang) {
+        errors.setLanguage(lang);
+        if (data.length < 4 || data.length > 10)
+            return errors.name.guestlength;
+        if ((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
+            return errors.name.space;
     }
     static groupname(data, lang, search = false) {
         errors.setLanguage(lang);
         if (search) {
             if (!data) return false;
-            if (data.length > 40) return errors.name.length;
+            if (data.length > 34) return errors.name.length;
         }
-        else if (!data || data.length > 40) return errors.name.length;
+        else if (!data || data.length > 34) return errors.name.length;
         const verify = marks => {
-            for(let i = marks.length - 1; i >= 0; i--){
-                switch(marks[i]){
+            for (let i = marks.length - 1; i >= 0; i--) {
+                switch (marks[i]) {
                     case '.':
-                        if(i > 0) return errors.name.punctuation;
+                        if (i > 0) return errors.name.punctuation;
                         break;
                     case '-':
-                        if((i > 0 && marks[i - 1] !== ' ') || (i > 1 && marks[i-2] === '-'))
+                        if ((i > 0 && marks[i - 1] !== ' ') || (i > 1 && marks[i - 2] === '-'))
                             return errors.name.punctuation;
                         break;
                     case ' ':
-                        if(i > 0 && marks[i - 1] === ' ') return errors.name.punctuation;
+                        if (i > 0 && marks[i - 1] === ' ') return errors.name.punctuation;
                         break;
-                    default:;
+                    default: ;
                 }
             }
         }

@@ -42,7 +42,8 @@ export default class App extends Component {
         else return "en";
     }
     signInAsGuest = jwt => {
-        alert("trying");
+        localStorage.setItem("jwt", jwt);
+        this.setState({jwt});
     }
     changeUser = data => {
         //newpassword to be considered
@@ -94,6 +95,7 @@ export default class App extends Component {
             <Router>
                 <Switch>
                     <Route path="/signin/:as" component={SignIn} />} />
+                    <Route path="/fatal" component={()=><h1>Error</h1>}/>
                     <Route path="/" component={Pager} />
                 </Switch>
             </Router>
