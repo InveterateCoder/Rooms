@@ -59,7 +59,7 @@ namespace Rooms.Controllers
                 string content = $"Hello {data.Name}. Please follow the link to confirm your email addresss.\n{_settings.EmailConfirmAddr + key}";
                 if (!await SendMail(data.Email, content))
                     throw new Exception("Failed to send a confirmation email.");
-                return Ok();
+                return Ok("ok");
             }
             catch (Exception ex)
             {
@@ -138,6 +138,24 @@ namespace Rooms.Controllers
         {
             if (!isRightName(name)) return BadRequest(Errors.BadName);
             return Ok(GetToken(name + Guid.NewGuid().ToString()));
+        }
+        [HttpPost("recover")]
+        public async Task<IActionResult> Recover([Required, FromBody, StringLength(320, MinimumLength = 6)]string email)
+        {
+            try
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Email == email);
+                if(user == null)
+                    return BadRequest(Errors.NotRegistered);
+                string content = $"Hello {user.Name}. Your password is {user.Password}";
+                if (!await SendMail(user.Email, content))
+                    throw new Exception("Failed to send a confirmation email.");
+                return Ok("ok");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
         }
         private bool isRightName(string name)
         {
