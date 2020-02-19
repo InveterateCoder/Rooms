@@ -3,5 +3,6 @@ export default {
     signInAsUser: "/api/reg/sign/user",
     confirmEmail: "/api/reg/confirm",
     register: "/api/reg/reg",
-    recover: "/api/reg/recover"
+    recover: "/api/reg/recover",
+    accountChange: "/api/account/change"
 }

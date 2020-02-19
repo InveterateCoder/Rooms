@@ -19,9 +19,9 @@ namespace Rooms.Migrations
 
             modelBuilder.Entity("Rooms.Models.Message", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<long>("MessageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Encrypted")
                         .HasColumnType("tinyint(1)");
@@ -36,8 +36,8 @@ namespace Rooms.Migrations
                         .HasColumnType("varchar(5) CHARACTER SET utf8mb4")
                         .HasMaxLength(5);
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
+                    b.Property<long?>("RoomId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -50,8 +50,8 @@ namespace Rooms.Migrations
                     b.Property<string>("ToNamesJson")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("MessageId");
 
@@ -100,9 +100,9 @@ namespace Rooms.Migrations
 
             modelBuilder.Entity("Rooms.Models.Room", b =>
                 {
-                    b.Property<int>("RoomId")
+                    b.Property<long>("RoomId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Country")
                         .IsRequired()
@@ -140,30 +140,30 @@ namespace Rooms.Migrations
 
             modelBuilder.Entity("Rooms.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("varchar(320) CHARACTER SET utf8mb4")
                         .HasMaxLength(320);
 
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
+                    b.Property<long?>("MessageId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
-                        .HasMaxLength(40);
+                        .HasColumnType("varchar(34) CHARACTER SET utf8mb4")
+                        .HasMaxLength(34);
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("varchar(16) CHARACTER SET utf8mb4")
                         .HasMaxLength(16);
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
+                    b.Property<long?>("RoomId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("UserId");
 

@@ -4,7 +4,7 @@ namespace Rooms.Models
 {
     public class RegForm
     {
-        [Required, StringLength(40, MinimumLength=4)]
+        [Required, StringLength(34, MinimumLength=4)]
         public string Name {get;set;}
         [Required, StringLength(320, MinimumLength=6), EmailAddress]
         public string Email {get;set;}

@@ -9,8 +9,8 @@ using Rooms.Models;
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    [Migration("20200215101259_Initial")]
-    partial class Initial
+    [Migration("20200219150443_Migration_1")]
+    partial class Migration_1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,46 +21,93 @@ namespace Rooms.Migrations
 
             modelBuilder.Entity("Rooms.Models.Message", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<long>("MessageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("Encrypted")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("From")
+                        .IsRequired()
+                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
+                        .HasMaxLength(40);
+
                     b.Property<string>("Icon")
+                        .IsRequired()
                         .HasColumnType("varchar(5) CHARACTER SET utf8mb4")
                         .HasMaxLength(5);
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
+                    b.Property<long?>("RoomId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Text")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .IsRequired()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasMaxLength(10000);
 
                     b.Property<long>("TimeStamp")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ToJson")
+                    b.Property<string>("ToNamesJson")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("MessageId");
 
                     b.HasIndex("RoomId");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Rooms.Models.RegQueueEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<long>("Date")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("varchar(320) CHARACTER SET utf8mb4")
+                        .HasMaxLength(320);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("varchar(10) CHARACTER SET utf8mb4")
+                        .HasMaxLength(10);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
+                        .HasMaxLength(40);
+
+                    b.Property<string>("Password")
+                        .HasColumnType("varchar(16) CHARACTER SET utf8mb4")
+                        .HasMaxLength(16);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("RegQueue");
                 });
 
             modelBuilder.Entity("Rooms.Models.Room", b =>
                 {
-                    b.Property<int>("RoomId")
+                    b.Property<long>("RoomId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Country")
+                        .IsRequired()
                         .HasColumnType("varchar(2) CHARACTER SET utf8mb4")
                         .HasMaxLength(2);
 
@@ -68,10 +115,11 @@ namespace Rooms.Migrations
                         .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
                         .HasMaxLength(200);
 
-                    b.Property<byte>("MaxUsers")
+                    b.Property<byte>("Limit")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
                         .HasMaxLength(40);
 
@@ -79,36 +127,50 @@ namespace Rooms.Migrations
                         .HasColumnType("varchar(16) CHARACTER SET utf8mb4")
                         .HasMaxLength(16);
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
+                        .HasMaxLength(40);
+
                     b.HasKey("RoomId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("Rooms.Models.User", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<long>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("varchar(320) CHARACTER SET utf8mb4")
                         .HasMaxLength(320);
 
-                    b.Property<int?>("MessageId")
-                        .HasColumnType("int");
+                    b.Property<long?>("MessageId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
-                        .HasMaxLength(40);
+                        .IsRequired()
+                        .HasColumnType("varchar(34) CHARACTER SET utf8mb4")
+                        .HasMaxLength(34);
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("varchar(16) CHARACTER SET utf8mb4")
                         .HasMaxLength(16);
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
+                    b.Property<long?>("RoomId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.HasIndex("MessageId");
 
@@ -122,6 +184,12 @@ namespace Rooms.Migrations
                     b.HasOne("Rooms.Models.Room", null)
                         .WithMany("Messages")
                         .HasForeignKey("RoomId");
+
+                    b.HasOne("Rooms.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Rooms.Models.User", b =>

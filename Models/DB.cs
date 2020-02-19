@@ -25,10 +25,10 @@ namespace Rooms.Models
     }
     public class User
     {
-        public int UserId {get;set;}
+        public long UserId {get;set;}
         [Required, MaxLength(320)]
         public string Email {get;set;}
-        [Required, MaxLength(40)]
+        [Required, MaxLength(34)]
         public string Name {get;set;}
         [Required, MaxLength(16)]
         public string Password {get;set;}
@@ -36,7 +36,7 @@ namespace Rooms.Models
     }
     public class Room
     {
-        public int RoomId {get;set;}
+        public long RoomId {get;set;}
         [Required, MaxLength(2)]
         public string Country {get;set;}
         [Required, MaxLength(40)]
@@ -53,7 +53,7 @@ namespace Rooms.Models
     }
     public class Message
     {
-        public int MessageId {get;set;}
+        public long MessageId {get;set;}
         [Required]
         public long TimeStamp {get;set;}
         [Required]

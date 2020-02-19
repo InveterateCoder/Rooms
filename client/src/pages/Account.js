@@ -7,6 +7,8 @@ import { FilterGroup } from "./accessories/Forms/FilterGroup";
 import { Delete } from "./accessories/Forms/Delete";
 import validator from "../utils/validator";
 import LocalizedStrings from "react-localization";
+import { Post } from "../utils/requests";
+import urls from "../utils/Urls";
 
 const text = new LocalizedStrings({
     en: {
@@ -110,6 +112,7 @@ export function Account(props) {
     }
     const apply = () => {
         if (isValid() && hasFormChanged()) {
+
             context.changeUser({
                 email: form.email !== context.user.email ? form.email : null,
                 name: form.name !== context.user.name ? form.name : null,

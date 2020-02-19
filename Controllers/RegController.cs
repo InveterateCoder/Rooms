@@ -13,7 +13,6 @@ using Rooms.Infrastructure;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
 namespace Rooms.Controllers
