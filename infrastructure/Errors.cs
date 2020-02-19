@@ -7,5 +7,6 @@ namespace Rooms.Infrastructure
         public static string EmailOrPassInc = "emailOrPassInc";
         public static string BadName = "badName";
         public static string NotRegistered = "notRegistered";
+        public static string EmptyRequest = "emptyRequest";
     }
 }

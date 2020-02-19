@@ -5,14 +5,16 @@ const text = new LocalizedStrings({
         confEmailNotFound: "It seems you haven't registered yet or your confirmation period has expired. Please register.",
         emailOrPassInc: "The email address or password is incorrect.",
         badName: "Wrong name format.",
-        notRegistered: "User not registered."
+        notRegistered: "User not registered.",
+        emptyRequest: "Empty request."
     },
     ru:{
         emailTaken: "Этот электронный адрес уже используется. Пожалуйста, используйте другой.",
         confEmailNotFound: "Кажется, вы еще не зарегистрировались или ваш период подтверждения истек. Пожалуйста, зарегистрируйтесь.",
         emailOrPassInc: "Адрес электронной почты или пароль неверны.",
         badName: "Неправильный формат имени.",
-        notRegistered: "Пользователь не зарегистрирован."
+        notRegistered: "Пользователь не зарегистрирован.",
+        emptyRequest: "Пустой запрос."
     }
 });
 

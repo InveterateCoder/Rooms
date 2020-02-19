@@ -1,19 +1,12 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Rooms.Models;
 using Microsoft.AspNetCore.Http;
 using Rooms.Infrastructure;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace Rooms.Controllers
 {
@@ -25,11 +18,11 @@ namespace Rooms.Controllers
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class RegController : ControllerBase
     {
-        private readonly Settings _settings;
+        private readonly Helper Helper;
         private readonly RoomsDBContext _context;
-        public RegController(IOptions<Settings> settings, RoomsDBContext context)
+        public RegController(Helper helper, RoomsDBContext context)
         {
-            _settings = settings.Value;
+            Helper = helper;
             _context = context;
         }
         [HttpPost("reg")]
@@ -37,6 +30,7 @@ namespace Rooms.Controllers
         {
             try
             {
+                if(!Helper.isRightName(data.Name)) return BadRequest(Errors.BadName);
                 if (_context.Users.FirstOrDefault(u => u.Email == data.Email) != null)
                     return BadRequest(Errors.EmailTaken);
                 var limit = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)).Ticks;
@@ -55,8 +49,8 @@ namespace Rooms.Controllers
                     Password = data.Password
                 });
                 await _context.SaveChangesAsync();
-                string content = $"Hello {data.Name}. Please follow the link to confirm your email addresss.\n{_settings.EmailConfirmAddr + key}";
-                if (!await SendMail(data.Email, content))
+                string content = $"Hello {data.Name}. Please follow the link to confirm your email addresss.\n{Helper.Settings.EmailConfirmAddr + key}";
+                if (!await Helper.SendMail(data.Email, content))
                     throw new Exception("Failed to send a confirmation email.");
                 return Ok("ok");
             }
@@ -83,9 +77,13 @@ namespace Rooms.Controllers
                 });
                 _context.RegQueue.Remove(entity);
                 await _context.SaveChangesAsync();
+                Identity id = new Identity {
+                    UserId = user.Entity.UserId,
+                    Name = user.Entity.Name
+                };
                 return Ok(new
                 {
-                    jwt = GetToken(user.Entity.UserId.ToString()),
+                    jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
                     user = new
                     {
                         name = user.Entity.Name,
@@ -117,8 +115,12 @@ namespace Rooms.Controllers
                         limit = user.Room.Limit
                     };
                 }
+                 Identity id = new Identity {
+                    UserId = user.UserId,
+                    Name = user.Name
+                };
                 return Ok(new {
-                    jwt = GetToken(user.UserId.ToString()),
+                    jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
                     user = new
                     {
                         name = user.Name,
@@ -135,8 +137,13 @@ namespace Rooms.Controllers
         [HttpGet("sign/guest")]
         public IActionResult SignInGuest([Required, StringLength(10, MinimumLength = 4)]string name)
         {
-            if (!isRightName(name)) return BadRequest(Errors.BadName);
-            return Ok(GetToken(name + Guid.NewGuid().ToString()));
+            if (!Helper.isRightName(name)) return BadRequest(Errors.BadName);
+            Identity id = new Identity {
+                UserId = 0,
+                Name = name,
+                Guest = Guid.NewGuid().ToString()
+            };
+            return Ok(Helper.GetToken(JsonSerializer.Serialize(id)));
         }
         [HttpPost("recover")]
         public async Task<IActionResult> Recover([Required, FromBody, StringLength(320, MinimumLength = 6)]string email)
@@ -147,7 +154,7 @@ namespace Rooms.Controllers
                 if(user == null)
                     return BadRequest(Errors.NotRegistered);
                 string content = $"Hello {user.Name}. Your password is {user.Password}";
-                if (!await SendMail(user.Email, content))
+                if (!await Helper.SendMail(user.Email, content))
                     throw new Exception("Failed to send a confirmation email.");
                 return Ok("ok");
             }
@@ -155,40 +162,6 @@ namespace Rooms.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
-        }
-        private bool isRightName(string name)
-        {
-            if (new Regex(@"^\s+").IsMatch(name) || new Regex(@"\s+$").IsMatch(name))
-                return false;
-            return true;
-        }
-        private string GetToken(string id)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_settings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]{
-                    new Claim(ClaimTypes.Name, id)
-                }),
-                Expires = DateTime.UtcNow.AddDays(30),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
-                                            SecurityAlgorithms.HmacSha256Signature)
-            };
-            return tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor));
-        }
-        private async Task<bool> SendMail(string to, string content)
-        {
-            var msg = new SendGridMessage();
-            msg.SetFrom(new EmailAddress("inveterate.coder@outlook.com", "Rooms"));
-            msg.AddTo(to);
-            msg.SetSubject("Confirm your Email");
-            msg.AddContent(MimeType.Text, content);
-            var client = new SendGridClient(_settings.SGKey);
-            var response = await client.SendEmailAsync(msg);
-            if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
-                return true;
-            else return false;
         }
     }
 }

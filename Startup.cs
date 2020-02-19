@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Rooms.Models;
 using Microsoft.EntityFrameworkCore;
+using Rooms.Infrastructure;
 
 namespace Rooms
 {
@@ -45,6 +46,7 @@ namespace Rooms
                     ValidateAudience = false
                 };
             });
+            services.AddSingleton<Helper>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

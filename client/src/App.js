@@ -21,10 +21,7 @@ export default class App extends Component {
         this.state = {
             jwt: localStorage.getItem("jwt"),
             registered: localStorage.getItem("registered"),
-            user: {
-                name: "Arthur",
-                email: "inveterate.coder@gmail.com",
-            },
+            name: "Arthur",
             room: {
                 name: "",
                 description: "",
@@ -72,14 +69,8 @@ export default class App extends Component {
             user: data.user
         });
     }
-    changeUser = data => {
-        //newpassword to be considered
-        this.setState({
-            user: {
-                name: data.name ? data.name : this.state.user.name,
-                email: data.email ? data.email : this.state.user.email
-            }
-        });
+    changeName = name => {
+        this.setState({ name: name });
     }
     deleteUser = () => {
         alert("Deleting")
@@ -123,9 +114,9 @@ export default class App extends Component {
         
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
-            filters: this.state.filters, user: this.state.user, room: this.state.room,
+            filters: this.state.filters, name: this.state.name, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
-            setLanguage: this.setLanguage, changeUser: this.changeUser,
+            setLanguage: this.setLanguage, changeName: this.changeName,
             changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
             signInAsGuest: this.signInAsGuest

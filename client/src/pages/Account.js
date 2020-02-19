@@ -7,12 +7,9 @@ import { FilterGroup } from "./accessories/Forms/FilterGroup";
 import { Delete } from "./accessories/Forms/Delete";
 import validator from "../utils/validator";
 import LocalizedStrings from "react-localization";
-import { Post } from "../utils/requests";
-import urls from "../utils/Urls";
 
 const text = new LocalizedStrings({
     en: {
-        email: "Email",
         name: "Username",
         filters: "Filters",
         filtersHolder: "Select language",
@@ -30,7 +27,6 @@ const text = new LocalizedStrings({
         confirm: "Are you sure you want to delete your account?"
     },
     ru: {
-        email: "Эл. почта",
         name: "Пользователь",
         filters: "Фильтры",
         filtersHolder: "Выберете язык",
@@ -51,89 +47,55 @@ const text = new LocalizedStrings({
 
 export function Account(props) {
     const context = useContext(Context);
-    const [form, setForm] = useState({
-        email: context.user.email,
-        name: context.user.name,
-        newpassword: ""
-    });
-    const [errors, setErrors] = useState({
-        email: "",
-        name: ""
-    });
-    const inputChanged = ev => {
-        let name = ev.target.name;
-        let value = ev.target.value;
-        setErrors({
-            ...errors,
-            [name]: validator[name](value, context.lang)
-        });
-        setForm({
-            ...form,
-            [name]: value
-        });
+    const [name, setName] = useState(context.name);
+    const [newpassword, setNewPassword] = useState("");
+    const [nameError, setNameError] = useState("");
+    const nameChanged = ev => {
+        setName(ev.target.value);
+        setNameError(validator.name(ev.target.value, context.lang));
     }
     const newPasswordChanged = pswd => {
-        if (form.newpassword !== pswd)
-            setForm({
-                ...form,
-                newpassword: pswd
-            });
+        if (newpassword !== pswd)
+            setNewPassword(pswd);
     }
     const selectLanguage = ev => {
-        let value = ev.target.value;
-        setErrors({
-            email: validator.email(form.email, value),
-            name: validator.name(form.name, value),
-        });
-        context.setLanguage(value);
+        setNameError(validator.name(name, ev.target.value));
+        context.setLanguage(ev.target.value);
     }
     const hasFormChanged = () => {
-        if (form.newpassword !== "" || form.email !== context.user.email ||
-            form.name !== context.user.name)
+        if (newpassword !== "" || name !== context.name)
             return true;
         return false;
     }
     const isValid = () => {
-        if (!errors.email && !errors.name)
+        if (!nameError)
             return true;
         return false;
     }
 
     const cancelChanges = () => {
-        setForm({
-            email: context.user.email,
-            name: context.user.name,
-            newpassword: ""
-        });
-        setErrors({
-            email: "",
-            name: ""
-        });
+        setNameError("");
+        setName(context.name);
     }
     const apply = () => {
         if (isValid() && hasFormChanged()) {
-
-            context.changeUser({
-                email: form.email !== context.user.email ? form.email : null,
-                name: form.name !== context.user.name ? form.name : null,
-                newpassword: form.newpassword ? form.newpassword : null
-            });
-            setForm({ ...form, newpassword: "" });
+            //send request
+            if(name !== context.name) context.changeName(name);
+            //if(newpassword)
+            setNewPassword("");
         }
     }
     text.setLanguage(context.lang);
     return <div className="container formpage">
-        <Avatar image={context.icon} selectImage={name => context.changeIcon(name)} />
-        <FormGroup type="text" label={text.email} value={form.email} name="email"
-            inputChanged={inputChanged} error={errors.email} />
-        <FormGroup type="text" label={text.name} value={form.name} name="name"
-            inputChanged={inputChanged} error={errors.name} />
-        <PasswordGroup type="password" lang={context.lang} newpassword={form.newpassword}
+        <Avatar image={context.icon} selectImage={icon => context.changeIcon(icon)} />
+        <FormGroup type="text" label={text.name} value={name} name="name"
+            inputChanged={nameChanged} error={nameError} />
+        <PasswordGroup type="password" lang={context.lang} newpassword={newpassword}
             onChange={newPasswordChanged} />
         <div id="conf_acc_change" className={`${hasFormChanged() ? "" : "invisible"}`}>
             <button className="btn btn-outline-secondary mr-2" onClick={cancelChanges}>{text.cancel}</button>
             {
-                form.name
+                name
                     ?   <button onClick={apply} disabled={!isValid()}
                             className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
                                 {text.submit}</button>
