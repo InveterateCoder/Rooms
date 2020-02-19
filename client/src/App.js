@@ -39,7 +39,8 @@ export default class App extends Component {
     }
     bestLang = () => {
         let navlang = navigator.language.toLowerCase();
-        if (navlang === "kk" || navlang === "ky" ||
+        if (navlang === "ru" ||
+            navlang === "kk" || navlang === "ky" ||
             navlang === "be" || navlang === "uk" ||
             navlang === "uz" || navlang === "mo" ||
             navlang === "tk" || navlang === "tg" ||
@@ -91,7 +92,7 @@ export default class App extends Component {
     }
     changeFilters = filters => {
         localStorage.setItem("filters", JSON.stringify(filters));
-        this.setState(filters);
+        this.setState({ filters });
     }
     changeRoom = data => {
         //room change here
@@ -119,7 +120,7 @@ export default class App extends Component {
             }
             routes.push(<Redirect key="tolobby" to="/lobby/1" />);
         } else routes.push(<Redirect key="tosign" to="/signin/guest" />);
-
+        
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
             filters: this.state.filters, user: this.state.user, room: this.state.room,

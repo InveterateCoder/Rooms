@@ -5,6 +5,12 @@ const languages = {
     ru: "Русский"
 };
 export function FormGroup(props) {
+    const keyPressed = ev => {
+        if(ev.which === 13){
+            if(!props.error)
+                props.add();
+        }
+    }
     const getRightSide = () => {
         switch (props.type) {
             case "text":
@@ -12,7 +18,7 @@ export function FormGroup(props) {
                     value={props.value} name={props.name} onChange={props.inputChanged}/>
             case "search":
                 return <>
-                    <input spellCheck={false} type="search" placeholder={props.holder} name="langs"
+                    <input spellCheck={false} type="search" onKeyPress={keyPressed} placeholder={props.holder} name="langs"
                         className={`form-control ${props.error && props.value && "error"}`}
                         list="search" value={props.value} onChange={props.inputChanged} />
                     <button disabled={props.error} onClick={props.add}

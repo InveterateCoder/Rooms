@@ -54,7 +54,6 @@ export function Account(props) {
         name: context.user.name,
         newpassword: ""
     });
-    const [filters, setFilters] = useState(context.filters);
     const [errors, setErrors] = useState({
         email: "",
         name: ""
@@ -78,20 +77,6 @@ export function Account(props) {
                 newpassword: pswd
             });
     }
-    const addFilter = (key, value) => {
-        let temp = {}
-        temp = { ...filters, [key]: value };
-        context.changeFilters(temp);
-        setFilters(temp);
-    }
-    const deleteFilter = key => {
-        let temp = {}
-        for (let kkey in filters)
-            if (kkey !== key) temp[kkey] = filters[kkey];
-        context.changeFilters(temp);
-        setFilters(temp);
-    }
-
     const selectLanguage = ev => {
         let value = ev.target.value;
         setErrors({
@@ -155,7 +140,6 @@ export function Account(props) {
         <hr />
         <FormGroup type="select" label={text.language} lang={context.lang} selectLanguage={selectLanguage} />
         <br/>
-        <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add}
-            addFilter={addFilter} deleteFilter={deleteFilter} filters={filters} />
+        <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add} />
     </div>
 }

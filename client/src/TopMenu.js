@@ -32,6 +32,7 @@ export function TopMenu(props) {
     const context = useContext(Context);
     const [navExpanded, setExpanded] = useState(false);
     const toggleNav = expanded => setExpanded(expanded);
+    const [page, setPage] = useState(1);
     let val, error;
     let refresh = false;
     if (!props.location.search) val = "";
@@ -58,7 +59,11 @@ export function TopMenu(props) {
         if (searchError) alert(searchError);
         else props.history.push("/lobby/1?q=" + search.trim());
     }
-    let page = props.location.pathname.startsWith("/lobby/") ? Number(props.location.pathname.substring(7)) : 1;
+    if(props.location.pathname.startsWith("/lobby/")){
+        let num = Number(props.location.pathname.substring(7));
+        if(page !== num)
+            setPage(num);
+    }
     text.setLanguage(context.lang);
     return <Navbar bg="dark" variant="dark" expand="md" sticky="top"
         expanded={navExpanded}

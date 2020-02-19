@@ -7,7 +7,9 @@ import urls from "./utils/Urls";
 export class EConfirm extends Component {
     static contextType = Context;
     render() {
-        return <Loading id="spinner" type="spinningBubbles" color="#17a2b8" width="100px" />
+        return <div className="cover">
+            <Loading id="spinner" type="spinningBubbles" color="#17a2b8" width="100px" />
+        </div>
     }
     componentDidMount() {
         Post(urls.confirmEmail, this.props.match.params.number, this.context.lang)

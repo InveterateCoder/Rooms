@@ -2,10 +2,29 @@ body {
     overflow-y: scroll;
     padding-bottom: 50px;
 }
-#loading {
-    background-color: rgba(0, 0, 0, .4);
+.cover {
     position: fixed;
     left: 0; right: 0;
     top: 0; bottom: 0;
+}
+#loading {
+    background-color: rgba(0, 0, 0, .4);
     opacity: 0;
+}
+#fatal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    user-select: none;
+    text-align: center;
+}
+#fatal > .display-1 {
+    letter-spacing: 7px;
+    margin-bottom: -36px;
+}
+#fatal > span {
+    font-size: 0.9em;
+    margin-right: 35px;
+    padding: 5px;
 }

@@ -8,7 +8,7 @@ export function Loading(props) {
         let handle = setTimeout(() => div.current.style.opacity = 1, 300);
         return () => clearTimeout(handle);
     })
-    return <div ref={div} id="loading" tabIndex="-1">
+    return <div ref={div} id="loading" className="cover" tabIndex="-1">
         <Spinner id="spinner" type="spinningBubbles" color="#fff" width="100px" />
     </div>
 }
