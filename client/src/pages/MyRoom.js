@@ -6,6 +6,8 @@ import { FormGroup } from "./accessories/Forms/FormGroup";
 import { PasswordGroup } from "./accessories/Forms/PasswordGroup";
 import { Delete } from "./accessories/Forms/Delete";
 import LocalizedStrings from "react-localization";
+import { Post, Get } from "../utils/requests";
+import urls from "../utils/Urls";
 
 const text = new LocalizedStrings({
     en: {
@@ -69,7 +71,7 @@ export function MyRoom(props) {
     }
     const limitChanged = ev => {
         if (ev.target.value >= 2 && ev.target.value <= 50)
-            setRLimit(ev.target.value);
+            setRLimit(Number(ev.target.value));
     }
     const hasFormChanged = () => {
         if (rcountry !== context.room.country ||
@@ -97,17 +99,34 @@ export function MyRoom(props) {
         setRLimit(context.room.limit);
     }
     const apply = () => {
-        let isdelete = context.room.name && !rname;
-        context.changeRoom({
-            country: rcountry,
-            name: rname,
-            limit: rlimit,
-            password: isdelete ? "" : rpassword,
-            description: isdelete ? "" : rdescription.description
-        });
-        if (isdelete) {
-            setRPassword("");
-            setRDescription({ description: "", error: "" });
+        if (context.room.name && !rname) {
+            Get(urls.roomDelete, context.lang, context.jwt)
+                .then(success => {
+                    if (success) {
+                        context.changeRoom(null);
+                        setRPassword("");
+                        setRDescription({ description: "", error: "" });
+                        setRCountry("gb");
+                    }
+                }).catch(() => props.history.push("/fatal"));
+        }
+        else {
+            Post(urls.roomChange, {
+                name: rname,
+                country: rcountry,
+                password: rpassword ? rpassword : null,
+                description: rdescription.description ? rdescription.description : null,
+                limit: rlimit
+            }, context.lang, context.jwt).then(success => {
+                if (success)
+                    context.changeRoom({
+                        country: rcountry,
+                        name: rname,
+                        limit: rlimit,
+                        password: rpassword,
+                        description: rdescription.description
+                    });
+            }).catch(() => props.history.push("/fatal"));
         }
     }
     text.setLanguage(context.lang);

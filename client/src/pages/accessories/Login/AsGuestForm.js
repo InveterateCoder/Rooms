@@ -43,10 +43,8 @@ export function AsGuestForm(props) {
         else {
             setLoading(true);
             Get(urls.signInAsGuest + input.current.value, context.lang).then(jwt => {
-                if(jwt) {
-                    context.signInAsGuest(jwt);
-                    props.history.replace("/lobby/1");
-                } else setLoading(false);
+                if(jwt) context.signInAsGuest(jwt);
+                else setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }
     }

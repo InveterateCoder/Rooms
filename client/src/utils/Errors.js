@@ -6,7 +6,8 @@ const text = new LocalizedStrings({
         emailOrPassInc: "The email address or password is incorrect.",
         badName: "Wrong name format.",
         notRegistered: "User not registered.",
-        emptyRequest: "Empty request."
+        emptyRequest: "Empty request.",
+        noRoom: "No room found."
     },
     ru:{
         emailTaken: "Этот электронный адрес уже используется. Пожалуйста, используйте другой.",
@@ -14,7 +15,8 @@ const text = new LocalizedStrings({
         emailOrPassInc: "Адрес электронной почты или пароль неверны.",
         badName: "Неправильный формат имени.",
         notRegistered: "Пользователь не зарегистрирован.",
-        emptyRequest: "Пустой запрос."
+        emptyRequest: "Пустой запрос.",
+        noRoom: "Комната не найдена."
     }
 });
 

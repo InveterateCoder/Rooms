@@ -7,6 +7,9 @@ import { FilterGroup } from "./accessories/Forms/FilterGroup";
 import { Delete } from "./accessories/Forms/Delete";
 import validator from "../utils/validator";
 import LocalizedStrings from "react-localization";
+import { Loading } from "../Loading";
+import { Post, Get } from "../utils/requests";
+import urls from "../utils/Urls";
 
 const text = new LocalizedStrings({
     en: {
@@ -47,6 +50,7 @@ const text = new LocalizedStrings({
 
 export function Account(props) {
     const context = useContext(Context);
+    const [loading, setLoading] = useState(false);
     const [name, setName] = useState(context.name);
     const [newpassword, setNewPassword] = useState("");
     const [nameError, setNameError] = useState("");
@@ -79,11 +83,24 @@ export function Account(props) {
     }
     const apply = () => {
         if (isValid() && hasFormChanged()) {
-            //send request
-            if(name !== context.name) context.changeName(name);
-            //if(newpassword)
-            setNewPassword("");
+            setLoading(true);
+            Post(urls.accountChange,
+                { name: name !== context.name ? name : null, password: newpassword ? newpassword : null },
+                context.lang, context.jwt).then(jwt => {
+                    if(jwt){
+                        context.changeAccaunt(jwt, name);
+                        setNewPassword("");
+                    }
+                    setLoading(false);
+                }).catch(() => props.history.push("/fatal"));
         }
+    }
+    const deleteAccount = () => {
+        Get(urls.accountDelete, context.lang, context.jwt)
+            .then(success => {
+                if(success)
+                    context.signOut();
+            }).catch(() => props.history.push("/fatal"));
     }
     text.setLanguage(context.lang);
     return <div className="container formpage">
@@ -99,12 +116,15 @@ export function Account(props) {
                     ?   <button onClick={apply} disabled={!isValid()}
                             className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
                                 {text.submit}</button>
-                    :   <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={context.deleteUser} />
+                    :   <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={deleteAccount} />
             }
         </div>
         <hr />
         <FormGroup type="select" label={text.language} lang={context.lang} selectLanguage={selectLanguage} />
         <br/>
         <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add} />
+        {
+            loading && <Loading />
+        }
     </div>
 }

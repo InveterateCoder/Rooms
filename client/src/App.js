@@ -1,27 +1,20 @@
 import React, { Component } from 'react';
 import { Context } from "./data/Context";
-import { BrowserRouter as Router, Route, Switch, Redirect, withRouter } from "react-router-dom";
-import { Lobby } from "./pages/Lobby";
-import { Account } from "./pages/Account";
-import { MyRoom } from "./pages/MyRoom";
-import { TopMenu } from "./TopMenu";
-import { SignIn } from "./pages/SignIn";
-import { Fatal } from "./Fatal";
-import { EConfirm } from "./EConfirm";
-
-const TopMenuWithRouter = withRouter(TopMenu);
+import { Route, Switch } from "react-router-dom";
+import { Preloader } from "./Preloader";
+import { Home } from "./Home";
+import { Get } from "./utils/requests";
+import urls from "./utils/Urls";
 
 export default class App extends Component {
     constructor(props) {
         super(props);
         let filters = localStorage.getItem("filters");
         filters = filters ? JSON.parse(filters) : {};
-        //en: "English",
-        //ru: "Русский"
         this.state = {
             jwt: localStorage.getItem("jwt"),
             registered: localStorage.getItem("registered"),
-            name: "Arthur",
+            name: "",
             room: {
                 name: "",
                 description: "",
@@ -48,7 +41,7 @@ export default class App extends Component {
     }
     signInAsGuest = jwt => {
         localStorage.setItem("jwt", jwt);
-        this.setState({ jwt });
+        this.setState({ jwt }, () => this.props.history.replace("/lobby/1"));
     }
     signInAsUser = data => {
         localStorage.setItem("jwt", data.jwt);
@@ -56,9 +49,9 @@ export default class App extends Component {
         this.setState({
             jwt: data.jwt,
             registered: true,
-            user: data.user,
+            name: data.name,
             room: data.room ? data.room : this.state.room
-        });
+        }, () => this.props.history.replace("/lobby/1"));
     }
     userRegistered = data => {
         localStorage.setItem("jwt", data.jwt);
@@ -66,14 +59,16 @@ export default class App extends Component {
         this.setState({
             jwt: data.jwt,
             registered: true,
-            user: data.user
+            name: data.name
         });
     }
-    changeName = name => {
+    changeAccaunt = (jwt, name) => {
+        localStorage.setItem("jwt", jwt);
+        this.setState({
+            jwt: jwt,
+            name: name
+        });
         this.setState({ name: name });
-    }
-    deleteUser = () => {
-        alert("Deleting")
     }
     changeIcon = icon => {
         localStorage.setItem("icon", icon);
@@ -86,8 +81,16 @@ export default class App extends Component {
         this.setState({ filters });
     }
     changeRoom = data => {
-        //room change here
-        this.setState({ room: data });
+        if(data)
+            this.setState({ room: data });
+        else
+            this.setState({ room: {
+                name: "",
+                description: "",
+                country: "gb",
+                password: "",
+                limit: 20
+            }});
     }
     setLanguage = lang => {
         localStorage.setItem("lang", lang);
@@ -102,38 +105,41 @@ export default class App extends Component {
         });
     }
     render() {
-        let routes = [];
-        if(this.state.jwt){
-            routes.push(<Route key="lobby" path="/lobby/:page(\d+)" exact={true} component={Lobby} />);
-            if(this.state.registered){
-                routes.push(<Route key="account" path="/account" exact={true} component={Account} />);
-                routes.push(<Route key="myroom" path="/myroom" exact={true} component={MyRoom} />);
-            }
-            routes.push(<Redirect key="tolobby" to="/lobby/1" />);
-        } else routes.push(<Redirect key="tosign" to="/signin/guest" />);
-        
         return <Context.Provider value={{
             jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
             filters: this.state.filters, name: this.state.name, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
-            setLanguage: this.setLanguage, changeName: this.changeName,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon, deleteUser: this.deleteUser,
+            setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
             signInAsGuest: this.signInAsGuest
         }}>
-            <Router>
-                {
-                    this.state.jwt && <TopMenuWithRouter />
-                }
-                <Switch>
-                    {
-                        !this.state.registered && <Route path="/signin/:as" component={SignIn} />
-                    }
-                    <Route path="/fatal" component={Fatal} />
-                    <Route path="/econfirm/:number(\d{9})" exact={true} strict={true} component={EConfirm} />
-                    {routes}
-                </Switch>
-            </Router>
+            {
+                this.state.registered && !this.state.name
+                    ? <Preloader />
+                    : <Switch>
+                        <Route path="/" component={Home} />
+                    </Switch>
+            }
         </Context.Provider>
+    }
+    componentDidMount() {
+        if (this.state.registered && this.state.jwt) {
+            Get(urls.accountInfo, this.state.lang, this.state.jwt)
+                .then(data => {
+                    if (data)
+                        this.setState({
+                            name: data.name,
+                            room: !data.room ? this.state.room : {
+                                name: data.room.name,
+                                country: data.room.country,
+                                limit: data.room.limit,
+                                password: data.room.password ? data.room.password : "",
+                                description: data.room.description ? data.room.description : ""
+                            }
+                        });
+                    else this.signOut();
+                }).catch(() => this.signOut());
+        }
     }
 }

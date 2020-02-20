@@ -12,9 +12,6 @@ namespace Rooms.Models
         public DbSet<Message> Messages {get;set;}
         public DbSet<RegQueueEntity> RegQueue {get;set;}
         protected override void OnModelCreating(ModelBuilder modelBuilder){
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
             modelBuilder.Entity<Room>()
                 .HasIndex(r => r.Slug)
                 .IsUnique();
@@ -37,11 +34,15 @@ namespace Rooms.Models
     public class Room
     {
         public long RoomId {get;set;}
+        [Required]
+        public long UserId {get;set;}
+        [Required]
+        public User User {get;set;}
         [Required, MaxLength(2)]
         public string Country {get;set;}
-        [Required, MaxLength(40)]
+        [Required, MaxLength(34)]
         public string Name {get;set;}
-        [Required, MaxLength(40)]
+        [Required, MaxLength(34)]
         public string Slug {get;set;}
         [MaxLength(200)]
         public string Description {get;set;}
@@ -57,12 +58,13 @@ namespace Rooms.Models
         [Required]
         public long TimeStamp {get;set;}
         [Required]
-        public User User {get;set;}
-        [Required, MaxLength(40)]
+        public long RoomId {get;set;}
+        [Required]
+        public Room Room {get;set;}
+        [Required, MaxLength(34)]
         public string From {get;set;}
         [Required, MaxLength(5)]
         public string Icon {get;set;}
-        public List<User> To {get;set;}
         public string ToNamesJson {get;set;}
         [Required, MaxLength(10000)]
         public string Text {get;set;}
@@ -76,7 +78,7 @@ namespace Rooms.Models
         public long Date {get;set;}
         [Required, MaxLength(10)]
         public string Key {get;set;}
-        [Required, MaxLength(40)]
+        [Required, MaxLength(34)]
         public string Name {get;set;}
         [Required, MaxLength(320)]
         public string Email {get;set;}

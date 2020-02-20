@@ -131,10 +131,8 @@ export function AsUserForm(props) {
                     Post(urls.signInAsUser,
                         { email: state.email, password: state.password }, context.lang)
                         .then(data => {
-                            if (data) {
-                                context.signInAsUser(data);
-                                props.history.replace("/lobby/1");
-                            } else setLoading(false);
+                            if (data) context.signInAsUser(data);
+                            else setLoading(false);
                         }).catch(() => props.history.push("/fatal"));
                     break;
                 case "recover":

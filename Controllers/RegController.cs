@@ -84,11 +84,7 @@ namespace Rooms.Controllers
                 return Ok(new
                 {
                     jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
-                    user = new
-                    {
-                        name = user.Entity.Name,
-                        email = user.Entity.Email
-                    }
+                    name = user.Entity.Name
                 });
             }
             catch (Exception ex)
@@ -121,11 +117,7 @@ namespace Rooms.Controllers
                 };
                 return Ok(new {
                     jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
-                    user = new
-                    {
-                        name = user.Name,
-                        email = user.Email
-                    },
+                    name = user.Name,
                     room = room
                 });
             }

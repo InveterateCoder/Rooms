@@ -1,7 +1,13 @@
-using System.Text.RegularExpressions;
+using System;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Rooms.Infrastructure;
+using Rooms.Models;
+
 namespace Rooms.Controllers
 {
     [Authorize]
@@ -13,51 +19,71 @@ namespace Rooms.Controllers
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class RoomController : ControllerBase
     {
-        
-        private bool isRightName(string name)
+        private readonly Helper Helper;
+        private readonly RoomsDBContext _context;
+        public RoomController(Helper helper, RoomsDBContext context)
         {
-            Regex reg = new Regex(@"^[\p{L}\d.\- ]+$");
-            if (!reg.IsMatch(name)) return false;
-            if (name[^1] == ' ' || name[^1] == '-') return false;
-            if (name[0] == '.' || name[0] == ' ' || name[0] == '-') return false;
-            bool verify(string marks)
+            Helper = helper;
+            _context = context;
+        }
+        [HttpPost("change")]
+        public async Task<IActionResult> Change([FromBody]RoomForm form)
+        {
+            try
             {
-                for (var i = marks.Length - 1; i >= 0; i--)
-                {
-                    switch (marks[i])
+                Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                if (id.Guest != null) return Forbid();
+                if (!Helper.isRighGrouptName(form.Name)) return BadRequest(Errors.BadName);
+                var user = await _context.Users.Include(u => u.Room).FirstOrDefaultAsync(u => u.UserId == id.UserId);
+                if (user == null) return BadRequest(Errors.NotRegistered);
+                
+                if (user.Room == null)
+                    await _context.Rooms.AddAsync(new Room
                     {
-                        case '.':
-                            if (i > 0) return false;
-                            break;
-                        case '-':
-                            if ((i > 0 && marks[i - 1] != ' ') || (i > 1 && marks[i - 2] == '-'))
-                                return false;
-                            break;
-                        case ' ':
-                            if (i > 0 && marks[i - 1] == ' ') return false;
-                            break;
-                        default: return false;
-                    }
-                }
-                return true;
-            }
-            var marks = "";
-            for (var i = name.Length - 1; i >= 0; i--)
-            {
-                var cchar = name[i];
-                if (cchar == '.' || cchar == ' ' || cchar == '-')
-                    marks = cchar + marks;
+                        Name = form.Name,
+                        Slug = Helper.Slugify(form.Name),
+                        Description = form.Description,
+                        Country = form.Country,
+                        Password = form.Password,
+                        Limit = form.Limit,
+                        UserId = user.UserId
+                    });
                 else
                 {
-                    if (marks.Length > 0)
-                    {
-                        var ret = verify(marks);
-                        if (!ret) return ret;
-                        else marks = "";
-                    }
+                    user.Room.Name = form.Name;
+                    user.Room.Slug = Helper.Slugify(form.Name);
+                    user.Room.Description = form.Description;
+                    user.Room.Country = form.Country;
+                    user.Room.Password = form.Password;
+                    user.Room.Limit = form.Limit;
+                    _context.Rooms.Update(user.Room);
                 }
+                await _context.SaveChangesAsync();
+                return Ok("ok");
             }
-            return true;
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+        [HttpGet("delete")]
+        public async Task<IActionResult> Delete()
+        {
+            try
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                if (id.Guest != null) return Forbid();
+                var user = await _context.Users.Include(u => u.Room).FirstOrDefaultAsync(u => u.UserId == id.UserId);
+                if (user == null) return BadRequest(Errors.NotRegistered);
+                if (user.Room == null) return BadRequest(Errors.NoRoom);
+                _context.Rooms.Remove(user.Room);
+                await _context.SaveChangesAsync();
+                return Ok("ok");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
         }
     }
 }
