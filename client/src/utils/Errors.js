@@ -7,7 +7,8 @@ const text = new LocalizedStrings({
         badName: "Wrong name format.",
         notRegistered: "User not registered.",
         emptyRequest: "Empty request.",
-        noRoom: "No room found."
+        noRoom: "No room found.",
+        roomNameExist: "Room with this name already exists.",
     },
     ru:{
         emailTaken: "Этот электронный адрес уже используется. Пожалуйста, используйте другой.",
@@ -16,7 +17,8 @@ const text = new LocalizedStrings({
         badName: "Неправильный формат имени.",
         notRegistered: "Пользователь не зарегистрирован.",
         emptyRequest: "Пустой запрос.",
-        noRoom: "Комната не найдена."
+        noRoom: "Комната не найдена.",
+        roomNameExist: "Комната с таким названием уже существует.",
     }
 });
 

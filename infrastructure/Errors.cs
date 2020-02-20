@@ -9,5 +9,6 @@ namespace Rooms.Infrastructure
         public static string NotRegistered = "notRegistered";
         public static string EmptyRequest = "emptyRequest";
         public static string NoRoom = "noRoom";
+        public static string RoomNameExist = "roomNameExist";
     }
 }
