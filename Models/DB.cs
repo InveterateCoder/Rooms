@@ -1,6 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 
 namespace Rooms.Models
@@ -36,7 +37,6 @@ namespace Rooms.Models
         public long RoomId {get;set;}
         [Required]
         public long UserId {get;set;}
-        [Required]
         public User User {get;set;}
         [Required, MaxLength(2)]
         public string Country {get;set;}
@@ -50,22 +50,37 @@ namespace Rooms.Models
         public string Password {get;set;}
         [Required]
         public byte Limit {get;set;}
-        public List<Message> Messages {get;set;}
+        public IEnumerable<Message> Messages {get;set;}
     }
     public class Message
     {
         public long MessageId {get;set;}
         [Required]
-        public long TimeStamp {get;set;}
-        [Required]
         public long RoomId {get;set;}
         [Required]
         public Room Room {get;set;}
+        [Required]
+        public long TimeStamp {get;set;}
+        [MaxLength(5000)]
+        public string AccessIdsJson {get;set;}
+        [NotMapped]
+        public IEnumerable<long> AccessIds
+        {
+            get => AccessIdsJson == null ? null : JsonSerializer.Deserialize<IEnumerable<long>>(AccessIdsJson);
+            set => AccessIdsJson = value == null ? null : JsonSerializer.Serialize<IEnumerable<long>>(value);
+        }
         [Required, MaxLength(34)]
-        public string From {get;set;}
+        public string SenderName {get;set;}
         [Required, MaxLength(5)]
-        public string Icon {get;set;}
+        public string SenderIcon {get;set;}
+        [MaxLength(5000)]
         public string ToNamesJson {get;set;}
+        [NotMapped]
+        public IEnumerable<string> ToNames
+        {
+            get => ToNamesJson == null ? null : JsonSerializer.Deserialize<IEnumerable<string>>(ToNamesJson);
+            set => ToNamesJson = value == null ? null : JsonSerializer.Serialize<IEnumerable<string>>(value);
+        }
         [Required, MaxLength(10000)]
         public string Text {get;set;}
         [Required]

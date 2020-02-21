@@ -47,6 +47,7 @@ namespace Rooms
                 };
             });
             services.AddSingleton<Helper>();
+            services.AddSingleton<State>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
