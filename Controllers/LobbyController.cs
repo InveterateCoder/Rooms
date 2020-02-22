@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -27,25 +27,69 @@ namespace Rooms.Controllers
         }
         [HttpGet("search/{page:min(1)}/{perpage:min(10)}")]
         public async Task<IActionResult> Search(int page, int perpage,
-            [FromQuery] string slug, [FromQuery] string countries)
+            [FromQuery] string slug, [FromQuery] string c_codes)
         {
             try
             {
-                string[] cs = countries == null ? null : countries.Split('_');
-                foreach (var country in cs)
-                    if (!StaticData.CountryCodes.Contains(country))
-                        return BadRequest(Errors.BadQuery);
-                if (slug != null && char.IsWhiteSpace(slug[0])) return BadRequest(Errors.BadQuery);
-                IQueryable<Room> rooms;
-                if (string.IsNullOrEmpty(slug)) rooms = _context.Rooms.AsQueryable();
-                else rooms = _context.Rooms.Where(r => r.Slug.StartsWith(slug));
-                if (cs != null)
-                    rooms = rooms.Where(r => cs.Contains(r.Country));
-                IQueryable<Room> activeRooms = null;
-                if(_state.ActiveRooms.Count > 0) {
-                    var activeIds = _state.ActiveRooms.Keys;
-                    activeRooms = rooms.Where(r => activeIds.Contains(r.RoomId));
-                }
+                return await Task<IActionResult>.Factory.StartNew(() =>
+                {
+                    string[] cs = c_codes == null ? null : c_codes.Split('_');
+                    if (cs != null)
+                        foreach (var country in cs)
+                            if (!StaticData.CountryCodes.Contains(country))
+                                return BadRequest(Errors.BadQuery);
+                    if (slug != null)
+                    {
+                        if (!Helper.isRighGrouptName(slug, true))
+                            return BadRequest(Errors.BadQuery);
+                    }
+                    IQueryable<Room> rooms;
+                    if (string.IsNullOrEmpty(slug)) rooms = _context.Rooms.AsQueryable();
+                    else rooms = _context.Rooms.Where(r => r.Slug.StartsWith(slug, StringComparison.OrdinalIgnoreCase));
+                    if (cs != null && cs.Length > 0)
+                        rooms = rooms.Where(r => cs.Contains(r.Country));
+                    int count = rooms.Count();
+                    if (count <= 0) return Ok(new SearchReturn(1, 0, null));
+                    int total_pages = count / perpage + (count % perpage > 0 ? 1 : 0);
+                    if (page > total_pages) page = total_pages;
+                    int activeCount = 0;
+                    IQueryable<Room> activeRooms = null;
+                    if (_state.ActiveRooms.Count > 0)
+                    {
+                        var activeIds = _state.ActiveRooms.Keys;
+                        activeRooms = rooms.Where(r => activeIds.Contains(r.RoomId));
+                        activeCount = activeRooms.Count();
+                        if (activeCount > 0)
+                        {
+                            activeRooms.OrderBy(r => r.Slug);
+                            rooms = rooms.Where(r => !activeIds.Contains(r.RoomId));
+                        }
+                    }
+                    rooms.OrderBy(r => r.Slug);
+                    int skip = (page - 1) * perpage;
+                    int skip_remain = activeCount - skip;
+                    List<SearchRoom> list = null;
+                    if (skip_remain > 0)
+                    {
+                        list = activeRooms.Skip(skip).Take(perpage).Select(r => new SearchRoom(r.Name, r.Slug,
+                            r.Description, r.Country, r.Password != null ? true : false,
+                            _state.ActiveRooms[r.RoomId].Online)).ToList();
+                        if (list.Count < perpage)
+                        {
+                            int take = perpage - list.Count();
+                            var remnant = rooms.Take(take).Select(r => new SearchRoom(r.Name, r.Slug,
+                                r.Description, r.Country, r.Password != null ? true : false, 0)).ToArray();
+                            list.AddRange(remnant);
+                        }
+                    }
+                    else
+                    {
+                        skip_remain = Math.Abs(skip_remain);
+                        list = rooms.Skip(skip_remain).Take(perpage).Select(r => new SearchRoom(r.Name, r.Slug,
+                            r.Description, r.Country, r.Password != null ? true : false, 0)).ToList();
+                    }
+                    return Ok(new SearchReturn(page, total_pages, list));
+                });
             }
             catch (Exception ex)
             {

@@ -37,7 +37,7 @@ export function TopMenu(props) {
     let refresh = false;
     if (!props.location.search) val = "";
     else if (props.location.search.startsWith("?q=")) {
-        val = props.location.search.substring(3).replace("%20", ' ');
+        val = props.location.search.substring(3).replace(/_/g, ' ');
         if(val.length === 0) refresh = true;
         else error = validator.groupname(val, context.lang, true);
     } else refresh = true;
@@ -57,7 +57,8 @@ export function TopMenu(props) {
     const applySearch = () => {
         if (search === val) return;
         if (searchError) alert(searchError);
-        else props.history.push("/lobby/1?q=" + search.trim());
+        else if (!search) props.history.push("/lobby/1");
+        else props.history.push("/lobby/1?q=" + search.replace(/\s/g, '_'));
     }
     if(props.location.pathname.startsWith("/lobby/")){
         let num = Number(props.location.pathname.substring(7));
@@ -82,7 +83,7 @@ export function TopMenu(props) {
         <Navbar.Toggle />
         <Navbar.Collapse>
             <Nav className="ml-auto">
-                <Nav.Link className="m-auto" as={NavLink} to={`/lobby/${page}${search ? "?q=" + search.trim() : ""}`} activeClassName="active">
+                <Nav.Link className="m-auto" as={NavLink} to={`/lobby/${page}${search ? "?q=" + search.replace(/\s/g, '_') : ""}`} activeClassName="active">
                     <FontAwesomeIcon icon={faSearch} /> {text.Lobby}</Nav.Link>
                 {
                     context.registered

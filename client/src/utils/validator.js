@@ -40,14 +40,14 @@ export default class {
         errors.setLanguage(lang);
         if (data.length < 4 || data.length > 34)
             return errors.name.length;
-        if ((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
+        if ((/(^\s+|\s+$)/gu).test(data))
             return errors.name.space;
     }
     static guestname(data, lang) {
         errors.setLanguage(lang);
         if (data.length < 4 || data.length > 10)
             return errors.name.guestlength;
-        if ((/^\s+/gu).test(data) || (/\s+$/gu).test(data))
+        if ((/(^\s+|\s+$)/gu).test(data))
             return errors.name.space;
     }
     static groupname(data, lang, search = false) {
@@ -60,6 +60,7 @@ export default class {
         const verify = marks => {
             for (let i = marks.length - 1; i >= 0; i--) {
                 switch (marks[i]) {
+                    case "'":
                     case '.':
                         if (i > 0) return errors.name.punctuation;
                         break;
@@ -77,7 +78,7 @@ export default class {
         let marks = "";
         for (let i = data.length - 1; i >= 0; i--) {
             let char = data.charAt(i);
-            if (char === '.' || char === ' ' || char === '-')
+            if (char === '.' || char === ' ' || char === '-' || char === "'" || char === '&')
                 marks = char + marks;
             else {
                 if (marks.length) {
@@ -87,9 +88,9 @@ export default class {
                 }
             }
         }
-        if (!(/^[\p{L}\d.\- ]+$/gu).test(data))
+        if (!(/^[\p{L}\d.\-&' ]+$/gu).test(data))
             return errors.name.junk;
-        if (data[0] === '.' || data[0] === ' ' || data[0] === '-')
+        if (data[0] === '.' || data[0] === ' ' || data[0] === '-' || data[0] === "'" || data[0] === '&')
             return errors.name.first;
         if (!search) {
             if (data[data.length - 1] === ' ' || data[data.length - 1] === '-')

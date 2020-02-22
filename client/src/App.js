@@ -5,6 +5,7 @@ import { Preloader } from "./Preloader";
 import { Home } from "./Home";
 import { Get } from "./utils/requests";
 import urls from "./utils/Urls";
+import Countries from "./data/countries"
 
 export default class App extends Component {
     constructor(props) {
@@ -24,6 +25,7 @@ export default class App extends Component {
             },
             lang: localStorage.getItem("lang") || this.bestLang(),
             filters: filters,
+            c_codes: localStorage.getItem("c_codes"),
             icon: localStorage.getItem("icon") || "user"
         }
     }
@@ -46,11 +48,15 @@ export default class App extends Component {
     signInAsUser = data => {
         localStorage.setItem("jwt", data.jwt);
         localStorage.setItem("registered", true);
+        let codes = this.getCountries(this.state.filters);
+        localStorage.setItem("c_codes", codes);
+        debugger;
         this.setState({
             jwt: data.jwt,
             registered: true,
             name: data.name,
-            room: data.room ? data.room : this.state.room
+            room: data.room ? data.room : this.state.room,
+            c_codes: codes
         }, () => this.props.history.replace("/lobby/1"));
     }
     userRegistered = data => {
@@ -78,7 +84,21 @@ export default class App extends Component {
     }
     changeFilters = filters => {
         localStorage.setItem("filters", JSON.stringify(filters));
-        this.setState({ filters });
+        let codes = this.getCountries(filters);
+        localStorage.setItem("c_codes", codes);
+        this.setState({ filters, c_codes: codes });
+    }
+    getCountries = filters => {
+        let keys = Object.keys(filters);
+        let c_codes = new Set();
+        keys.forEach(key => {
+            for (let value of Object.values(Countries))
+                if(value.langs.includes(key)) c_codes.add(value.code);
+        });
+        let codes = "";
+        if(c_codes.size > 0)
+            codes = Array.from(c_codes).reduce((a, b) => a + '_' + b);
+        return codes;
     }
     changeRoom = data => {
         if(data)
@@ -99,6 +119,7 @@ export default class App extends Component {
     signOut = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("registered");
+        localStorage.removeItem("c_codes");
         this.setState({
             jwt: null,
             registered: false
@@ -110,7 +131,7 @@ export default class App extends Component {
             filters: this.state.filters, name: this.state.name, room: this.state.room,
             signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
             setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon,
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon, c_codes: this.state.c_codes,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
             signInAsGuest: this.signInAsGuest
         }}>

@@ -49,33 +49,34 @@ namespace Rooms.Infrastructure
         }
         public bool isRightName(string name)
         {
-            if (new Regex(@"^\s+").IsMatch(name) || new Regex(@"\s+$").IsMatch(name))
+            if (Regex.IsMatch(name, @"(^\s+|\s+$)"))
                 return false;
             return true;
         }
-        public bool isRighGrouptName(string name)
+        public bool isRighGrouptName(string name, bool slug = false)
         {
-            Regex reg = new Regex(@"^[\p{L}\d.\- ]+$");
-            if (!reg.IsMatch(name)) return false;
-            if (name[^1] == ' ' || name[^1] == '-') return false;
-            if (name[0] == '.' || name[0] == ' ' || name[0] == '-') return false;
+            char ch = slug ? '_' : ' ';
+            if (!Regex.IsMatch(name, $@"^[\p{{L}}\d.\-&'{ch}]+$")) return false;
+            if (!slug && (name[^1] == ch || name[^1] == '-')) return false;
+            if (name[0] == '.' || name[0] == ch || name[0] == '-' || name[0] == '\'' || name[0] =='&') return false;
             bool verify(string marks)
             {
                 for (var i = marks.Length - 1; i >= 0; i--)
                 {
                     switch (marks[i])
                     {
+                        case '\'':
                         case '.':
                             if (i > 0) return false;
                             break;
                         case '-':
-                            if ((i > 0 && marks[i - 1] != ' ') || (i > 1 && marks[i - 2] == '-'))
+                            if ((i > 0 && marks[i - 1] != ch) || (i > 1 && marks[i - 2] == '-'))
                                 return false;
                             break;
                         case ' ':
-                            if (i > 0 && marks[i - 1] == ' ') return false;
+                        case '_':
+                            if (i > 0 && marks[i - 1] == ch) return false;
                             break;
-                        default: return false;
                     }
                 }
                 return true;
@@ -84,7 +85,7 @@ namespace Rooms.Infrastructure
             for (var i = name.Length - 1; i >= 0; i--)
             {
                 var cchar = name[i];
-                if (cchar == '.' || cchar == ' ' || cchar == '-')
+                if (cchar == '.' || cchar == ch || cchar == '-' || cchar == '\'' || cchar == '&')
                     marks = cchar + marks;
                 else
                 {

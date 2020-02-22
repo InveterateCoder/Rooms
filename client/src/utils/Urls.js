@@ -8,5 +8,6 @@ export default {
     accountInfo: "/api/account/info",
     accountDelete: "/api/account/delete",
     roomChange: "/api/room/change",
-    roomDelete: "/api/room/delete"
+    roomDelete: "/api/room/delete",
+    lobbySearch: "/api/lobby/search"
 }

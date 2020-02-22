@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Rooms.Infrastructure;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Rooms.Controllers
 {
@@ -94,20 +95,9 @@ namespace Rooms.Controllers
         {
             try
             {
-                var user = _context.Users.FirstOrDefault(u => u.Email == form.Email);
+                var user = _context.Users.Include(u => u.Room).FirstOrDefault(u => u.Email == form.Email);
                 if (user == null || user.Password != form.Password)
                     return BadRequest(Errors.EmailOrPassInc);
-                object room = null;
-                if(user.Room != null){
-                    room = new
-                    {
-                        name = user.Room.Name,
-                        description = user.Room.Description,
-                        country = user.Room.Country,
-                        password = user.Room.Password,
-                        limit = user.Room.Limit
-                    };
-                }
                  Identity id = new Identity {
                     UserId = user.UserId,
                     Name = user.Name
@@ -115,7 +105,13 @@ namespace Rooms.Controllers
                 return Ok(new {
                     jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
                     name = user.Name,
-                    room = room
+                    room = user.Room == null ? null : new {
+                        name = user.Room.Name,
+                        description = user.Room.Description,
+                        country = user.Room.Country,
+                        password = user.Room.Password,
+                        limit = user.Room.Limit
+                    }
                 });
             }
             catch (Exception ex)
