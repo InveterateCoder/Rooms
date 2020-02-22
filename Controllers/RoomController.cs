@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,9 +15,6 @@ namespace Rooms.Controllers
     [ApiController]
     [Route("/api/[controller]")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class RoomController : ControllerBase
     {
         private readonly Helper Helper;
@@ -34,6 +32,7 @@ namespace Rooms.Controllers
                 Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
                 if (id.Guest != null) return Forbid();
                 if (!Helper.isRighGrouptName(form.Name)) return BadRequest(Errors.BadName);
+                if (!StaticData.CountryCodes.Contains(form.Country)) return BadRequest(Errors.WrongCountry);
                 var room = await _context.Rooms.FirstOrDefaultAsync(r => r.UserId == id.UserId);
                 var slug = Helper.Slugify(form.Name);
                 if (room == null)

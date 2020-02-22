@@ -13,9 +13,6 @@ namespace Rooms.Controllers
     [ApiController]
     [Route("/api/[controller]")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public class RegController : ControllerBase
     {
         private readonly Helper Helper;

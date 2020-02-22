@@ -10,5 +10,7 @@ namespace Rooms.Infrastructure
         public static string EmptyRequest = "emptyRequest";
         public static string NoRoom = "noRoom";
         public static string RoomNameExist = "roomNameExist";
+        public static string BadQuery = "badQuery";
+        public static string WrongCountry = "wrongCountry";
     }
 }
