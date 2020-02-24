@@ -9,6 +9,7 @@ const text = new LocalizedStrings({
         emptyRequest: "Empty request.",
         noRoom: "No room found.",
         roomNameExist: "Room with this name already exists.",
+        badQuery: "Bad query format.",
         wrongCountry: "Wrong country code."
     },
     ru:{
@@ -20,6 +21,7 @@ const text = new LocalizedStrings({
         emptyRequest: "Пустой запрос.",
         noRoom: "Комната не найдена.",
         roomNameExist: "Комната с таким названием уже существует.",
+        badQuery: "Неверный формат запроса.",
         wrongCountry: "Неверный код страны."
     }
 });

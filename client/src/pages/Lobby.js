@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Context } from "../data/Context";
-import Loading from "react-loading";
+import { Loading } from "../Loading";
 import { Paginator } from "./accessories/Lobby/Paginator";
 import { Presenter } from "./accessories/Lobby/Presenter";
 import validator from "../utils/validator";
@@ -18,28 +18,31 @@ export class Lobby extends Component {
             slug: null
         }
     }
-    queryServer(request) {
+    queryServer() {
         let page = Number(this.props.match.params.page);
-        if(this.state.page && page > this.state.page && this.state.page === this.state.total) {
-            this.props.history.replace("/lobby/" + this.state.page + this.props.location.search);
-            return;
-        }
+        if (!page) page = 1;
+        if (this.state.page && page > this.state.total) return;
         let slug = this.props.location.search;
-        if (slug.startsWith("?q=")) {
-            slug = slug.substring(3);
-            let name = slug;
-            name = name.replace(/_/g, ' ');
-            if (validator.groupname(name, this.context.lang, true))
-                slug = null;
+        if(slug){
+            if (slug.startsWith("?q=")) {
+                slug = slug.substring(3);
+                let name = slug;
+                name = name.replace(/_/g, ' ');
+                if (validator.groupname(name, this.context.lang, true))
+                    slug = null;
+            } else {
+                this.props.history.replace(this.props.match.url);
+                return;
+            }
         }
-        if(page !== this.state.page || slug !== this.state.slug) {
+        if (page !== this.state.page || slug !== this.state.slug) {
             let addr = `${urls.lobbySearch}/${page}/10`;
-            if(slug || this.context.c_codes) addr += "?";
-            if(slug) addr += "slug=" + slug;
-            if(this.context.c_codes) addr += (slug ? "&" : "") + "c_codes=" + this.context.c_codes;
+            if (slug || this.context.c_codes) addr += "?";
+            if (slug) addr += "slug=" + slug;
+            if (this.context.c_codes) addr += (slug ? "&" : "") + "c_codes=" + this.context.c_codes;
             Get(addr, this.context.lang, this.context.jwt)
                 .then(data => {
-                    if(data)
+                    if (data)
                         this.setState({
                             page: data.page,
                             total: data.total,
@@ -50,10 +53,16 @@ export class Lobby extends Component {
         }
     }
     render() {
+        let loading = false;
+        let page = Number(this.props.match.params.page);
+        if (!this.state.page ||
+            (this.state.total && page > this.state.total && this.state.page !== this.state.total) ||
+            (page > 0 && page <= this.state.total && page !== this.state.page))
+                loading = true;
         return <div id="lobby" className="container-fluid">
             {
-                this.props.match.params.page && Number(this.props.match.params.page) !== this.state.page
-                    ? <Loading id="spinner" type="spinningBubbles" color="#17a2b8" width="100px" />
+                loading
+                    ? <Loading />
                     : <>
                         <Presenter list={this.state.list} />
                         <Paginator base="/lobby/" q={this.props.location.search}

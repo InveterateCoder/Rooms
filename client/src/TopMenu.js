@@ -62,8 +62,9 @@ export function TopMenu(props) {
     }
     if(props.location.pathname.startsWith("/lobby/")){
         let num = Number(props.location.pathname.substring(7));
-        if(page !== num)
-            setPage(num);
+        if(isNaN(num)){
+            props.history.replace("/lobby/1");
+        } else if(page !== num) setPage(num);
     }
     text.setLanguage(context.lang);
     return <Navbar bg="dark" variant="dark" expand="md" sticky="top"
