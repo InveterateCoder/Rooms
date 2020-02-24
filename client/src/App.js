@@ -26,7 +26,8 @@ export default class App extends Component {
             lang: localStorage.getItem("lang") || this.bestLang(),
             filters: filters,
             c_codes: localStorage.getItem("c_codes"),
-            icon: localStorage.getItem("icon") || "user"
+            icon: localStorage.getItem("icon") || "user",
+            perpage: localStorage.getItem("perpage") || 10
         }
     }
     bestLang = () => {
@@ -119,6 +120,10 @@ export default class App extends Component {
         localStorage.setItem("lang", lang);
         this.setState({ lang: lang });
     }
+    setPerpage = perpage => {
+        localStorage.setItem("perpage", perpage);
+        this.setState({ perpage });
+    }
     signOut = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("registered");
@@ -136,7 +141,7 @@ export default class App extends Component {
             setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
             changeRoom: this.changeRoom, changeIcon: this.changeIcon, c_codes: this.state.c_codes,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
-            signInAsGuest: this.signInAsGuest
+            signInAsGuest: this.signInAsGuest, perpage: this.state.perpage, setPerpage: this.setPerpage
         }}>
             {
                 this.state.registered && !this.state.name

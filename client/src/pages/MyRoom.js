@@ -5,6 +5,7 @@ import { FlagGroup } from "./accessories/Forms/FlagGroup";
 import { FormGroup } from "./accessories/Forms/FormGroup";
 import { PasswordGroup } from "./accessories/Forms/PasswordGroup";
 import { Delete } from "./accessories/Forms/Delete";
+import { Loading } from "../Loading";
 import LocalizedStrings from "react-localization";
 import { Post, Get } from "../utils/requests";
 import urls from "../utils/Urls";
@@ -49,6 +50,7 @@ export function MyRoom(props) {
     }));
     const [rnameError, setRNameError] = useState(() => validator.groupname(rname, context.lang));
     const [rlimit, setRLimit] = useState(context.room.limit);
+    const [loading, setLoading] = useState(false);
     const setCountry = code => {
         if (rcountry !== code)
             setRCountry(code);
@@ -99,6 +101,7 @@ export function MyRoom(props) {
         setRLimit(context.room.limit);
     }
     const apply = () => {
+        setLoading(true);
         if (context.room.name && !rname) {
             Get(urls.roomDelete, context.lang, context.jwt)
                 .then(success => {
@@ -108,6 +111,7 @@ export function MyRoom(props) {
                         setRDescription({ description: "", error: "" });
                         setRCountry("gb");
                     }
+                    setLoading(false);
                 }).catch(() => props.history.push("/fatal"));
         }
         else {
@@ -126,6 +130,7 @@ export function MyRoom(props) {
                         password: rpassword,
                         description: rdescription.description
                     });
+                setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }
     }
@@ -155,5 +160,8 @@ export function MyRoom(props) {
                         {context.room.name ? text.apply : text.create}</button>
             }
         </div>
+        {
+            loading && <Loading />
+        }
     </div>
 }

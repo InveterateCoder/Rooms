@@ -21,7 +21,7 @@ export class Lobby extends Component {
     queryServer() {
         let page = Number(this.props.match.params.page);
         if (!page) page = 1;
-        if (this.state.page && page > this.state.total) return;
+        if (this.state.page && page > this.state.page && this.state.page === this.state.total) return;
         let slug = this.props.location.search;
         if(slug){
             if (slug.startsWith("?q=")) {
@@ -36,7 +36,7 @@ export class Lobby extends Component {
             }
         }
         if (page !== this.state.page || slug !== this.state.slug) {
-            let addr = `${urls.lobbySearch}/${page}/10`;
+            let addr = `${urls.lobbySearch}/${page}/${this.context.perpage}`;
             if (slug || this.context.c_codes) addr += "?";
             if (slug) addr += "slug=" + slug;
             if (this.context.c_codes) addr += (slug ? "&" : "") + "c_codes=" + this.context.c_codes;

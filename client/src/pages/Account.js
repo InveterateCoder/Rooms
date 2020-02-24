@@ -19,12 +19,8 @@ const text = new LocalizedStrings({
         add: "Add",
         current: "Current password",
         submit: "Apply",
-        notifications: "Notifications",
-        notifs: {
-            true: "On",
-            false: "Off"
-        },
         language: "Language",
+        perpage: "Rooms per page",
         cancel: "Cancel",
         delete: "Delete",
         confirm: "Are you sure you want to delete your account?"
@@ -36,12 +32,8 @@ const text = new LocalizedStrings({
         add: "Добавить",
         current: "Текущий пароль",
         submit: "Применить",
-        notifications: "Уведомления",
-        notifs: {
-            true: "Вкл.",
-            false: "Выкл."
-        },
         language: "Язык",
+        perpage: "Комнат на стр.",
         cancel: "Отмена",
         delete: "Удалить",
         confirm: "Вы уверены, что хотите удалить свой аккаунт?"
@@ -120,9 +112,14 @@ export function Account(props) {
             }
         </div>
         <hr />
-        <FormGroup type="select" label={text.language} lang={context.lang} selectLanguage={selectLanguage} />
-        <br/>
         <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add} />
+        <br/>
+        <FormGroup type="select" label={text.perpage} value={context.perpage}
+            onChange={ev => context.setPerpage(ev.target.value)}
+            opts={{10: 10, 30: 30, 50: 50}} />
+        <br/>
+        <FormGroup type="select" label={text.language} value={context.lang} onChange={selectLanguage}
+            opts={{en: "English", ru: "Русский"}} />
         {
             loading && <Loading />
         }

@@ -1,9 +1,6 @@
 import React from "react";
 import Flag from "react-flags";
-const languages = {
-    en: "English",
-    ru: "Русский"
-};
+
 export function FormGroup(props) {
     const keyPressed = ev => {
         if(ev.which === 13){
@@ -32,9 +29,9 @@ export function FormGroup(props) {
                     </datalist>
                 </>
             case "select":
-                return <select className="form-control" value={props.lang} onChange={props.selectLanguage}>
+                return <select className="form-control" value={props.value} onChange={props.onChange}>
                     {
-                        Object.entries(languages).map(([key, value]) =>
+                        Object.entries(props.opts).map(([key, value]) =>
                             <option key={key} value={key}>{value}</option>)
                     }
                 </select>
@@ -43,11 +40,11 @@ export function FormGroup(props) {
     }
     return <div className="form-group">
         <div className="row">
-            <div className={`col-${props.type === "text" || props.type === "search" ? "sm-" : ""}3`}>
+            <div className={`col-${props.type === "text" || props.type === "search" ? "sm-3" : "6"}`}>
                 {
                     !props.flag
                         ?
-                            <label className="h5">{props.label}</label>
+                            <label className="h5 pb-2">{props.label}</label>
                         :
                             <>
                                 {props.lock && <img src="/img/lock.png" width="48" alt="lock imag"/>}
