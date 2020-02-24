@@ -23,15 +23,19 @@ export function Paginator(props){
     let items = [];
     if(start > 1)
             items.push(<li key={`back_${back}`} className="page-item">
-                <Link className="page-link" to={props.base + back}>...</Link></li>)
+                <Link className="page-link" to={props.base + back + props.q}>...</Link></li>)
     for(let i = start; i <= end; i++){
         items.push(<li key={i} className={`page-item ${i === props.page ? "active" : ""}`}>
-            <Link className="page-link"
-                to={i === props.page ? "#" : props.base + i + props.q}>{i}</Link></li>)
+            {
+                i === props.page
+                    ? <span className="page-link" style={{cursor:"pointer"}}>{i}</span>
+                    : <Link className="page-link" to={props.base + i + props.q}>{i}</Link>
+            }
+        </li>)
     }
     if(end < props.total)
         items.push(<li key={`forward_${forward}`} className="page-item">
-            <Link className="page-link" to={props.base + forward}>...</Link></li>)
+            <Link className="page-link" to={props.base + forward + props.q}>...</Link></li>)
     return <ul className="pagination">
         {items}
     </ul>

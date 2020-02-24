@@ -20,6 +20,10 @@ export class Lobby extends Component {
     }
     queryServer(request) {
         let page = Number(this.props.match.params.page);
+        if(this.state.page && page > this.state.page && this.state.page === this.state.total) {
+            this.props.history.replace("/lobby/" + this.state.page + this.props.location.search);
+            return;
+        }
         let slug = this.props.location.search;
         if (slug.startsWith("?q=")) {
             slug = slug.substring(3);

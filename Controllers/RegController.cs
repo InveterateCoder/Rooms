@@ -23,6 +23,40 @@ namespace Rooms.Controllers
             Helper = helper;
             _context = context;
         }
+        [HttpGet("seed/{quantity:min(10)}")]
+        public IActionResult Seed(int quantity)
+        {
+            const string name = "Name{0}";
+            const string email = "name{0}@email.com";
+            const string password = "fakepassword";
+            const string roomName = "Group{0}";
+            const string description = "Fake description here!";
+            try
+            {
+                for(int i = 1; i <= quantity; i++){
+                    var user = _context.Users.Add(new Models.User {
+                        Name = string.Format(name, i),
+                        Email = string.Format(email, i),
+                        Password = password
+                    });
+                    _context.SaveChanges();
+                    _context.Rooms.Add(new Room {
+                        Name = string.Format(roomName, i),
+                        Description = description,
+                        Country = "gb",
+                        Limit = 20,
+                        Slug = string.Format(roomName, i).ToLower(),
+                        UserId = user.Entity.UserId
+                    });
+                }
+                _context.SaveChanges();
+                return Ok("ok");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
         [HttpPost("reg")]
         public async Task<IActionResult> Register([FromBody]RegForm data)
         {

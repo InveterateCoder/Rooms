@@ -61,32 +61,32 @@ namespace Rooms.Controllers
                         activeCount = activeRooms.Count();
                         if (activeCount > 0)
                         {
-                            activeRooms.OrderBy(r => r.Slug);
+                            activeRooms = activeRooms.OrderBy(r => r.Slug);
                             rooms = rooms.Where(r => !activeIds.Contains(r.RoomId));
                         }
                     }
-                    rooms.OrderBy(r => r.Slug);
+                    rooms = rooms.OrderBy(r => r.Slug);
                     int skip = (page - 1) * perpage;
                     int skip_remain = activeCount - skip;
-                    List<SearchRoom> list = null;
+                    IEnumerable<SearchRoom> list = null;
                     if (skip_remain > 0)
                     {
                         list = activeRooms.Skip(skip).Take(perpage).Select(r => new SearchRoom(r.Name, r.Slug,
                             r.Description, r.Country, r.Password != null ? true : false,
-                            _state.ActiveRooms[r.RoomId].Online)).ToList();
-                        if (list.Count < perpage)
+                            _state.ActiveRooms[r.RoomId].Online)).ToArray();
+                        if (list.Count() < perpage)
                         {
                             int take = perpage - list.Count();
                             var remnant = rooms.Take(take).Select(r => new SearchRoom(r.Name, r.Slug,
                                 r.Description, r.Country, r.Password != null ? true : false, 0)).ToArray();
-                            list.AddRange(remnant);
+                            list = list.Concat(remnant);
                         }
                     }
                     else
                     {
                         skip_remain = Math.Abs(skip_remain);
                         list = rooms.Skip(skip_remain).Take(perpage).Select(r => new SearchRoom(r.Name, r.Slug,
-                            r.Description, r.Country, r.Password != null ? true : false, 0)).ToList();
+                            r.Description, r.Country, r.Password != null ? true : false, 0)).ToArray();
                     }
                     return Ok(new SearchReturn(page, total_pages, list));
                 });

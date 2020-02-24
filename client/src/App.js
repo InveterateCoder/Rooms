@@ -50,12 +50,15 @@ export default class App extends Component {
         localStorage.setItem("registered", true);
         let codes = this.getCountries(this.state.filters);
         localStorage.setItem("c_codes", codes);
-        debugger;
         this.setState({
             jwt: data.jwt,
             registered: true,
             name: data.name,
-            room: data.room ? data.room : this.state.room,
+            room: !data.room ? this.state.room : {
+                ...data.room,
+                password: data.room.password ? data.room.password : "",
+                description: data.room.description ? data.room.description : ""
+            },
             c_codes: codes
         }, () => this.props.history.replace("/lobby/1"));
     }
@@ -152,9 +155,7 @@ export default class App extends Component {
                         this.setState({
                             name: data.name,
                             room: !data.room ? this.state.room : {
-                                name: data.room.name,
-                                country: data.room.country,
-                                limit: data.room.limit,
+                                ...data.room,
                                 password: data.room.password ? data.room.password : "",
                                 description: data.room.description ? data.room.description : ""
                             }
