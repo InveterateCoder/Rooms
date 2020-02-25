@@ -38,10 +38,10 @@ export function TopMenu(props) {
     if (!props.location.search) val = "";
     else if (props.location.search.startsWith("?q=")) {
         val = props.location.search.substring(3).replace(/_/g, ' ');
-        if(val.length === 0) refresh = true;
+        if (val.length === 0) refresh = true;
         else error = validator.groupname(val, context.lang, true);
     } else refresh = true;
-    if(refresh){
+    if (refresh) {
         let newlocation = {};
         Object.assign(newlocation, props.location);
         newlocation.search = "";
@@ -49,7 +49,7 @@ export function TopMenu(props) {
     }
     const [search, setSearch] = useState(val);
     const [searchError, setSearchError] = useState(error);
-    if(refresh) return null;
+    if (refresh) return null;
     const searchChanged = ev => {
         setSearch(ev.target.value);
         setSearchError(validator.groupname(ev.target.value, context.lang, true));
@@ -60,16 +60,15 @@ export function TopMenu(props) {
         else if (!search) props.history.push("/lobby/1");
         else props.history.push("/lobby/1?q=" + search.replace(/\s/g, '_'));
     }
-    if(props.location.pathname.startsWith("/lobby/")){
+    if (props.location.pathname.startsWith("/lobby/")) {
         let num = Number(props.location.pathname.substring(7));
-        if(isNaN(num)){
+        if (isNaN(num)) {
             props.history.replace("/lobby/1");
-        } else if(page !== num) setPage(num);
+        } else if (page !== num) setPage(num);
     }
     text.setLanguage(context.lang);
     return <Navbar bg="dark" variant="dark" expand="md" sticky="top"
-        expanded={navExpanded}
-        onToggle={toggleNav}>
+        expanded={navExpanded} onToggle={toggleNav} style={{userSelect:"none"}} >
         <Navbar.Brand>Rooms</Navbar.Brand>
         <InputGroup style={{ width: "55%", maxWidth: "245px" }} className="m-auto">
             <FormControl autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck="false"

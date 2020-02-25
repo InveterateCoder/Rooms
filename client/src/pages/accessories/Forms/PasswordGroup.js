@@ -95,13 +95,13 @@ export function PasswordGroup(props) {
             <Modal.Body>
                 <div className="form-group">
                     <Password type={props.type} className="form-control" placeholder={text.newholder}
-                        value={newpassword} name="newpassword" onChange={passwordChanged}/>
+                        value={newpassword} onChange={passwordChanged}/>
 
                     <p className="text-danger">{errors.newpassword}</p>
                 </div>
                 <div className="form-group">
                     <Password className="form-control" placeholder={text.confholder} value={confirm}
-                        name="confirm" onChange={confirmChanged} />
+                        onChange={confirmChanged} />
                     <p className="text-danger">{errors.confirm}</p>
                 </div>
             </Modal.Body>

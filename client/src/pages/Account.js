@@ -111,7 +111,7 @@ export function Account(props) {
                     :   <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={deleteAccount} />
             }
         </div>
-        <hr />
+        <hr/><br/>
         <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add} />
         <br/>
         <FormGroup type="select" label={text.perpage} value={context.perpage}

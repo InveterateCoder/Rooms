@@ -19,6 +19,7 @@
     width: 400px;
     margin: 10px;
     box-shadow: 0 0 5px gray;
+    user-select: none;
 }
 #lobby .card:hover {
     box-shadow: 0 0 5px black;
