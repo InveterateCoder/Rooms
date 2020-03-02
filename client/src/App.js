@@ -12,9 +12,13 @@ export default class App extends Component {
         super(props);
         let filters = localStorage.getItem("filters");
         filters = filters ? JSON.parse(filters) : {};
+        let registered = localStorage.getItem("registered");
+        let lang = localStorage.getItem("lang");
+        if(!lang || !registered)
+            lang = this.bestLang();
         this.state = {
             jwt: localStorage.getItem("jwt"),
-            registered: localStorage.getItem("registered"),
+            registered: registered,
             name: "",
             room: {
                 name: "",
@@ -23,7 +27,7 @@ export default class App extends Component {
                 password: "",
                 limit: 20
             },
-            lang: localStorage.getItem("lang") || this.bestLang(),
+            lang: lang,
             filters: filters,
             c_codes: localStorage.getItem("c_codes"),
             icon: localStorage.getItem("icon") || "user",
@@ -60,6 +64,7 @@ export default class App extends Component {
                 password: data.room.password ? data.room.password : "",
                 description: data.room.description ? data.room.description : ""
             },
+            lang: localStorage.getItem("lang") || this.bestLang(),
             c_codes: codes
         }, () => this.props.history.replace("/lobby/1"));
     }
@@ -130,7 +135,8 @@ export default class App extends Component {
         localStorage.removeItem("c_codes");
         this.setState({
             jwt: null,
-            registered: false
+            registered: false,
+            lang: this.bestLang()
         });
     }
     render() {
