@@ -3,6 +3,7 @@ import { Context } from "./data/Context";
 import { Route, Switch } from "react-router-dom";
 import { Preloader } from "./Preloader";
 import { Home } from "./Home";
+import { Room } from "./Room";
 import { Get } from "./utils/requests";
 import urls from "./utils/Urls";
 import Countries from "./data/countries"
@@ -31,7 +32,8 @@ export default class App extends Component {
             filters: filters,
             c_codes: localStorage.getItem("c_codes"),
             icon: localStorage.getItem("icon") || "user",
-            perpage: localStorage.getItem("perpage") || 10
+            perpage: localStorage.getItem("perpage") || 10,
+            openin: localStorage.getItem("opin") || "nw"
         }
     }
     bestLang = () => {
@@ -129,6 +131,10 @@ export default class App extends Component {
         localStorage.setItem("perpage", perpage);
         this.setState({ perpage });
     }
+    setOpenIn = value => {
+        localStorage.setItem("opin", value);
+        this.setState({ openin: value });
+    }
     signOut = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("registered");
@@ -140,19 +146,19 @@ export default class App extends Component {
         });
     }
     render() {
-        return <Context.Provider value={{
-            jwt: this.state.jwt, registered: this.state.registered, lang: this.state.lang,
-            filters: this.state.filters, name: this.state.name, room: this.state.room,
-            signOut: this.signOut, changeFilters: this.changeFilters, icon: this.state.icon,
+        return <Context.Provider value={{ ...this.state,
+            signOut: this.signOut, changeFilters: this.changeFilters,
             setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon, c_codes: this.state.c_codes,
+            changeRoom: this.changeRoom, changeIcon: this.changeIcon,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
-            signInAsGuest: this.signInAsGuest, perpage: this.state.perpage, setPerpage: this.setPerpage
+            signInAsGuest: this.signInAsGuest, setPerpage: this.setPerpage,
+            setOpenIn: this.setOpenIn
         }}>
             {
                 this.state.registered && !this.state.name
                     ? <Preloader />
                     : <Switch>
+                        <Route path="/room/:room" component={Room} />
                         <Route path="/" component={Home} />
                     </Switch>
             }
