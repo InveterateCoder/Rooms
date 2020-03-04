@@ -73,7 +73,7 @@ namespace Rooms.Controllers
             try
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
-                if (id.Guest != null) return Forbid();
+                if (id.Guest != null) return Ok(id.Name);
                 var user = await _context.Users.Include(u => u.Room).FirstOrDefaultAsync(u => u.UserId == id.UserId);
                 if (user == null) throw new Exception("Invalid Token");
                 return Ok(new

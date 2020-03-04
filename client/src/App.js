@@ -15,7 +15,7 @@ export default class App extends Component {
         filters = filters ? JSON.parse(filters) : {};
         let registered = localStorage.getItem("registered");
         let lang = localStorage.getItem("lang");
-        if(!lang || !registered)
+        if (!lang || !registered)
             lang = this.bestLang();
         this.state = {
             jwt: localStorage.getItem("jwt"),
@@ -48,9 +48,9 @@ export default class App extends Component {
             return "ru";
         else return "en";
     }
-    signInAsGuest = jwt => {
+    signInAsGuest = (jwt, name) => {
         localStorage.setItem("jwt", jwt);
-        this.setState({ jwt }, () => this.props.history.replace("/lobby/1"));
+        this.setState({ jwt, name }, () => this.props.history.replace("/lobby/1"));
     }
     signInAsUser = data => {
         localStorage.setItem("jwt", data.jwt);
@@ -104,24 +104,26 @@ export default class App extends Component {
         let c_codes = new Set();
         keys.forEach(key => {
             for (let value of Object.values(Countries))
-                if(value.langs.includes(key)) c_codes.add(value.code);
+                if (value.langs.includes(key)) c_codes.add(value.code);
         });
         let codes = "";
-        if(c_codes.size > 0)
+        if (c_codes.size > 0)
             codes = Array.from(c_codes).reduce((a, b) => a + '_' + b);
         return codes;
     }
     changeRoom = data => {
-        if(data)
+        if (data)
             this.setState({ room: data });
         else
-            this.setState({ room: {
-                name: "",
-                description: "",
-                country: "gb",
-                password: "",
-                limit: 20
-            }});
+            this.setState({
+                room: {
+                    name: "",
+                    description: "",
+                    country: "gb",
+                    password: "",
+                    limit: 20
+                }
+            });
     }
     setLanguage = lang => {
         localStorage.setItem("lang", lang);
@@ -146,7 +148,8 @@ export default class App extends Component {
         });
     }
     render() {
-        return <Context.Provider value={{ ...this.state,
+        return <Context.Provider value={{
+            ...this.state,
             signOut: this.signOut, changeFilters: this.changeFilters,
             setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
             changeRoom: this.changeRoom, changeIcon: this.changeIcon,
@@ -155,7 +158,7 @@ export default class App extends Component {
             setOpenIn: this.setOpenIn
         }}>
             {
-                this.state.registered && !this.state.name
+                this.state.jwt && !this.state.name
                     ? <Preloader />
                     : <Switch>
                         {
@@ -167,20 +170,26 @@ export default class App extends Component {
         </Context.Provider>
     }
     componentDidMount() {
-        if (this.state.registered && this.state.jwt) {
+        if (this.state.jwt) {
             Get(urls.accountInfo, this.state.lang, this.state.jwt)
                 .then(data => {
-                    if (data)
-                        this.setState({
-                            name: data.name,
-                            room: !data.room ? this.state.room : {
-                                ...data.room,
-                                password: data.room.password ? data.room.password : "",
-                                description: data.room.description ? data.room.description : ""
-                            }
-                        });
+                    if (data) {
+                        if (this.state.registered)
+                            this.setState({
+                                name: data.name,
+                                room: !data.room ? this.state.room : {
+                                    ...data.room,
+                                    password: data.room.password ? data.room.password : "",
+                                    description: data.room.description ? data.room.description : ""
+                                }
+                            });
+                        else this.setState({name: data});
+                    }
                     else this.signOut();
-                }).catch(() => this.signOut());
+                }).catch(() => {
+                    this.signOut();
+                    this.props.history.replace("/fatal")
+                });
         }
     }
 }

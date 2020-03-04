@@ -51,4 +51,7 @@ export class Room extends Component {
             </div>
         </div>
     }
+    componentDidMount(){
+        window.scrollTo(0, document.body.scrollHeight);
+    }
 }

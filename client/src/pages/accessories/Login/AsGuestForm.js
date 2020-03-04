@@ -43,7 +43,7 @@ export function AsGuestForm(props) {
         else {
             setLoading(true);
             Get(urls.signInAsGuest + input.current.value, context.lang).then(jwt => {
-                if(jwt) context.signInAsGuest(jwt);
+                if(jwt) context.signInAsGuest(jwt, input.current.value);
                 else setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }
