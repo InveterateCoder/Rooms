@@ -45,6 +45,20 @@
 .menuopen {
     margin-left: 0 !important;
 }
+#names {
+    position: absolute;
+    top: 57px;
+    bottom: 57px;
+    width: 100%;
+    overflow-y: scroll;
+}
+#menubtns {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    height: 57px;
+    border-top: 1px solid #f8f9fa;
+}
 @media screen and (max-width:1350px) {
     #roomcont {
         width: 100%;

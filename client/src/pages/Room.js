@@ -18,9 +18,9 @@ export class Room extends Component {
     }
     openmenu = () => {
         this.menu.current.focus();
-        this.setState({menuopen: true});
+        this.setState({ menuopen: true });
     }
-    closemenu = () => this.setState({menuopen: false});
+    closemenu = () => this.setState({ menuopen: false });
     render() {
         return <div id="room">
             <div id="roomcont" className="container-fluid">
@@ -45,14 +45,99 @@ export class Room extends Component {
             <div id="roommenu" ref={this.menu} tabIndex={-1} className={`bg-dark${this.state.menuopen ? " menuopen" : ""}`} onBlur={this.closemenu}>
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
                     <button onClick={this.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
-                    <img src={`/img/${this.context.icon}.svg`} width={32} style={{padding:"1px"}}
+                    <img src={`/img/${this.context.icon}.svg`} width={32} style={{ padding: "1px" }}
                         className="mr-3 rounded-circle bg-light" alt="icon" />
                     <span className="navbar-brand">{this.context.name}</span>
                 </nav>
+                <div id="names" className="text-light">
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                    <div className="mt-3 p-2 pl-3 pr-3">
+                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
+                            className="mr-3 rounded-circle bg-light" alt="user" />
+                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                    </div>
+                </div>
+                <div id="menubtns">
+                    
+                </div>
             </div>
         </div>
     }
-    componentDidMount(){
+    componentDidMount() {
         window.scrollTo(0, document.body.scrollHeight);
     }
 }
