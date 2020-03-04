@@ -45,7 +45,8 @@ export class Room extends Component {
             <div id="roommenu" ref={this.menu} tabIndex={-1} className={`bg-dark${this.state.menuopen ? " menuopen" : ""}`} onBlur={this.closemenu}>
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
                     <button onClick={this.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
-                    <img src="/img/user.svg" width={30} className="mr-2 rounded-circle bg-light p-1" />
+                    <img src={`/img/${this.context.icon}.svg`} width={32} style={{padding:"1px"}}
+                        className="mr-3 rounded-circle bg-light" alt="icon" />
                     <span className="navbar-brand">{this.context.name}</span>
                 </nav>
             </div>

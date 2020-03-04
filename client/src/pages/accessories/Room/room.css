@@ -36,6 +36,9 @@
     width: 23%;
     transition: margin .4s;
 }
+#roommenu nav {
+    border-bottom: 1px solid #f8f9fa;
+}
 .btnmenu {
     display: none;
 }
