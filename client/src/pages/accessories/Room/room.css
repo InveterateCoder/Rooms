@@ -1,8 +1,8 @@
 #roomcont {
     float: right;
     width: 77%;
-    padding-top: 85px;
-    padding-bottom: 67px;
+    padding-top: 72px;
+    padding-bottom: 73px;
 }
 #roomcont nav {
     position: fixed;
@@ -11,7 +11,7 @@
     right: 0;
     transition: left .4s;
 }
-#roomcont .navbar-brand {
+#roomcont .navbar-brand, #roommenu .navbar-brand {
     max-width: 80%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -20,9 +20,9 @@
     position: fixed;
     left: 24%;
     width: 75%;
-    bottom: 12px;
+    bottom: 20px;
     transition: left .4s, width .4s;
-    box-shadow: 0 0 5px gray;
+    box-shadow: 0 2px 7px 1px gray;
     background-color: rgba(248, 249, 250, .85);
 }
 #input:focus {
@@ -36,8 +36,11 @@
     width: 23%;
     transition: margin .4s;
 }
-#btnopen {
+.btnmenu {
     display: none;
+}
+.menuopen {
+    margin-left: 0 !important;
 }
 @media screen and (max-width:1350px) {
     #roomcont {
@@ -47,10 +50,10 @@
         left: 0;
     }
     #input {
-        left: 2%;
-        width: 96%;
+        left: 1%;
+        width: 98%;
     }
-    #btnopen {
+    .btnmenu {
         display: inline-block;
     }
     #roommenu {
