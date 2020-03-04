@@ -1,0 +1,61 @@
+#roomcont {
+    float: right;
+    width: 77%;
+    padding-top: 85px;
+    padding-bottom: 67px;
+}
+#roomcont nav {
+    position: fixed;
+    top: 0;
+    left: 23%;
+    right: 0;
+    transition: left .4s;
+}
+#roomcont .navbar-brand {
+    max-width: 80%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#input {
+    position: fixed;
+    left: 24%;
+    width: 75%;
+    bottom: 12px;
+    transition: left .4s, width .4s;
+    box-shadow: 0 0 5px gray;
+    background-color: rgba(248, 249, 250, .85);
+}
+#input:focus {
+    background-color: white;
+}
+#roommenu {
+    position: fixed;
+    top:0;
+    left:0;
+    bottom:0;
+    width: 23%;
+    transition: margin .4s;
+}
+#btnopen {
+    display: none;
+}
+@media screen and (max-width:1350px) {
+    #roomcont {
+        width: 100%;
+    }
+    #roomcont nav {
+        left: 0;
+    }
+    #input {
+        left: 2%;
+        width: 96%;
+    }
+    #btnopen {
+        display: inline-block;
+    }
+    #roommenu {
+        max-width: 307px;
+        margin-left: -307px;
+        width: 90%;
+    }
+}

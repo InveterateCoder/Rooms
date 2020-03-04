@@ -3,7 +3,7 @@ import { Context } from "./data/Context";
 import { Route, Switch } from "react-router-dom";
 import { Preloader } from "./Preloader";
 import { Home } from "./Home";
-import { Room } from "./Room";
+import { Room } from "./pages/Room";
 import { Get } from "./utils/requests";
 import urls from "./utils/Urls";
 import Countries from "./data/countries"
@@ -30,10 +30,10 @@ export default class App extends Component {
             },
             lang: lang,
             filters: filters,
-            c_codes: localStorage.getItem("c_codes"),
-            icon: localStorage.getItem("icon") || "user",
-            perpage: localStorage.getItem("perpage") || 10,
-            openin: localStorage.getItem("opin") || "nw"
+            c_codes: registered ? localStorage.getItem("c_codes") : null,
+            icon: registered ? localStorage.getItem("icon") || "user" : "user",
+            perpage: registered ? localStorage.getItem("perpage") || 30 : 30,
+            openin: registered ? localStorage.getItem("opin") || "nw" : "nw"
         }
     }
     bestLang = () => {
@@ -158,7 +158,9 @@ export default class App extends Component {
                 this.state.registered && !this.state.name
                     ? <Preloader />
                     : <Switch>
-                        <Route path="/room/:room" component={Room} />
+                        {
+                            this.state.jwt && <Route path="/room/:room" component={Room} />
+                        }
                         <Route path="/" component={Home} />
                     </Switch>
             }
