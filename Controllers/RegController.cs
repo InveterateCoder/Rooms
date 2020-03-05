@@ -23,7 +23,7 @@ namespace Rooms.Controllers
             Helper = helper;
             _context = context;
         }
-        [HttpGet("seed/{quantity:min(10)}")]
+        /*[HttpGet("seed/{quantity:min(10)}")]
         public IActionResult Seed(int quantity)
         {
             const string name = "Name{0}";
@@ -56,7 +56,7 @@ namespace Rooms.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
-        }
+        }*/
         [HttpPost("reg")]
         public async Task<IActionResult> Register([FromBody]RegForm data)
         {
@@ -160,7 +160,7 @@ namespace Rooms.Controllers
             Identity id = new Identity {
                 UserId = 0,
                 Name = name,
-                Guest = Guid.NewGuid().ToString()
+                Guest = Guid.NewGuid().ToString("n")
             };
             return Ok(Helper.GetToken(JsonSerializer.Serialize(id)));
         }
