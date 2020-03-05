@@ -52,12 +52,31 @@
     width: 100%;
     overflow-y: scroll;
 }
+#names > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+    cursor: pointer;
+}
+#names > div:hover {
+    background-color: #6c757d;
+}
+#names > div > span {
+    vertical-align: middle;
+    font-size: 18px;
+}
 #menubtns {
     position: absolute;
-    width: 100%;
+    margin:0;
+    left: 0;
+    right: 0;
     bottom: 0;
     height: 57px;
     border-top: 1px solid #f8f9fa;
+}
+#menubtns .col {
+    padding-top: 12px;
 }
 @media screen and (max-width:1350px) {
     #roomcont {

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Context } from "../data/Context";
 import "./accessories/Room/room.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faArrowLeft, faGlobe, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 import Flag from "react-flags";
 
 export class Room extends Component {
@@ -50,89 +50,22 @@ export class Room extends Component {
                     <span className="navbar-brand">{this.context.name}</span>
                 </nav>
                 <div id="names" className="text-light">
-                    <div className="mt-3 p-2 pl-3 pr-3">
+                    <div className="p-2 pl-3 pr-3">
                         <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
                             className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
-                    </div>
-                    <div className="mt-3 p-2 pl-3 pr-3">
-                        <img src="/img/woman.svg" width={32} style={{ padding: "1px" }}
-                            className="mr-3 rounded-circle bg-light" alt="user" />
-                        <span style={{ verticalAlign: "middle", fontSize: 18 }}>Some cool name</span>
+                        <span>Supercalifragilisticexpialidocious</span>
                     </div>
                 </div>
-                <div id="menubtns">
-                    
+                <div id="menubtns" className="row">
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faGlobe} />
+                    </div>
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faUserFriends} />
+                    </div>
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faVolumeMute}/>
+                    </div>
                 </div>
             </div>
         </div>
