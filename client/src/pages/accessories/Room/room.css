@@ -36,8 +36,13 @@
     width: 23%;
     transition: margin .4s;
 }
-#roommenu nav {
+#roommenu > nav {
     border-bottom: 1px solid #f8f9fa;
+    user-select: none;
+}
+#roommenu > nav > img {
+    width: 32px;
+    padding: 1px;
 }
 .btnmenu {
     display: none;
@@ -53,14 +58,20 @@
     overflow-y: scroll;
 }
 #names > div {
+    user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    user-select: none;
+}
+#names > div.user {
     cursor: pointer;
 }
-#names > div:hover {
+#names > div.user:hover {
     background-color: #6c757d;
+}
+#names > div > img {
+    width: 32px;
+    padding: 1px;
 }
 #names > div > span {
     vertical-align: middle;
@@ -77,6 +88,14 @@
 }
 #menubtns .col {
     padding-top: 12px;
+}
+#menubtns > span {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    transform: translateY(-50%);
 }
 @media screen and (max-width:1350px) {
     #roomcont {

@@ -2,31 +2,56 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faGlobe, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 
+const text = {
+    en: "Register to use secret messaging and sound",
+    ru: "Зарегистрируйтесь, чтобы использовать секретные сообщения и звук"
+};
+
 export function Menu(props) {
+    const users = props.users;
+    users.sort(function (a, b) {
+        if (a.name < b.name)
+            return -1;
+        if (a.name > b.name)
+            return 1;
+        return 0;
+    });
+    const userClicked = user => {
+        alert(user.name);
+    }
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
             <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
-            <img src={`/img/${props.icon}.svg`} width={32} style={{ padding: "1px" }}
-                className="mr-3 rounded-circle bg-light" alt="icon" />
-            <span className="navbar-brand">{props.name}</span>
+            <img src={`/img/${props.icon}.svg`} draggable={false}
+                className={`mr-3 rounded-circle bg-${props.registered ? "light" : "secondary"}`} alt="icon" />
+            <span className={`navbar-brand${props.registered ? "" : " text-muted"}`}>{props.name}</span>
         </nav>
         <div id="names" className="text-light">
-            <div className="p-2 pl-3 pr-3">
-                <img src="/img/man.svg" width={32} style={{ padding: "1px" }}
-                    className="mr-3 rounded-circle bg-light" alt="icon" />
-                <span>Supercalifragilisticexpialidocious</span>
-            </div>
+            {
+                users.map(user => <div className={`p-2 pl-3 pr-3${user.guid ? " text-muted" : props.registered ? " user" : ""}`}
+                    key={user.guid ? user.guid : user.id} onClick={!user.guid && props.registered ? () => userClicked(user) : null}>
+                    <img src={`/img/${user.icon}.svg`} draggable={false}
+                        className={`mr-3 rounded-circle bg-${user.guid ? "secondary" : "light"}`} alt="icon" />
+                    <span>{user.name}</span>
+                </div>)
+            }
         </div>
-        <div id="menubtns" className="row">
-            <div className="col btn btn-dark">
-                <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faGlobe} />
-            </div>
-            <div className="col btn btn-dark">
-                <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faUserFriends} />
-            </div>
-            <div className="col btn btn-dark">
-                <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faVolumeMute} />
-            </div>
-        </div>
+        {
+            props.registered
+                ? <div id="menubtns" className="row">
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faGlobe} />
+                    </div>
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faUserFriends} />
+                    </div>
+                    <div className="col btn btn-dark">
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faVolumeMute} />
+                    </div>
+                </div>
+                : <div id="menubtns">
+                    <span className="text-warning">{text[props.lang]}</span>
+                </div>
+        }
     </div>
 }
