@@ -41,7 +41,9 @@ export class Room extends Component {
             icon: context.icon,
             roomname: "Lorem ipsum dolor sit amet, consectetuer",
             menuopen: false,
-            users: fakeUsers
+            users: fakeUsers,
+            public: true,
+            selusers: [],
         }
         this.menu = React.createRef();
     }
@@ -50,12 +52,32 @@ export class Room extends Component {
         this.setState({ menuopen: true });
     }
     closemenu = () => this.setState({ menuopen: false });
+    setPublic = mode => this.setState({ public: mode });
+    userClicked = user => {
+        if (this.state.public)
+            this.setState({
+                selusers: [user],
+                public: false
+            });
+        else {
+            let arr;
+            if (this.state.selusers.includes(user))
+                arr = this.state.selusers.filter(u => u !== user);
+            else
+                arr = [...this.state.selusers, user];
+            this.setState({
+                selusers: arr,
+                public: !(arr.length > 0)
+            });
+        }
+    }
     render() {
         return <div id="room">
             <Content lang={this.context.lang} openmenu={this.openmenu} flag={this.state.flag}
                 roomname={this.state.roomname} />
             <Menu registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen} closemenu={this.closemenu}
-                icon={this.state.icon} name={this.state.name} users={this.state.users} />
+                icon={this.state.icon} name={this.state.name} users={this.state.users} selusers={this.state.selusers}
+                userClicked={this.userClicked} public={this.state.public} setPublic={this.setPublic} />
         </div>
     }
     componentDidMount() {

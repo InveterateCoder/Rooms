@@ -8,12 +8,12 @@ import LocalizedStrings from "react-localization";
 
 const text = new LocalizedStrings({
     en: {
-        msg: "Create your own chat room / Secure your room with a password / Encrypt your entire traffic with a secret word",
+        msg: "Create your own chat room / Secure your room with a password / Send secret messages",
         Guest: "Guest",
         User: "User"
     },
     ru: {
-        msg: "Создай собственную чат комнату / Защити свою комнату паролем / Зашифруй весь трафик секретным словом",
+        msg: "Создай собственную чат комнату / Защити свою комнату паролем / Отправляй секретные сообщения",
         Guest: "Гость",
         User: "Пользователь"
     }

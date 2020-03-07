@@ -62,12 +62,18 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    border: 1px solid transparent;
 }
 #names > div.user {
     cursor: pointer;
 }
-#names > div.user:hover {
+#names > div.user:not(.selected):hover {
     background-color: #6c757d;
+}
+#names > .selected {
+    border-bottom: 1px solid #343a40;
+    background-color: #f8f9fa;
+    color: #343a40;
 }
 #names > div > img {
     width: 32px;
