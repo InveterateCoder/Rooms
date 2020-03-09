@@ -23,7 +23,7 @@ namespace Rooms.Models
     }
     public class User
     {
-        public int UserId {get;set;}
+        public long UserId {get;set;}
         [Required, MaxLength(320)]
         public string Email {get;set;}
         [Required, MaxLength(34)]
@@ -34,9 +34,9 @@ namespace Rooms.Models
     }
     public class Room
     {
-        public int RoomId {get;set;}
+        public long RoomId {get;set;}
         [Required]
-        public int UserId {get;set;}
+        public long UserId {get;set;}
         public User User {get;set;}
         [Required, MaxLength(2)]
         public string Country {get;set;}
@@ -54,9 +54,9 @@ namespace Rooms.Models
     }
     public class Message
     {
-        public int MessageId {get;set;}
+        public long MessageId {get;set;}
         [Required]
-        public int RoomId {get;set;}
+        public long RoomId {get;set;}
         [Required]
         public Room Room {get;set;}
         [Required]
@@ -64,10 +64,10 @@ namespace Rooms.Models
         [MaxLength(5000)]
         public string AccessIdsJson {get;set;}
         [NotMapped]
-        public IEnumerable<int> AccessIds
+        public IEnumerable<long> AccessIds
         {
-            get => AccessIdsJson == null ? null : JsonSerializer.Deserialize<IEnumerable<int>>(AccessIdsJson);
-            set => AccessIdsJson = value == null ? null : JsonSerializer.Serialize<IEnumerable<int>>(value);
+            get => AccessIdsJson == null ? null : JsonSerializer.Deserialize<IEnumerable<long>>(AccessIdsJson);
+            set => AccessIdsJson = value == null ? null : JsonSerializer.Serialize<IEnumerable<long>>(value);
         }
         [Required, MaxLength(34)]
         public string SenderName {get;set;}
@@ -83,8 +83,6 @@ namespace Rooms.Models
         }
         [Required, MaxLength(10000)]
         public string Text {get;set;}
-        [Required]
-        public bool Encrypted {get;set;}
     }
     public class RegQueueEntity
     {

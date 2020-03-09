@@ -16,15 +16,17 @@ namespace Rooms.Models
     }
     public struct ActiveUser
     {
-        public ActiveUser(long userId, string name, string guid)
+        public ActiveUser(long userId, string name, string guid, string connectionId)
         {
             this.userId = userId;
             this.name = name;
             this.guid = guid;
+            this.connectionId = connectionId;
         }
         public long userId;
         public string name;
         public string guid;
+        public string connectionId;
     }
     public struct InMemoryMessage
     {

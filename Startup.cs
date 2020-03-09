@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Rooms.Models;
 using Microsoft.EntityFrameworkCore;
 using Rooms.Infrastructure;
+using Rooms.Hubs;
 
 namespace Rooms
 {
@@ -24,6 +25,7 @@ namespace Rooms
         {
             services.AddControllers();
             services.AddSpaStaticFiles(config => config.RootPath = "client/build");
+            services.AddSignalR();
             var settingsSection = Configuration.GetSection("Settings");
             services.Configure<Settings>(settingsSection);
             var settings = settingsSection.Get<Settings>();
@@ -66,6 +68,7 @@ namespace Rooms
             app.UseAuthorization();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
+                endpoints.MapHub<RoomsHub>("/hub/rooms");
             });
             app.UseSpa(spa =>
             {
