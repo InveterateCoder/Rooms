@@ -105,6 +105,7 @@
 }
 #msgpanel > div > img {
     width: 60px;
+    user-select: none;
 }
 @media screen and (max-width:1350px) {
     #roomcont {

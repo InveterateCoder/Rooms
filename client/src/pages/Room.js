@@ -109,7 +109,7 @@ export class Room extends Component {
         let time = "time holder";
         let elem = document.createElement("div");
         elem.className="media p-3";
-        elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3"/>
+        elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3" draggable="false"/>
         <div class="media-body">
         <h4 class="text-dark"><span class="mr-3">${msg.secret ? sec : pub}</span>${msg.sender} <small><i class="text-muted">${time}</i></small></h4>
         <p>${msg.text}</p>
