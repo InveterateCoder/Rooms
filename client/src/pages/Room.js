@@ -109,7 +109,7 @@ export class Room extends Component {
         let time = "time holder";
         let elem = document.createElement("div");
         elem.className="media p-3";
-        elem.innerHTML = `<img src="/img/${msg.icon}.svg" alt="icon" class="mr-3"/>
+        elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3"/>
         <div class="media-body">
         <h4 class="text-dark"><span class="mr-3">${msg.secret ? sec : pub}</span>${msg.sender} <small><i class="text-muted">${time}</i></small></h4>
         <p>${msg.text}</p>
@@ -125,8 +125,7 @@ export class Room extends Component {
                     <span className="navbar-brand">{this.state.roomname}</span>
                 </nav>
                 <input id="input" type="text" className="form-control" placeholder={text[this.context.lang]} />
-                <div ref={this.msgpanel} id="msgpanel">
-                </div>
+                <div ref={this.msgpanel} id="msgpanel"></div>
             </div>
             <Menu registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen} closemenu={this.closemenu}
                 icon={this.state.icon} name={this.state.name} users={this.state.users} selusers={this.state.selusers}
