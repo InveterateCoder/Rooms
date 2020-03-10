@@ -11,6 +11,7 @@ using Rooms.Models;
 using Microsoft.EntityFrameworkCore;
 using Rooms.Infrastructure;
 using Rooms.Hubs;
+using System.Threading.Tasks;
 
 namespace Rooms
 {
@@ -47,6 +48,17 @@ namespace Rooms
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+                opts.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/rooms"))
+                            context.Token = accessToken;
+                        return Task.CompletedTask;
+                    }
+                };
             });
             services.AddSingleton<Helper>();
             services.AddSingleton<State>();
@@ -68,7 +80,7 @@ namespace Rooms
             app.UseAuthorization();
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
-                endpoints.MapHub<RoomsHub>("/hub/rooms");
+                endpoints.MapHub<RoomsHub>("/hubs/rooms");
             });
             app.UseSpa(spa =>
             {

@@ -49,7 +49,7 @@ export function Menu(props) {
                     </div>
                 </div>
                 : <div id="menubtns">
-                    <span className="text-warning">{text[props.lang]}</span>
+                    <span className="text-warning p-2">{text[props.lang]}</span>
                 </div>
         }
     </div>

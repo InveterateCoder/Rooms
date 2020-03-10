@@ -107,6 +107,38 @@
     width: 60px;
     user-select: none;
 }
+#msgpanel > div:not(.secret) > div > h4 > svg {
+    margin-right: 1rem;
+}
+#msgpanel > div.secret > div > h4 > svg {
+    margin-right: 0.63rem;
+}
+#msgpanel > div:not(.secret) {
+    border: 1px dashed #6c757d;
+}
+#msgpanel > div.secret {
+    border: 1px dashed #cccccc;
+}
+#msgpanel > div > div > h4 > small {
+    user-select: none;
+}
+#roompass {
+    position: fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+#failed {
+    position: fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
 @media screen and (max-width:1350px) {
     #roomcont {
         width: 100%;

@@ -73,15 +73,7 @@ namespace Rooms.Models
         public string SenderName {get;set;}
         [Required, MaxLength(5)]
         public string SenderIcon {get;set;}
-        [MaxLength(5000)]
-        public string ToNamesJson {get;set;}
-        [NotMapped]
-        public IEnumerable<string> ToNames
-        {
-            get => ToNamesJson == null ? null : JsonSerializer.Deserialize<IEnumerable<string>>(ToNamesJson);
-            set => ToNamesJson = value == null ? null : JsonSerializer.Serialize<IEnumerable<string>>(value);
-        }
-        [Required, MaxLength(10000)]
+        [Required, MaxLength(2000)]
         public string Text {get;set;}
     }
     public class RegQueueEntity

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Rooms.Models
 {
-    public struct ActiveRoom
+    public class ActiveRoom
     {
-        public ActiveRoom(long roomId)
+        public ActiveRoom()
         {
             users = new List<ActiveUser>();
             messages = new List<InMemoryMessage>();
@@ -14,42 +14,40 @@ namespace Rooms.Models
         public byte Online { get => Convert.ToByte(users.Count); }
         public List<InMemoryMessage> messages;
     }
-    public struct ActiveUser
+    public class ActiveUser
     {
-        public ActiveUser(long userId, string name, string guid, string connectionId)
+        public ActiveUser(long userId, string icon, string name, string guid, string connectionId)
         {
             this.userId = userId;
+            this.icon = icon;
             this.name = name;
             this.guid = guid;
-            this.connectionId = connectionId;
+            this.connectionIds = new List<string>();
+            connectionIds.Add(connectionId);
         }
         public long userId;
+        public string icon;
         public string name;
         public string guid;
-        public string connectionId;
+        public List<string> connectionIds;
     }
-    public struct InMemoryMessage
+    public class InMemoryMessage
     {
         public InMemoryMessage(long roomId, long timeStamp, string senderName,
-            string senderIcon, IEnumerable<long> accessIds,
-            IEnumerable<string> toNames, string text, bool encrypted)
+            string senderIcon, IEnumerable<long> accessIds, string text)
         {
             this.roomId = roomId;
             this.timeStamp = timeStamp;
             this.accessIds = accessIds;
             this.senderName = senderName;
             this.senderIcon = senderIcon;
-            this.toNames = toNames;
             this.text = text;
-            this.encrypted = encrypted;
         }
         public long roomId;
         public long timeStamp;
         public IEnumerable<long> accessIds;
         public string senderName;
         public string senderIcon;
-        public IEnumerable<string> toNames;
         public string text;
-        public bool encrypted;
     }
 }
