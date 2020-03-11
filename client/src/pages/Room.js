@@ -64,14 +64,16 @@ const text = new LocalizedStrings({
     en: {
         placeholder: "Type a message...",
         today: "Today",
-        wrong: "Sorry, something went wrong. Try again.",
-        noroom: "Sorry, room is not found."
+        noroom: "Sorry, room is not found.",
+        limit: "Sorry, room's capacity has reached the limit. Try again later.",
+        access: "Access denied. Wrong password."
     },
     ru: {
         placeholder: "Введите сообщение ...",
         today: "Сегодня",
-        wrong: "Извините, что-то пошло не так. Попробуйте еще раз.",
-        noroom: "Извините, комната не найден."
+        noroom: "Извините, комната не найден.",
+        limit: "Извините, вместимость комнаты достигла предела. Попробуйте позже.",
+        access: "Доступ запрещен. Неправильный пароль."
     }
 })
 
@@ -82,10 +84,10 @@ export class Room extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            failed: false,
-            noroom: false,
+            failed: "",
+            warning: "",
             loading: true,
-            secured: false,
+            blocked: false,
             password: "",
             name: context.name,
             icon: context.icon,
@@ -129,14 +131,20 @@ export class Room extends Component {
     }
     passwordChanged = val => this.setState({ password: val });
     passwordKeyPressed = ev => {
-        if(ev.target.tagName === "INPUT" && ev.which === 13)
+        if (ev.target.tagName === "INPUT" && ev.which === 13)
             this.confirmPassword();
     }
     confirmPassword = () => {
         let err = validator.password(this.state.password, this.context.lang);
-        if(err) alert(err);
+        if (err) alert(err);
         else this.setState({ loading: true }, async () => {
-            
+            try {
+                let data = await this.connection.invoke("Enter", this.props.match.params["room"], this.state.icon, this.state.password);
+                if(data.code === "password") alert(text.access);
+                this.processEnter(data);
+            } catch (err) {
+                this.setState({ failed: err.message });
+            }
         });
     }
     formMessage = (msg, today) => {
@@ -157,14 +165,39 @@ export class Room extends Component {
         let panel = this.msgpanel.current;
         msgs.forEach(msg => panel.insertBefore(this.formMessage(msg, today), panel.firstChild));
     }
+    processEnter = data => {
+        switch (data.code) {
+            case "ok":
+                this.setState({
+                    loading: false,
+                    blocked: false,
+                    flag: data.payload.flag,
+                    roomname: data.payload.name,
+                    moremsgs: data.payload.moreMessages,
+                    users: data.payload.users
+                }, () => this.fillMessages(data.payload.messages));
+                break;
+            case "password":
+                this.setState({ loading: false, blocked: true });
+                break;
+            case "limit":
+                this.setState({ warning: text.limit });
+                break;
+            case "noroom":
+                this.setState({ warning: text.noroom });
+                break;
+            default:
+                this.setState({ failed: data.code });
+        }
+    }
     render() {
         text.setLanguage(this.context.lang);
-        if (this.state.failed) return <div id="failed">
-            <FontAwesomeIcon icon={faExclamationTriangle} size="4x" color={this.state.noroom ? "orange" : "red"} />
-            <h5 className={`mt-3 text-${this.state.noroom ? "warning" : "danger"} h5`}>{this.state.noroom ? text.noroom : text.wrong}</h5>
+        if (this.state.failed || this.state.warning) return <div id="failed">
+            <FontAwesomeIcon icon={faExclamationTriangle} size="4x" color={this.state.warning ? "orange" : "red"} />
+            <h5 className={`mt-3 text-${this.state.warning ? "warning" : "danger"} h5`}>{this.state.warning ? this.state.warning : this.state.failed}</h5>
         </div>
         else if (this.state.loading) return <Preloader />
-        else if (this.state.secured) return <div id="roompass">
+        else if (this.state.blocked) return <div id="roompass">
             <h4 className="text-info mb-4">Room's password</h4>
             <div className="input-group" onKeyPress={this.passwordKeyPressed}>
                 <Password className="form-control" placeholder="Enter password" value={this.state.password}
@@ -194,22 +227,11 @@ export class Room extends Component {
     async componentDidMount() {
         try {
             await this.connection.start();
-            let room = await this.connection.invoke("Enter", this.props.match.params["room"], this.state.icon, null);
-            if (!room)
-                this.setState({ failed: true, noroom: true });
-            else if (!room.name)
-                this.setState({ loading: false, secured: true });
-            else
-                this.setState({
-                    loading: false,
-                    flag: room.flag,
-                    roomname: room.name,
-                    moremsgs: room.moreMessages,
-                    users: room.users
-                }, () => this.fillMessages(room.messages));
+            let data = await this.connection.invoke("Enter", this.props.match.params["room"], this.state.icon, null);
+            this.processEnter(data);
         }
-        catch (error) {
-            this.setState({ failed: true });
+        catch (err) {
+            this.setState({ failed: err.message });
         }
     }
 }

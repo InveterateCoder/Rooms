@@ -54,9 +54,9 @@ namespace Rooms.Controllers
                     if (page > total_pages) page = total_pages;
                     int activeCount = 0;
                     IQueryable<Room> activeRooms = null;
-                    if (_state.ActiveRooms.Count > 0)
+                    if (_state.ActiveRoomsCount > 0)
                     {
-                        var activeIds = _state.ActiveRooms.Keys;
+                        var activeIds = _state.ActiveRoomsKeys;
                         activeRooms = rooms.Where(r => activeIds.Contains(r.RoomId));
                         activeCount = activeRooms.Count();
                         if (activeCount > 0)
@@ -73,7 +73,7 @@ namespace Rooms.Controllers
                     {
                         list = activeRooms.Skip(skip).Take(perpage).Select(r => new SearchRoom(r.Name, r.Slug,
                             r.Description, r.Country, r.Password != null ? true : false,
-                            _state.ActiveRooms[r.RoomId].Online)).ToArray();
+                            _state.GetRoom(r.RoomId).Online)).ToArray();
                         if (list.Count() < perpage)
                         {
                             int take = perpage - list.Count();
