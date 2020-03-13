@@ -36,14 +36,29 @@ namespace Rooms.Models
             lock (_users)
                 return _users.First(u => u.ContainsConnection(connectionId));
         }
-        public IEnumerable<ActiveUser> Users(long id, string guid)
+        public int GetOpenConnections(long id, string guid)
+        {
+            Func<ActiveUser, bool> filter;
+            if (id > 0) filter = u => u.userId == id;
+            else if (guid != null) filter = u => u.guid == guid;
+            else throw new ArgumentException("Either id or guid must be provided");
+            lock (_users) return _users.First(filter).connectionIds.Count();
+        }
+        public IEnumerable<ActiveUser> Users(long id = 0, string guid = null)
         {
             Func<ActiveUser, bool> filter;
             if (id != 0) filter = u => u.userId != id;
             else if (!string.IsNullOrEmpty(guid)) filter = u => u.guid != guid;
-            else throw new ArgumentException("Wrong credentials");
-            lock (_users)
-                return _users.Where(filter);
+            else return _users;
+            lock (_users) return _users.Where(filter);
+        }
+        public ActiveUser User(long id, string guid)
+        {
+            Func<ActiveUser, bool> filter;
+            if (id != 0) filter = u => u.userId == id;
+            else if (!string.IsNullOrEmpty(guid)) filter = u => u.guid == guid;
+            else throw new ArgumentException("Either id or guid must be provided.");
+            lock (_users) return _users.FirstOrDefault(filter);
         }
         public IEnumerable<InMemoryMessage> Messages
         {
@@ -53,10 +68,24 @@ namespace Rooms.Models
                     return _messages.OrderByDescending(m => m.timeStamp);
             }
         }
+        public string[] GetConnections(long userId = 0, string guid = null, string connectionId = null)
+        {
+            lock (_users)
+            {
+                if (userId != 0)
+                    return _users.Where(u => u.userId != userId).SelectMany(u => u.connectionIds).ToArray();
+                else if (guid != null)
+                    return _users.Where(u => u.guid != guid).SelectMany(u => u.connectionIds).ToArray();
+                else if (connectionId != null)
+                    return _users.SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
+                else
+                    return _users.SelectMany(u => u.connectionIds).ToArray();
+            }
+        }
     }
     public class ActiveUser
     {
-        private List<string> connectionIds;
+        public List<string> connectionIds;
         public long userId;
         public string icon;
         public string name;

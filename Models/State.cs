@@ -44,23 +44,33 @@ namespace Rooms.Models
             _activeUsers[connectionId] = roomId;
             return room;
         }
-        public ActiveRoom DisconnectUser(string connectionId)
+        public UsersRoom DisconnectUser(string connectionId)
         {
+            UsersRoom data = new UsersRoom()
+            {
+                room = null,
+                removed = false
+            };
             lock (_activeRooms)
             {
-                if(!_activeUsers.ContainsKey(connectionId)) return null;
-                var room = _activeRooms[_activeUsers[connectionId]];
-                var user = room.UserByConnectionId(connectionId);
-                if (user.RemoveConnection(connectionId) <= 0)
-                    if (room.RemoveUser(user) <= 0)
+                if(!_activeUsers.ContainsKey(connectionId)) return data;
+                data.room = _activeRooms[_activeUsers[connectionId]];
+                var user = data.room.UserByConnectionId(connectionId);
+                if (user.RemoveConnection(connectionId) == 0)
+                    if (data.room.RemoveUser(user) == 0)
                     {
                         _activeRooms.Remove(_activeUsers[connectionId]);
                         _activeUsers.Remove(connectionId);
-                        return room;
+                        data.removed = true;
                     }
             }
             _activeUsers.Remove(connectionId);
-            return null;
+            return data;
         }
+    }
+    public struct UsersRoom
+    {
+        public ActiveRoom room;
+        public bool removed;
     }
 }

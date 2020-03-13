@@ -26,7 +26,7 @@ namespace Rooms.Hubs
             {
                 if (icon != "man" && icon != "woman" && icon != "user") throw new HubException("Wrong icon name");
                 Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                return await Task.Run(() =>
+                return await Task.Run(async () =>
                 {
                     var room = _context.Rooms.Include(r => r.Messages).FirstOrDefault(r => r.Slug == slug);
                     if (room == null) return new ReturnSignal<RoomInfo> { Code = "noroom" };
@@ -73,6 +73,9 @@ namespace Rooms.Hubs
                         Icon = u.icon
                     });
                     info.Messages = messages;
+                    if (active.GetOpenConnections(id.UserId, id.Guest) <= 1)
+                        await Clients.Clients(active.GetConnections(id.UserId, id.Guest))
+                            .SendAsync("addUser", new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = icon, Name = id.Name });
                     return new ReturnSignal<RoomInfo>
                     {
                         Code = "ok",
@@ -89,10 +92,17 @@ namespace Rooms.Hubs
         {
             try
             {
-                await Task.Run(() =>
+                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                await Task.Run(async () =>
                 {
-                    var room = _state.DisconnectUser(Context.ConnectionId);
-                    if (room != null)
+                    var data = _state.DisconnectUser(Context.ConnectionId);
+                    if (!data.removed)
+                    {
+                        if(data.room.User(id.UserId, id.Guest) == null)
+                            await Clients.Clients(data.room.GetConnections()).SendAsync("removeUser",
+                                new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
+                    }
+                    else
                     {
                         //TODO SAVE in DATABASE
                     }

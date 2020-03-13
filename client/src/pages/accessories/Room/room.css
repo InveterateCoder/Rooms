@@ -1,3 +1,15 @@
+#room > div:first-child {
+    position: fixed;
+    right: 20px;
+    margin-left: 20px;
+    top:100px;
+    bottom: 100px;
+    overflow-y: auto;
+    max-width: 576px;
+}
+#room > div:first-child > div button {
+    outline: none;
+}
 #roomcont {
     float: right;
     width: 77%;
