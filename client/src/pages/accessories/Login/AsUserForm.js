@@ -18,7 +18,7 @@ const text = new LocalizedStrings({
         },
         inputs: {
             sign: [["Email", "email"], ["Password", "password"]],
-            register: [["Email", "email"], ["Username", "name"],
+            register: [["Email", "email"], ["User name", "name"],
             ["Password", "password"], ["Confirm password", "confirm"]],
             recover: [["Email", "email"]]
         },

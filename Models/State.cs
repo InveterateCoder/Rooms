@@ -22,10 +22,31 @@ namespace Rooms.Models
                     return _activeRooms.Keys;
             }
         }
+        public ActiveRoom GetRoom(string connectionId) =>
+            GetRoom(_activeUsers[connectionId]);
         public ActiveRoom GetRoom(long roomId)
         {
-            lock(_activeRooms)
+            lock (_activeRooms)
                 return _activeRooms[roomId];
+        }
+        public UserMsg SendMessage(string connectionId, string message, long[] accessIds)
+        {
+            var roomId = _activeUsers[connectionId];
+            ActiveRoom room;
+            lock(_activeRooms) room = _activeRooms[roomId];
+            var msg = room.AddMessage(roomId, connectionId, message, accessIds);
+            return new UserMsg
+            {
+                connectionIds = room.GetConnections(connectionId: connectionId, ids: accessIds),
+                message = new RoomsMsg
+                {
+                    Time = msg.timeStamp,
+                    Icon = msg.senderIcon,
+                    Secret = accessIds != null,
+                    Sender = msg.senderName,
+                    Text = msg.text
+                }
+            };
         }
         public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId)
         {
@@ -36,7 +57,7 @@ namespace Rooms.Models
                     room = _activeRooms[roomId];
                 else
                 {
-                    room = new ActiveRoom();
+                    room = new ActiveRoom(roomId);
                     _activeRooms[roomId] = room;
                 }
                 room.AddUser(connectionId, name, icon, userId, guid);
@@ -53,7 +74,7 @@ namespace Rooms.Models
             };
             lock (_activeRooms)
             {
-                if(!_activeUsers.ContainsKey(connectionId)) return data;
+                if (!_activeUsers.ContainsKey(connectionId)) return data;
                 data.room = _activeRooms[_activeUsers[connectionId]];
                 var user = data.room.UserByConnectionId(connectionId);
                 if (user.RemoveConnection(connectionId) == 0)
@@ -72,5 +93,10 @@ namespace Rooms.Models
     {
         public ActiveRoom room;
         public bool removed;
+    }
+    public struct UserMsg
+    {
+        public string[] connectionIds;
+        public RoomsMsg message;
     }
 }

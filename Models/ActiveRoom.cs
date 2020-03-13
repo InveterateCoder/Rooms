@@ -6,9 +6,11 @@ namespace Rooms.Models
 {
     public class ActiveRoom
     {
+        private readonly long roomId;
         private readonly List<ActiveUser> _users = new List<ActiveUser>();
-        private readonly List<InMemoryMessage> _messages = new List<InMemoryMessage>();
+        private readonly SortedList<long, InMemoryMessage> _messages = new SortedList<long, InMemoryMessage>();
         public byte Online { get => Convert.ToByte(_users.Count); }
+        public ActiveRoom(long roomId) => this.roomId = roomId;
         public void AddUser(string connectionId, string name, string icon, long id, string guid)
         {
             Func<ActiveUser, bool> filter;
@@ -60,15 +62,23 @@ namespace Rooms.Models
             else throw new ArgumentException("Either id or guid must be provided.");
             lock (_users) return _users.FirstOrDefault(filter);
         }
-        public IEnumerable<InMemoryMessage> Messages
+        public IEnumerable<InMemoryMessage> GetMessages(bool reverse = false)
         {
-            get
-            {
-                lock (_messages)
-                    return _messages.OrderByDescending(m => m.timeStamp);
-            }
+            lock (_messages)
+                if (reverse)
+                    return _messages.Values.Reverse();
+                else return _messages.Values;
         }
-        public string[] GetConnections(long userId = 0, string guid = null, string connectionId = null)
+        public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds)
+        {
+            var time = DateTime.UtcNow.Ticks;
+            ActiveUser user;
+            lock (_users) user = _users.First(u => u.connectionIds.Contains(connectionId));
+            var msg = new InMemoryMessage(roomId, time, user.name, user.icon, accessIds, message);
+            lock (_messages) _messages.Add(time, msg);
+            return msg;
+        }
+        public string[] GetConnections(long userId = 0, string guid = null, string connectionId = null, long[] ids = null)
         {
             lock (_users)
             {
@@ -77,7 +87,12 @@ namespace Rooms.Models
                 else if (guid != null)
                     return _users.Where(u => u.guid != guid).SelectMany(u => u.connectionIds).ToArray();
                 else if (connectionId != null)
-                    return _users.SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
+                {
+                    if (ids != null)
+                        return _users.Where(u => ids.Contains(u.userId)).SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
+                    else
+                        return _users.SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
+                }
                 else
                     return _users.SelectMany(u => u.connectionIds).ToArray();
             }

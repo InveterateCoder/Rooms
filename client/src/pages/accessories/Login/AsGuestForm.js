@@ -12,7 +12,7 @@ import { Loading } from "../../../Loading";
 const text = new LocalizedStrings({
     en: {
         header: "Sign In as a Guest",
-        placeholder: "Guestname",
+        placeholder: "Guest name",
         submit: "Sign In",
         alertHeader: "Be advised to register",
         alertBody: "As a guest you will not be able to create your own group, choose filters and change the language. Consider registering and logging in as a user."

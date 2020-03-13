@@ -20,6 +20,26 @@ namespace Rooms.Hubs
             _context = context;
             _state = state;
         }
+        public async Task<long> SendMessage(string message, long[] accessIds)
+        {
+            try
+            {
+                return await Task.Run(async () =>
+                {
+                    Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                    IEnumerable<long> ids = null;
+                    if(accessIds != null && id.UserId > 0)
+                        ids = accessIds.Append(id.UserId);
+                    var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
+                    await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
+                    return data.message.Time;
+                });
+            }
+            catch
+            {
+                return 0;
+            }
+        }
         public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password)
         {
             try
@@ -55,9 +75,14 @@ namespace Rooms.Hubs
                                 Secret = m.AccessIdsJson != null
                             }));
                     }
-                    var activemsgs = active.Messages;
+                    var activemsgs = active.GetMessages(true);
                     if (activemsgs.Count() > 0)
-                        messages.AddRange(activemsgs.Select(m => new RoomsMsg
+                    {
+                        Func<InMemoryMessage, bool> filter;
+                        if (id.UserId > 0) filter = m => m.accessIds == null || m.accessIds.Contains(id.UserId);
+                        else if (id.Guest != null) filter = m => m.accessIds == null;
+                        else throw new HubException("Couldn't read neither id nor guid.");
+                        messages.AddRange(activemsgs.Where(filter).Select(m => new RoomsMsg
                         {
                             Icon = m.senderIcon,
                             Sender = m.senderName,
@@ -65,6 +90,7 @@ namespace Rooms.Hubs
                             Text = m.text,
                             Secret = m.accessIds != null
                         }));
+                    }
                     info.Users = active.Users(id.UserId, id.Guest).Select(u => new RoomsUser
                     {
                         Id = u.userId,
@@ -98,7 +124,7 @@ namespace Rooms.Hubs
                     var data = _state.DisconnectUser(Context.ConnectionId);
                     if (!data.removed)
                     {
-                        if(data.room.User(id.UserId, id.Guest) == null)
+                        if (data.room.User(id.UserId, id.Guest) == null)
                             await Clients.Clients(data.room.GetConnections()).SendAsync("removeUser",
                                 new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
                     }
