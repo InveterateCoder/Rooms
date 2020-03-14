@@ -118,6 +118,7 @@ export class Room extends Component {
         this.connection.on("recieveMessage", this.recieveMessage);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
+        this.toastsRef = React.createRef();
     }
     openmenu = () => {
         this.menu.current.focus();
@@ -186,18 +187,33 @@ export class Room extends Component {
             }
         });
     }
+    fillToasts = () => {
+        let toasts = this.state.toasts.map(([id, time, msg]) =>
+            <Toast onClose={() => this.removeNotification(id)} key={id}>
+                <Toast.Header>
+                    <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+                    <strong className="mr-auto">{text.message}</strong>
+                    <small className="ml-3">{time}</small>
+                </Toast.Header>
+                <Toast.Body>{msg}</Toast.Body>
+            </Toast>);
+        setTimeout(() => {
+            this.toastsRef.current.scrollTo(0, this.toastsRef.current.scrollHeight);
+        }, 200);
+        return toasts;
+    }
     formMessage = (msg, today) => {
         let date, time;
-        if(today) {
+        if (today) {
             date = new Date((msg.time - 621355968000000000) / 10000);
             time = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}, ${date.getHours()}:${date.getMinutes()}`;
         }
         let elem = document.createElement("div");
-        elem.className = `media p-3 mb-3${msg.secret ? " secret" : ""}`;
-        elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3" draggable="false"/>
+        elem.className = "media p-3 mb-3";
+        elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3" />
         <div class="media-body">
-        <h4 class="text-secondary">${msg.secret ? sec : pub}${msg.sender}<small class="ml-2">${time ? "<i>" + time + "</i>" : "&#8987;"}</small></h4>
-        <p>${msg.text}</p>
+        <h5 class="text-secondary">${msg.secret ? sec : pub}${msg.sender}<small class="ml-2">${time ? "<i>" + time + "</i>" : "&#8987;"}</small></h5>
+        <p class="mb-0">${msg.text}</p>
         </div>`;
         return elem;
     }
@@ -205,7 +221,7 @@ export class Room extends Component {
         let id = Date.now();
         let date = new Date(id);
         let time = `${date.getHours()}:${date.getMinutes()}`;
-        let timeoutId = setTimeout(() => this.removeNotification(id), 13000);
+        let timeoutId = setTimeout(() => this.removeNotification(id), 7000);
         this.setState({ toasts: [...this.state.toasts, [id, time, msg, timeoutId]] });
     }
     removeNotification = id => {
@@ -250,14 +266,13 @@ export class Room extends Component {
         let element = this.formMessage(msg, null);
         this.appendMessage(element);
         this.connection.invoke("SendMessage", val, ids).then(resp => {
-            if(!resp || isNaN(resp)) this.setState({failed: text.wrong});
-            else
-            {
+            if (!resp || isNaN(resp)) this.setState({ failed: text.wrong });
+            else {
                 let date = new Date((resp - 621355968000000000) / 10000);
                 let time = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}, ${date.getHours()}:${date.getMinutes()}`;
                 element.getElementsByTagName("small")[0].innerHTML = `<i>${time}</i>`;
-            } 
-        }).catch(err => this.setState({failed: err.message || text.wrong}));
+            }
+        }).catch(err => this.setState({ failed: err.message || text.wrong }));
     }
     msgInputKeyPressed = ev => {
         if (ev.which === 13)
@@ -284,19 +299,8 @@ export class Room extends Component {
             </div>
         </div>
         else return <div id="room">
-            <div>
-                {
-                    this.state.toasts.map(([id, time, msg]) =>
-                        <Toast onClose={() => this.removeNotification(id)} key={id}>
-                            <Toast.Header>
-                                <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
-                                <strong className="mr-auto">{text.message}</strong>
-                                <small className="ml-3">{time}</small>
-                            </Toast.Header>
-                            <Toast.Body>{msg}</Toast.Body>
-                        </Toast>
-                    )
-                }
+            <div ref={this.toastsRef}>
+                {this.fillToasts()}
             </div>
             <div id="roomcont" className="container-fluid">
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
