@@ -12,55 +12,6 @@ import Password from "react-type-password";
 import validator from "../utils/validator";
 import * as signalR from "@aspnet/signalr";
 
-/*const fakeUsers = [
-    {
-        id: 3,
-        name: "Abraham",
-        icon: "man",
-        guid: null
-    },
-    {
-        id: 1,
-        name: "Loco",
-        icon: "woman",
-        guid: null
-    },
-    {
-        id: 0,
-        name: "Stranger",
-        icon: "user",
-        guid: "adbadf12345432321"
-    },
-    {
-        id: 2,
-        name: "Somebody",
-        icon: "man",
-        guid: null
-    },
-    {
-        id: 0,
-        name: "Come on",
-        icon: "user",
-        guid: "avddfdfvdaf13434nn"
-    }
-]
-
-const fakeMsgs = [
-    {
-        time: 637193647496720000,
-        sender: "Good Gal",
-        icon: "woman",
-        secret: false,
-        text: "Hello everyone!"
-    },
-    {
-        time: 637193647496720000,
-        sender: "Somebody",
-        icon: "man",
-        secret: true,
-        text: "lololo"
-    }
-]*/
 const text = new LocalizedStrings({
     en: {
         placeholder: "Type a message...",
@@ -119,6 +70,7 @@ export class Room extends Component {
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
+        this.toastTimer = null;
     }
     openmenu = () => {
         this.menu.current.focus();
@@ -197,7 +149,8 @@ export class Room extends Component {
                 </Toast.Header>
                 <Toast.Body>{msg}</Toast.Body>
             </Toast>);
-        setTimeout(() => {
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => {
             this.toastsRef.current.scrollTo(0, this.toastsRef.current.scrollHeight);
         }, 200);
         return toasts;
