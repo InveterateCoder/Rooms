@@ -42,6 +42,21 @@ namespace Rooms.Hubs
                 return 0;
             }
         }
+        public async Task ChangeIcon(string icon)
+        {
+            if (icon != "user" && icon != "man" && icon != "woman")
+                Context.Abort();
+            else
+            {
+                await Task.Run(async () =>
+                {
+                    Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                    var connectionIds = _state.ChangeUser(id.UserId, icon: icon);
+                    if (connectionIds.Count() > 0)
+                        await Clients.Clients(connectionIds).SendAsync("iconChanged", new { id = id.UserId, icon = icon });
+                });
+            }
+        }
         public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password)
         {
             try
@@ -56,6 +71,7 @@ namespace Rooms.Hubs
                     ActiveRoom active = _state.ConnectUser(id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId);
                     RoomInfo info = new RoomInfo()
                     {
+                        MyId = id.UserId,
                         Flag = room.Country,
                         Name = room.Name
                     };

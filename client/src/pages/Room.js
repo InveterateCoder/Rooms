@@ -20,11 +20,14 @@ const text = new LocalizedStrings({
         limit: "Sorry, room's capacity has reached the limit. Try again later.",
         access: "Access denied. Wrong password.",
         deleted: "The room has been deleted by the owner.",
+        userRemoved: "User successfully deleted.",
         message: "Message",
         entered: "entered the room.",
         left: "left the room.",
         exceeds: "Exceeded the message length limit of 2000 characters.",
-        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        renamed: "was renamed to",
+        changedIcon: "has changed icon."
     },
     ru: {
         placeholder: "Введите сообщение ...",
@@ -34,11 +37,14 @@ const text = new LocalizedStrings({
         limit: "Извините, вместимость комнаты достигла предела. Попробуйте позже.",
         access: "Доступ запрещен. Неправильный пароль.",
         deleted: "Комната была удалена владельцем.",
+        userRemoved: "Пользователь успешно удален.",
         message: "Сообщение",
         entered: "вошел в комнату.",
         left: "покинул комнату.",
         exceeds: "Превышен лимит длины сообщения 2000 символов.",
-        months: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"]
+        months: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+        renamed: "был переименован в",
+        changedIcon: "изменил значок."
     }
 })
 const pub = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="globe" class="svg-inline--fa fa-globe fa-w-16 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" color="#007bff"><path fill="currentColor" d="M336.5 160C322 70.7 287.8 8 248 8s-74 62.7-88.5 152h177zM152 256c0 22.2 1.2 43.5 3.3 64h185.3c2.1-20.5 3.3-41.8 3.3-64s-1.2-43.5-3.3-64H155.3c-2.1 20.5-3.3 41.8-3.3 64zm324.7-96c-28.6-67.9-86.5-120.4-158-141.6 24.4 33.8 41.2 84.7 50 141.6h108zM177.2 18.4C105.8 39.6 47.8 92.1 19.3 160h108c8.7-56.9 25.5-107.8 49.9-141.6zM487.4 192H372.7c2.1 21 3.3 42.5 3.3 64s-1.2 43-3.3 64h114.6c5.5-20.5 8.6-41.8 8.6-64s-3.1-43.5-8.5-64zM120 256c0-21.5 1.2-43 3.3-64H8.6C3.2 212.5 0 233.8 0 256s3.2 43.5 8.6 64h114.6c-2-21-3.2-42.5-3.2-64zm39.5 96c14.5 89.3 48.7 152 88.5 152s74-62.7 88.5-152h-177zm159.3 141.6c71.4-21.2 129.4-73.7 158-141.6h-108c-8.8 56.9-25.6 107.8-50 141.6zM19.3 352c28.6 67.9 86.5 120.4 158 141.6-24.4-33.8-41.2-84.7-50-141.6h-108z"></path></svg>';
@@ -53,6 +59,7 @@ export class Room extends Component {
             loading: true,
             blocked: false,
             password: "",
+            myId: 0,
             name: context.name,
             icon: context.icon,
             flag: "??",
@@ -72,6 +79,9 @@ export class Room extends Component {
         this.connection.on("removeUser", this.removeUser);
         this.connection.on("recieveMessage", this.recieveMessage);
         this.connection.on("roomDeleted", this.roomDeleted);
+        this.connection.on("userRemoved", this.userRemoved);
+        this.connection.on("usernameChanged", this.usernameChanged);
+        this.connection.on("iconChanged", this.iconChanged);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -118,6 +128,7 @@ export class Room extends Component {
                 this.setState({
                     loading: false,
                     blocked: false,
+                    myId: data.payload.myId,
                     flag: data.payload.flag,
                     roomname: data.payload.name,
                     moremsgs: data.payload.moreMessages,
@@ -257,6 +268,51 @@ export class Room extends Component {
         this.connection.stop();
         this.setState({ warning: text.deleted });
     }
+    userRemoved = () => {
+        this.connection.stop();
+        this.setState({ warning: text.userRemoved });
+    }
+    usernameChanged = creds => {
+        if (creds.id === this.state.myId)
+            this.setState({ name: creds.name });
+        else {
+            let users = this.state.users;
+            let user = users.find(u => u.id === creds.id);
+            if (user) {
+                let oldName = user.name;
+                users = users.filter(u => u !== user);
+                let selusers = this.state.selusers;
+                let selincludes = selusers.includes(user);
+                if (selincludes)
+                    selusers = selusers.filter(u => u !== user);
+                user.name = creds.name;
+                if (selincludes)
+                    selusers = [...selusers, user];
+                this.setState({ users: [...users, user], selusers: selusers });
+                this.notify(`"${oldName}" ${text.renamed} "${creds.name}"`);
+            }
+        }
+    }
+    iconChanged = creds => {
+        if (creds.id === this.state.myId)
+            this.setState({ icon: creds.icon });
+        else {
+            let users = this.state.users;
+            let user = users.find(u => u.id === creds.id);
+            if (user) {
+                users = users.filter(u => u !== user);
+                let selusers = this.state.selusers;
+                let selincludes = selusers.includes(user);
+                if (selincludes)
+                    selusers = selusers.filter(u => u !== user);
+                user.icon = creds.icon;
+                if (selincludes)
+                    selusers = [...selusers, user];
+                this.setState({ users: [...users, user], selusers: selusers });
+                this.notify(`"${user.name}" ${text.changedIcon}`);
+            }
+        }
+    }
     render() {
         text.setLanguage(this.context.lang);
         if (this.state.failed || this.state.warning) return <div id="failed">
@@ -304,5 +360,8 @@ export class Room extends Component {
         catch (err) {
             this.setState({ failed: err.message });
         }
+    }
+    componentWillUnmount() {
+        this.connection.stop();
     }
 }

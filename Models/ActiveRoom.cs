@@ -38,6 +38,11 @@ namespace Rooms.Models
             lock (_users)
                 return _users.First(u => u.ContainsConnection(connectionId));
         }
+        public IEnumerable<string> ConnectionsByUser(long userId)
+        {
+            lock (_users)
+                return _users.FirstOrDefault(u => u.userId == userId)?.connectionIds;
+        }
         public int GetOpenConnections(long id, string guid)
         {
             Func<ActiveUser, bool> filter;

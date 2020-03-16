@@ -30,6 +30,29 @@ namespace Rooms.Models
             lock (_activeRooms)
                 return _activeRooms[roomId];
         }
+        public string[] UserConnections(long userId)
+        {
+            lock (_activeRooms)
+                return _activeRooms.Where(p => p.Value.User(userId, null) != null).SelectMany(p => p.Value.ConnectionsByUser(userId)).ToArray();
+        }
+        public string[] ChangeUser(long userId, string name = null, string icon = null)
+        {
+            List<string>connectionIds = new List<string>();
+            lock(_activeRooms)
+            {
+                foreach(var (_, room) in _activeRooms)
+                {
+                    var user = room.User(userId, null);
+                    if(user != null)
+                    {
+                        user.name = name ?? user.name;
+                        user.icon = icon ?? user.icon;
+                        connectionIds.AddRange(room.GetConnections());
+                    }
+                }
+            }
+            return connectionIds.ToArray();
+        }
         public string[] RemoveRoom(long roomId)
         {
             ActiveRoom room = null;

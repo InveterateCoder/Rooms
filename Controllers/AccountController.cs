@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Rooms.Hubs;
 using Rooms.Infrastructure;
 using Rooms.Models;
 
@@ -18,10 +21,14 @@ namespace Rooms.Controllers
     {
         private readonly Helper Helper;
         private readonly RoomsDBContext _context;
-        public AccountController(Helper helper, RoomsDBContext context)
+        private readonly State _state;
+        private readonly IHubContext<RoomsHub> _hub;
+        public AccountController(Helper helper, RoomsDBContext context, State state, IHubContext<RoomsHub> hub)
         {
             Helper = helper;
             _context = context;
+            _state = state;
+            _hub = hub;
         }
         [HttpPost("change")]
         public async Task<IActionResult> Change([FromBody]UserChangeForm form)
@@ -40,7 +47,9 @@ namespace Rooms.Controllers
                 if (form.Password?.Length >= 6) user.Password = form.Password;
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
-                id.UserId = user.UserId;
+                var connections = _state.ChangeUser(id.UserId, user.Name);
+                if (connections.Count() > 0)
+                    await _hub.Clients.Clients(connections).SendAsync("usernameChanged", new { id = id.UserId, name = user.Name });
                 id.Name = user.Name;
                 return Ok(Helper.GetToken(JsonSerializer.Serialize(id)));
             }
@@ -55,9 +64,18 @@ namespace Rooms.Controllers
             try
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
-                if(id.Guest != null) return Forbid();
-                var user = await _context.Users.FindAsync(id.UserId);
-                if(user == null) return BadRequest(Errors.NotRegistered);
+                if (id.Guest != null) return Forbid();
+                var user = await _context.Users.Include(u => u.Room).FirstOrDefaultAsync(u => u.UserId == id.UserId);
+                if (user == null) return BadRequest(Errors.NotRegistered);
+                if (user.Room != null)
+                {
+                    var connectionIds = _state.RemoveRoom(user.Room.RoomId);
+                    if (connectionIds != null)
+                        await _hub.Clients.Clients(connectionIds).SendAsync("roomDeleted");
+                }
+                var connections = _state.UserConnections(id.UserId);
+                if (connections.Count() > 0)
+                    await _hub.Clients.Clients(connections).SendAsync("userRemoved");
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
                 return Ok("ok");
