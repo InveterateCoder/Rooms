@@ -44,8 +44,8 @@ export function Menu(props) {
                         onClick={() => { if (props.public && props.selusers.length > 0) props.setPublic(false) }}>
                         <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faUserFriends} />
                     </div>
-                    <div className="col btn btn-dark">
-                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faVolumeMute} />
+                    <div className={`col btn btn-dark${props.sound ? " active" : ""}`} onClick={props.soundClicked}>
+                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={props.sound ? faVolumeUp : faVolumeMute} />
                     </div>
                 </div>
                 : <div id="menubtns">
