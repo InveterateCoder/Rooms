@@ -19,6 +19,7 @@ const text = new LocalizedStrings({
         noroom: "Sorry, room is not found.",
         limit: "Sorry, room's capacity has reached the limit. Try again later.",
         access: "Access denied. Wrong password.",
+        deleted: "The room has been deleted by the owner.",
         message: "Message",
         entered: "entered the room.",
         left: "left the room.",
@@ -32,6 +33,7 @@ const text = new LocalizedStrings({
         noroom: "Извините, комната не найден.",
         limit: "Извините, вместимость комнаты достигла предела. Попробуйте позже.",
         access: "Доступ запрещен. Неправильный пароль.",
+        deleted: "Комната была удалена владельцем.",
         message: "Сообщение",
         entered: "вошел в комнату.",
         left: "покинул комнату.",
@@ -65,10 +67,11 @@ export class Room extends Component {
         }
         this.connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
             { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
-        this.connection.onclose(() => this.setState({ failed: true }));
+        this.connection.onclose(() => this.setState({ failed: text.wrong }));
         this.connection.on("addUser", this.addUser);
         this.connection.on("removeUser", this.removeUser);
         this.connection.on("recieveMessage", this.recieveMessage);
+        this.connection.on("roomDeleted", this.roomDeleted);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -249,6 +252,10 @@ export class Room extends Component {
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date()));
         if (this.state.sound) this.state.sound.play();
+    }
+    roomDeleted = () => {
+        this.connection.stop();
+        this.setState({ warning: text.deleted });
     }
     render() {
         text.setLanguage(this.context.lang);

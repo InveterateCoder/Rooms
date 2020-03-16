@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Rooms.Models
 {
@@ -29,11 +30,30 @@ namespace Rooms.Models
             lock (_activeRooms)
                 return _activeRooms[roomId];
         }
+        public string[] RemoveRoom(long roomId)
+        {
+            ActiveRoom room = null;
+            lock (_activeRooms)
+            {
+                if (_activeRooms.ContainsKey(roomId))
+                {
+                    room = _activeRooms[roomId];
+                    lock (_activeUsers)
+                    {
+                        var users = _activeUsers.Where(u => u.Value == roomId);
+                        foreach (var user in users)
+                            _activeUsers.Remove(user.Key);
+                    }
+                }
+                _activeRooms.Remove(roomId);
+            }
+            return room?.GetConnections();
+        }
         public UserMsg SendMessage(string connectionId, string message, long[] accessIds)
         {
             var roomId = _activeUsers[connectionId];
             ActiveRoom room;
-            lock(_activeRooms) room = _activeRooms[roomId];
+            lock (_activeRooms) room = _activeRooms[roomId];
             var msg = room.AddMessage(roomId, connectionId, message, accessIds);
             return new UserMsg
             {
@@ -45,7 +65,8 @@ namespace Rooms.Models
                     Secret = accessIds != null,
                     Sender = msg.senderName,
                     Text = msg.text
-                }
+                },
+                room = room
             };
         }
         public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId)
@@ -74,7 +95,8 @@ namespace Rooms.Models
             };
             lock (_activeRooms)
             {
-                if (!_activeUsers.ContainsKey(connectionId)) return data;
+                lock (_activeUsers)
+                    if (!_activeUsers.ContainsKey(connectionId)) return data;
                 data.room = _activeRooms[_activeUsers[connectionId]];
                 var user = data.room.UserByConnectionId(connectionId);
                 if (user.RemoveConnection(connectionId) == 0)
@@ -98,5 +120,6 @@ namespace Rooms.Models
     {
         public string[] connectionIds;
         public RoomsMsg message;
+        public ActiveRoom room;
     }
 }

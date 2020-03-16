@@ -69,6 +69,14 @@ namespace Rooms.Models
                     return _messages.Values.Reverse();
                 else return _messages.Values;
         }
+        public int MsgCount
+        {
+            get
+            {
+                lock (_messages)
+                    return _messages.Count();
+            }
+        }
         public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds)
         {
             var time = DateTime.UtcNow.Ticks;

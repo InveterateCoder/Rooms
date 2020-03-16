@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rooms.Infrastructure;
 using Rooms.Models;
+using Microsoft.AspNetCore.SignalR;
+using Rooms.Hubs;
 
 namespace Rooms.Controllers
 {
@@ -19,10 +21,14 @@ namespace Rooms.Controllers
     {
         private readonly Helper Helper;
         private readonly RoomsDBContext _context;
-        public RoomController(Helper helper, RoomsDBContext context)
+        private readonly State _state;
+        private readonly IHubContext<RoomsHub> _hub;
+        public RoomController(Helper helper, RoomsDBContext context, State state, IHubContext<RoomsHub> hub)
         {
             Helper = helper;
             _context = context;
+            _state = state;
+            _hub = hub;
         }
         [HttpPost("change")]
         public async Task<IActionResult> Change([FromBody]RoomForm form)
@@ -77,8 +83,12 @@ namespace Rooms.Controllers
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
                 if (id.Guest != null) return Forbid();
-                var room = await _context.Rooms.FirstOrDefaultAsync(r => r.UserId == id.UserId);
+                var room = await _context.Rooms.Include(r => r.Messages).FirstOrDefaultAsync(r => r.UserId == id.UserId);
                 if (room == null) return BadRequest(Errors.NoRoom);
+                var connectionIds = _state.RemoveRoom(room.RoomId);
+                if (connectionIds != null)
+                    await _hub.Clients.Clients(connectionIds).SendAsync("roomDeleted");
+                _context.Messages.RemoveRange(room.Messages);
                 _context.Rooms.Remove(room);
                 await _context.SaveChangesAsync();
                 return Ok("ok");
