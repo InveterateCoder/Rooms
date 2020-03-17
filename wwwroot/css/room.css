@@ -3,7 +3,7 @@
     right: 20px;
     margin-left: 20px;
     top:100px;
-    bottom: 100px;
+    bottom: 150px;
     overflow-y: auto;
     max-width: 576px;
 }
@@ -13,6 +13,12 @@
 }
 #room > div:first-child > div button {
     outline: none;
+}
+#scrollDown {
+    position: fixed;
+    right: 80px;
+    bottom: 80px;
+    opacity: .4;
 }
 #roomcont {
     float: right;

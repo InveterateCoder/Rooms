@@ -13,7 +13,6 @@ namespace Rooms.Hubs
     [Authorize]
     public class RoomsHub : Hub
     {
-        private readonly int MsgsCount = 50;
         private RoomsDBContext _context;
         private State _state;
         public RoomsHub(RoomsDBContext context, State state)
@@ -21,11 +20,38 @@ namespace Rooms.Hubs
             _context = context;
             _state = state;
         }
+        public async Task<IEnumerable<RoomsMsg>> GetMessages(long oldestMsgTime, int count)
+        {
+            
+            return await Task.Run(async () =>
+                {
+                    Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                    List<RoomsMsg> messages = new List<RoomsMsg>();
+                    messages.AddRange(_state.GetOlderMsgs(id.UserId, id.Guest, oldestMsgTime, Context.ConnectionId));
+                    if (messages.Count < count)
+                    {
+                        var roomId = _state.GetRoomId(Context.ConnectionId);
+                        var room = await _context.Rooms.Include(r => r.Messages).FirstAsync(r => r.RoomId == roomId);
+                        messages.InsertRange(0, room.Messages.Where(m =>
+                            m.TimeStamp < oldestMsgTime &&
+                            (m.AccessIdsJson == null || (id.UserId != 0 && m.AccessIds.Contains(id.UserId))))
+                            .OrderByDescending(m => m.TimeStamp).Select(m => new RoomsMsg
+                            {
+                                Icon = m.SenderIcon,
+                                Secret = m.AccessIdsJson != null,
+                                Sender = m.SenderName,
+                                Text = m.Text,
+                                Time = m.TimeStamp
+                            }).Take(count - messages.Count));
+                    }
+                    else if (messages.Count > count)
+                        return messages.Take(count);
+                    return messages;
+                });
+        }
         public async Task<long> SendMessage(string message, long[] accessIds)
         {
-            try
-            {
-                return await Task.Run(async () =>
+            return await Task.Run(async () =>
                 {
                     Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
                     IEnumerable<long> ids = null;
@@ -33,14 +59,9 @@ namespace Rooms.Hubs
                         ids = accessIds.Append(id.UserId);
                     var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
                     await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
-                    if (data.room.MsgCount > MsgsCount) await SaveRoom(data.room);
+                    if (data.room.MsgCount > 50) await SaveRoom(data.room);
                     return data.message.Time;
                 });
-            }
-            catch
-            {
-                return 0;
-            }
         }
         public async Task ChangeIcon(string icon)
         {
@@ -57,7 +78,7 @@ namespace Rooms.Hubs
                 });
             }
         }
-        public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password)
+        public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password, int msgsCount)
         {
             try
             {
@@ -91,14 +112,12 @@ namespace Rooms.Hubs
                             Secret = m.accessIds != null
                         }));
                     }
-                    var remnant = MsgsCount - active.MsgCount;
+                    var remnant = msgsCount - active.MsgCount;
                     if (remnant > 0 && room.Messages.Count() > 0)
                     {
                         var filtered = room.Messages.Where(m => m.AccessIdsJson == null ||
                             (id.UserId != 0 && m.AccessIds.Contains(id.UserId)))
                             .OrderByDescending(m => m.TimeStamp);
-                        if (filtered.Count() > remnant) info.MoreMessages = true;
-                        else info.MoreMessages = false;
                         messages.AddRange(filtered.Take(remnant)
                             .Select(m => new RoomsMsg
                             {
@@ -134,25 +153,22 @@ namespace Rooms.Hubs
         }
         public async override Task OnDisconnectedAsync(Exception exception)
         {
-            try
+            Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+            await Task.Run(async () =>
             {
-                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                await Task.Run(async () =>
+                var data = _state.DisconnectUser(Context.ConnectionId);
+                if (data.room != null)
                 {
-                    var data = _state.DisconnectUser(Context.ConnectionId);
-                    if (data.room != null)
+                    if (!data.removed)
                     {
-                        if (!data.removed)
-                        {
-                            if (data.room.User(id.UserId, id.Guest) == null)
-                                await Clients.Clients(data.room.GetConnections()).SendAsync("removeUser",
-                                    new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
-                        }
-                        else await SaveRoom(data.room);
+                        if (data.room.User(id.UserId, id.Guest) == null)
+                            await Clients.Clients(data.room.GetConnections()).SendAsync("removeUser",
+                                new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
                     }
-                });
-            }
-            catch { };
+                    else await SaveRoom(data.room);
+                }
+            });
+            await base.OnDisconnectedAsync(exception);
         }
         private async Task SaveRoom(ActiveRoom room)
         {

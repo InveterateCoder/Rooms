@@ -5,7 +5,7 @@ import { Menu } from "./accessories/Room/Menu";
 import { Toast } from "react-bootstrap";
 import Flag from "react-flags";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faInfoCircle, faExclamationTriangle, faSignInAlt } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faInfoCircle, faExclamationTriangle, faSignInAlt, faArrowCircleDown } from "@fortawesome/free-solid-svg-icons";
 import LocalizedStrings from "react-localization";
 import Password from "react-type-password";
 import validator from "../utils/validator";
@@ -70,14 +70,16 @@ export class Room extends Component {
             icon: context.icon,
             flag: "??",
             roomname: null,
-            moremsgs: true,
             users: [],
             menuopen: false,
             public: true,
             selusers: [],
             toasts: [],
-            sound: null
+            sound: null,
+            scrolledDown: true
         }
+        this.msgsCount = 50;
+        this.oldestMsgTime = null;
         this.connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
             { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
         this.connection.onclose(() => this.setState({ failed: text.wrong }));
@@ -99,6 +101,23 @@ export class Room extends Component {
         this.setState({ menuopen: true });
     }
     closemenu = () => this.setState({ menuopen: false });
+    windowScrolled = () => {
+        let scrTop = document.scrollingElement.scrollTop;
+        let scrHeight = document.scrollingElement.scrollHeight;
+        let cliHeight = document.scrollingElement.clientHeight;
+        if (scrTop === 0 && this.oldestMsgTime) {
+            this.connection.invoke("GetMessages", this.oldestMsgTime, this.msgsCount).then(msgs => {
+                if (msgs && msgs.length > 0) {
+                    this.fillMessages(msgs);
+                    document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight - scrHeight);
+                }
+                if (!msgs || msgs.length < this.msgsCount) this.oldestMsgTime = null;
+                else this.oldestMsgTime = msgs[msgs.length - 1].time;
+            }).catch(err => this.setState({ failed: err.message || text.wrong }));
+        }
+        else if (!this.state.scrolledDown && scrTop + cliHeight > scrHeight - 100) this.setState({ scrolledDown: true });
+        else if (this.state.scrolledDown && scrTop + cliHeight < scrHeight - 100) this.setState({ scrolledDown: false });
+    }
     setPublic = mode => this.setState({ public: mode });
     userClicked = user => {
         if (this.state.public)
@@ -138,9 +157,16 @@ export class Room extends Component {
                     myId: data.payload.myId,
                     flag: data.payload.flag,
                     roomname: data.payload.name,
-                    moremsgs: data.payload.moreMessages,
                     users: data.payload.users
-                }, () => this.fillMessages(data.payload.messages));
+                }, () => {
+                    let length = data.payload.messages.length;
+                    if (length < this.msgsCount)
+                        this.oldestMsgTime = null;
+                    else
+                        this.oldestMsgTime = data.payload.messages[length - 1].time;
+                    this.fillMessages(data.payload.messages);
+                    window.scrollTo(0, document.body.scrollHeight);
+                });
                 break;
             case "password":
                 this.setState({ loading: false, blocked: true });
@@ -160,7 +186,8 @@ export class Room extends Component {
         if (err) alert(err);
         else this.setState({ loading: true }, async () => {
             try {
-                let data = await this.connection.invoke("Enter", this.props.match.params["room"], this.state.icon, this.state.password);
+                let data = await this.connection.invoke("Enter", this.props.match.params["room"],
+                    this.state.icon, this.state.password, this.msgsCount);
                 if (data.code === "password") alert(text.access);
                 this.processEnter(data);
             } catch (err) {
@@ -257,6 +284,7 @@ export class Room extends Component {
         }
         let element = this.formMessage(msg, null);
         this.appendMessage(element);
+        document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         this.connection.invoke("SendMessage", val, ids).then(resp => {
             if (!resp || isNaN(resp)) this.setState({ failed: text.wrong });
             else
@@ -270,6 +298,7 @@ export class Room extends Component {
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date()));
         if (this.state.sound) this.state.sound.play();
+        if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     roomDeleted = () => {
         this.connection.stop();
@@ -355,6 +384,8 @@ export class Room extends Component {
             <div ref={this.toastsRef}>
                 {this.fillToasts()}
             </div>
+            {!this.state.scrolledDown && <button id="scrollDown" className="btn btn-dark"
+                onClick={() => document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight)}><FontAwesomeIcon icon={faArrowCircleDown} /></button>}
             <div id="roomcont" className="container-fluid">
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
                     <button onClick={this.openmenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowRight} /></button>
@@ -371,9 +402,11 @@ export class Room extends Component {
         </div>
     }
     async componentDidMount() {
+        window.addEventListener("scroll", this.windowScrolled);
         try {
             await this.connection.start();
-            let data = await this.connection.invoke("Enter", this.props.match.params["room"], this.state.icon, null);
+            let data = await this.connection.invoke("Enter", this.props.match.params["room"],
+                this.state.icon, null, this.msgsCount);
             this.processEnter(data);
         }
         catch (err) {
@@ -381,6 +414,7 @@ export class Room extends Component {
         }
     }
     componentWillUnmount() {
+        window.removeEventListener("scroll", this.windowScrolled);
         this.connection.stop();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,6 +24,8 @@ namespace Rooms.Models
                     return _activeRooms.Keys;
             }
         }
+        public long GetRoomId(string connectionId) =>
+            _activeUsers[connectionId];
         public ActiveRoom GetRoom(string connectionId) =>
             GetRoom(_activeUsers[connectionId]);
         public ActiveRoom GetRoom(long roomId)
@@ -37,13 +40,13 @@ namespace Rooms.Models
         }
         public string[] ChangeUser(long userId, string name = null, string icon = null)
         {
-            List<string>connectionIds = new List<string>();
-            lock(_activeRooms)
+            List<string> connectionIds = new List<string>();
+            lock (_activeRooms)
             {
-                foreach(var (_, room) in _activeRooms)
+                foreach (var (_, room) in _activeRooms)
                 {
                     var user = room.User(userId, null);
-                    if(user != null)
+                    if (user != null)
                     {
                         user.name = name ?? user.name;
                         user.icon = icon ?? user.icon;
@@ -55,11 +58,34 @@ namespace Rooms.Models
         }
         public string[] Connections(long roomId)
         {
-            lock(_activeRooms)
+            lock (_activeRooms)
             {
-                if(_activeRooms.ContainsKey(roomId))
+                if (_activeRooms.ContainsKey(roomId))
                     return _activeRooms[roomId].GetConnections();
                 else return null;
+            }
+        }
+        public IEnumerable<RoomsMsg> GetOlderMsgs(long userId, string guid, long time, string connectionId)
+        {
+            lock (_activeRooms)
+            {
+                if (!_activeUsers.ContainsKey(connectionId)) return null;
+                var room = _activeRooms[_activeUsers[connectionId]];
+                lock (room)
+                {
+                    Func<InMemoryMessage, bool> filter;
+                    if (userId > 0) filter = m => (m.accessIds == null || m.accessIds.Contains(userId)) && m.timeStamp < time;
+                    else if (guid != null) filter = m => m.accessIds == null && m.timeStamp < time;
+                    else throw new ArgumentNullException("At least one identifier must be provided.");
+                    return room.GetMessages(true).Where(filter).Select(m => new RoomsMsg
+                    {
+                        Icon = m.senderIcon,
+                        Secret = m.accessIds != null,
+                        Sender = m.senderName,
+                        Text = m.text,
+                        Time = m.timeStamp
+                    });
+                }
             }
         }
         public string[] RemoveRoom(long roomId)
