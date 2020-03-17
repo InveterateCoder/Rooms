@@ -74,6 +74,27 @@ namespace Rooms.Models
                     return _messages.Values.Reverse();
                 else return _messages.Values;
         }
+        public List<Message> DumpMessages()
+        {
+            List<Message> result = new List<Message>();
+            lock (_messages)
+            {
+                foreach (var m in _messages.Values)
+                {
+                    result.Add(new Message
+                    {
+                        AccessIds = m.accessIds,
+                        RoomId = m.roomId,
+                        SenderIcon = m.senderIcon,
+                        SenderName = m.senderName,
+                        Text = m.text,
+                        TimeStamp = m.timeStamp
+                    });
+                }
+                _messages.Clear();
+                return result;
+            }
+        }
         public int MsgCount
         {
             get

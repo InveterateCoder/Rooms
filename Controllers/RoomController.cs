@@ -41,6 +41,7 @@ namespace Rooms.Controllers
                 if (!StaticData.CountryCodes.Contains(form.Country)) return BadRequest(Errors.WrongCountry);
                 var room = await _context.Rooms.FirstOrDefaultAsync(r => r.UserId == id.UserId);
                 var slug = Helper.Slugify(form.Name);
+                string[] connectionIds = null;
                 if (room == null)
                 {
                     if (await _context.Rooms.AnyAsync(r => r.Slug == slug))
@@ -60,6 +61,8 @@ namespace Rooms.Controllers
                 {
                     if (room.Slug != slug && await _context.Rooms.AnyAsync(r => r.Slug == slug))
                         return BadRequest(Errors.RoomNameExist);
+                    if (room.Name != form.Name || room.Country != form.Country)
+                        connectionIds = _state.Connections(room.RoomId);
                     room.Name = form.Name;
                     room.Slug = slug;
                     room.Description = form.Description;
@@ -69,6 +72,9 @@ namespace Rooms.Controllers
                     _context.Rooms.Update(room);
                 }
                 await _context.SaveChangesAsync();
+                if (connectionIds != null)
+                    await _hub.Clients.Clients(connectionIds).SendAsync("roomChanged",
+                        new { name = form.Name, flag = form.Country });
                 return Ok("ok");
             }
             catch (Exception ex)

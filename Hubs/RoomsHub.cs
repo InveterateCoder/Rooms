@@ -156,17 +156,12 @@ namespace Rooms.Hubs
         }
         private async Task SaveRoom(ActiveRoom room)
         {
-            foreach (var m in room.GetMessages())
-                await _context.Messages.AddAsync(new Message
-                {
-                    AccessIds = m.accessIds,
-                    RoomId = m.roomId,
-                    SenderIcon = m.senderIcon,
-                    SenderName = m.senderName,
-                    Text = m.text,
-                    TimeStamp = m.timeStamp
-                });
-            await _context.SaveChangesAsync();
+            var messages = room.DumpMessages();
+            if (messages.Count > 0)
+            {
+                await _context.Messages.AddRangeAsync(messages);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

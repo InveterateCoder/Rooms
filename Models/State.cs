@@ -53,6 +53,15 @@ namespace Rooms.Models
             }
             return connectionIds.ToArray();
         }
+        public string[] Connections(long roomId)
+        {
+            lock(_activeRooms)
+            {
+                if(_activeRooms.ContainsKey(roomId))
+                    return _activeRooms[roomId].GetConnections();
+                else return null;
+            }
+        }
         public string[] RemoveRoom(long roomId)
         {
             ActiveRoom room = null;
