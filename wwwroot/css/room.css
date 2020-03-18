@@ -1,23 +1,23 @@
-#room > div:first-child {
+#toasts {
     position: fixed;
     right: 20px;
     margin-left: 20px;
     top:70px;
-    bottom: 75px;
+    bottom: 83px;
     overflow-y: auto;
     min-width: 236px;
     max-width: 576px;
     text-align: right;
 }
-#room > div:first-child > div {
-    text-align: justify;
+#toasts > div {
+    text-align: left;
 }
-#room > div:first-child > div button {
+#toasts > div button {
     outline: none;
 }
 #scrollDown {
     position: fixed;
-    right: 80px;
+    right: 70px;
     bottom: 80px;
     opacity: .7;
 }
@@ -47,7 +47,7 @@
     position: fixed;
     left: 24%;
     width: 75%;
-    bottom: 20px;
+    bottom: 25px;
     transition: left .4s, width .4s;
 }
 #inpgroup > div > button {
@@ -150,8 +150,7 @@
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;
-    text-indent: 20px;
-    white-space:normal;
+    white-space: pre-wrap;
     margin-bottom: 0;
 }
 #msgpanel > div > div > h5 > svg {

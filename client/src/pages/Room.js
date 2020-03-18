@@ -25,6 +25,7 @@ const text = new LocalizedStrings({
         entered: "entered the room.",
         left: "left the room.",
         exceeds: "Exceeded the message length limit of 2000 characters.",
+        newlines: "Message cannot contain more than 10 lines.",
         months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
         renamed: "was renamed to",
         changedIcon: "has changed icon.",
@@ -45,6 +46,7 @@ const text = new LocalizedStrings({
         entered: "вошел в комнату.",
         left: "покинул комнату.",
         exceeds: "Превышен лимит длины сообщения 2000 символов.",
+        newlines: "Сообщение не может содержать более 10 строк.",
         months: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
         renamed: "был переименован в",
         changedIcon: "изменил значок.",
@@ -211,9 +213,7 @@ export class Room extends Component {
                 <Toast.Body>{msg}</Toast.Body>
             </Toast>);
         clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => {
-            this.toastsRef.current.scrollTo(0, 0);
-        }, 200);
+        this.toastTimer = setTimeout(() => this.toastsRef.current.scrollTo(0, 0), 200);
         return toasts;
     }
     formTime = (ticks, today) => {
@@ -273,14 +273,19 @@ export class Room extends Component {
         this.setState({ users: this.state.users.filter(u => u !== user), selusers: selusers, public: pub });
         this.notify(`"${usr.name}" ${text.left}`);
     }
-    sendMsg = target => {
-        let val = target.value.trim();
+    sendMsg = () => {
+        let val = this.inputRef.current.value.trim();
         if (!val) return;
         if (val.length > 2000) {
             this.notify(text.exceeds);
             return;
         }
-        target.value = "";
+        if ((val.match(/\n/g) || '').length > 10) {
+            this.notify(text.newlines);
+            return;
+        }
+        this.inputRef.current.value = "";
+        this.inputChanged();
         let ids = this.state.selusers.length > 0 && !this.state.public ? this.state.selusers.map(u => u.id) : null;
         let msg = {
             sender: this.context.name,
@@ -298,8 +303,13 @@ export class Room extends Component {
         }).catch(err => this.setState({ failed: err.message || text.wrong }));
     }
     msgInputKeyPressed = ev => {
-        /*if (ev.which === 13)
-            this.sendMsg(ev.target);*/
+        if (ev.which === 13) {
+            if (ev.shiftKey) {
+                ev.preventDefault();
+                this.sendMsg();
+            } else if (ev.target.value[ev.target.value.length - 1] === '\n')
+                ev.preventDefault();
+        }
     }
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date()));
@@ -367,6 +377,31 @@ export class Room extends Component {
             roomname: creds.name
         });
     }
+    inputChanged = () => {
+        this.inputRef.current.style.height = "36px";
+        this.inputRef.current.style.height = this.inputRef.current.scrollHeight + 5 + "px";
+        let top = this.inputRef.current.scrollTop + this.inputRef.current.offsetHeight;
+        if (top - 2 !== this.inputRef.current.scrollHeight && this.inputRef.current.scrollHeight - top < 36)
+            this.inputRef.current.scrollTo(0, this.inputRef.current.scrollHeight);
+        let newHeigh = this.inputRef.current.offsetHeight;
+        if (this.inputMaxed && newHeigh < 161) this.inputMaxed = false;
+        if (!this.inputMaxed && newHeigh !== this.inputHeight) {
+            if (newHeigh === 161) this.inputMaxed = true;
+            this.inputResized(newHeigh - this.inputHeight);
+            this.inputHeight = newHeigh;
+        }
+    }
+    inputResized = diff => {
+        this.msgpanel.current.style.marginBottom = (parseInt(this.msgpanel.current.style.marginBottom) || 15) + diff + "px";
+        if (this.state.scrolledDown)
+            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
+        else
+            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollTop + diff);
+        let style = getComputedStyle(this.scrDownBtnRef.current);
+        this.scrDownBtnRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
+        style = getComputedStyle(this.toastsRef.current);
+        this.toastsRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
+    }
     render() {
         text.setLanguage(this.context.lang);
         if (this.state.failed || this.state.warning) return <div id="failed">
@@ -387,10 +422,10 @@ export class Room extends Component {
             </div>
         </div>
         else return <div id="room">
-            <div ref={this.toastsRef}>
+            <div id="toasts" ref={this.toastsRef}>
                 {this.fillToasts()}
             </div>
-            <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-outline-primary"
+            <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-primary"
                 onClick={() => document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight)}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
             <div id="roomcont" className="container-fluid">
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
@@ -399,9 +434,9 @@ export class Room extends Component {
                     <span className="navbar-brand">{this.state.roomname}</span>
                 </nav>
                 <div id="inpgroup" className="input-group">
-                    <textarea id="input" ref={this.inputRef} onKeyPress={this.msgInputKeyPressed} className="form-control" placeholder={text.placeholder} />
+                    <textarea id="input" ref={this.inputRef} onInput={this.inputChanged} onKeyPress={this.msgInputKeyPressed} className="form-control" placeholder={text.placeholder} />
                     <div className="input-group-append">
-                        <button className="btn btn-outline-secondary ml-2"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                        <button className="btn btn-outline-secondary ml-2" onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>
                 <div ref={this.msgpanel} id="msgpanel"></div>
@@ -412,39 +447,7 @@ export class Room extends Component {
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />
         </div>
     }
-    inputChanged = () => {
-        let value = this.inputRef.current.value;
-        if (value[value.length - 1] === '\n' && (value[value.length - 2] === '\n' ||
-            (value.match(new RegExp('\n', 'g') || [])).length > 11))
-            this.inputRef.current.value = value.substring(0, value.length - 1);
-        else {
-            this.inputRef.current.style.height = "36px";
-            this.inputRef.current.style.height = this.inputRef.current.scrollHeight + 5 + "px";
-            let top = this.inputRef.current.scrollTop + this.inputRef.current.offsetHeight;
-            if (top - 2 !== this.inputRef.current.scrollHeight && this.inputRef.current.scrollHeight - top < 36)
-                this.inputRef.current.scrollTo(0, this.inputRef.current.scrollHeight);
-            let newHeigh = this.inputRef.current.offsetHeight;
-            if (this.inputMaxed && newHeigh < 161) this.inputMaxed = false;
-            if (!this.inputMaxed && newHeigh !== this.inputHeight) {
-                if (newHeigh === 161) this.inputMaxed = true;
-                this.inputResized(newHeigh - this.inputHeight);
-                this.inputHeight = newHeigh;
-            }
-        }
-    }
-    inputResized = diff => {
-        this.msgpanel.current.style.marginBottom = (parseInt(this.msgpanel.current.style.marginBottom) || 15) + diff + "px";
-        if (this.state.scrolledDown)
-            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
-        else
-            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollTop + diff);
-        let style = getComputedStyle(this.scrDownBtnRef.current);
-        this.scrDownBtnRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
-        style = getComputedStyle(this.toastsRef.current);
-        this.toastsRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
-    }
     async componentDidMount() {
-        setTimeout(() => this.inputRef.current.addEventListener("input", this.inputChanged), 500);
         window.addEventListener("scroll", this.windowScrolled);
         try {
             await this.connection.start();
@@ -457,7 +460,6 @@ export class Room extends Component {
         }
     }
     componentWillUnmount() {
-        this.inputRef.current.removeEventListener("input", this.inputChanged);
         window.removeEventListener("scroll", this.windowScrolled);
         this.connection.stop();
     }
