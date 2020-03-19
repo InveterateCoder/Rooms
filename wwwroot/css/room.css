@@ -3,9 +3,7 @@
     right: 20px;
     margin-left: 20px;
     top:70px;
-    bottom: 83px;
-    overflow-y: auto;
-    min-width: 236px;
+    overflow-y: scroll;
     max-width: 576px;
     text-align: right;
 }
@@ -50,20 +48,27 @@
     bottom: 25px;
     transition: left .4s, width .4s;
 }
+#inpgroup.focused {
+    bottom: 10px;
+}
 #inpgroup > div > button {
-    height: 41px;
+    height: 38px;
     margin-top: auto;
     box-shadow: 0 2px 7px 1px gray;
+}
+#inpgroup.focused > div > button {
+    border-radius: 0;
 }
 #input {
     box-shadow: 0 2px 7px 1px gray;
     background-color: rgba(248, 249, 250, .85);
     resize: none;
-    height: 41px;
+    height: 38px;
     max-height: 161px;
 }
-#input:focus {
+.focused #input {
     background-color: white;
+    border-radius: 25px 0 0 25px;
 }
 #roommenu {
     position: fixed;
