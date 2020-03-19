@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Context } from "../data/Context";
 import { Avatar } from "./accessories/Forms/Avatar";
 import { FormGroup } from "./accessories/Forms/FormGroup";
@@ -10,6 +10,7 @@ import LocalizedStrings from "react-localization";
 import { Loading } from "../Loading";
 import { Post, Get } from "../utils/requests";
 import urls from "../utils/Urls";
+import * as signalR from "@aspnet/signalr";
 
 const text = new LocalizedStrings({
     en: {
@@ -51,6 +52,7 @@ const text = new LocalizedStrings({
         }
     }
 });
+let connection = null;
 
 export function Account(props) {
     const context = useContext(Context);
@@ -58,6 +60,15 @@ export function Account(props) {
     const [name, setName] = useState(context.name);
     const [newpassword, setNewPassword] = useState("");
     const [nameError, setNameError] = useState("");
+    useEffect(() => {
+        connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
+            { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
+        connection.start();
+        return () => {
+            connection.stop();
+            connection = null;
+        }
+    }, []);
     const nameChanged = ev => {
         setName(ev.target.value);
         setNameError(validator.name(ev.target.value, context.lang));
@@ -68,6 +79,7 @@ export function Account(props) {
     }
     const selectLanguage = ev => {
         setNameError(validator.name(name, ev.target.value));
+        connection.invoke("ChangeLanguage", ev.target.value).catch(err => alert(err.message));
         context.setLanguage(ev.target.value);
     }
     const hasFormChanged = () => {
@@ -91,7 +103,7 @@ export function Account(props) {
             Post(urls.accountChange,
                 { name: name !== context.name ? name : null, password: newpassword ? newpassword : null },
                 context.lang, context.jwt).then(jwt => {
-                    if(jwt){
+                    if (jwt) {
                         context.changeAccaunt(jwt, name);
                         setNewPassword("");
                     }
@@ -102,13 +114,17 @@ export function Account(props) {
     const deleteAccount = () => {
         Get(urls.accountDelete, context.lang, context.jwt)
             .then(success => {
-                if(success)
+                if (success)
                     context.signOut();
             }).catch(() => props.history.push("/fatal"));
     }
+    const changeIcon = icon => {
+        connection.invoke("ChangeIcon", icon).catch(err => alert(err.message));
+        context.changeIcon(icon)
+    }
     text.setLanguage(context.lang);
     return <div className="container formpage">
-        <Avatar image={context.icon} selectImage={icon => context.changeIcon(icon)} />
+        <Avatar image={context.icon} selectImage={icon => changeIcon(icon)} />
         <FormGroup type="text" label={text.name} value={name} name="name"
             inputChanged={nameChanged} error={nameError} />
         <PasswordGroup type="password" lang={context.lang} newpassword={newpassword}
@@ -117,25 +133,25 @@ export function Account(props) {
             <button className="btn btn-outline-secondary mr-2" onClick={cancelChanges}>{text.cancel}</button>
             {
                 name
-                    ?   <button onClick={apply} disabled={!isValid()}
-                            className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
-                                {text.submit}</button>
-                    :   <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={deleteAccount} />
+                    ? <button onClick={apply} disabled={!isValid()}
+                        className={`btn btn-outline-${!isValid() ? "secondary disabled" : "primary"}`}>
+                        {text.submit}</button>
+                    : <Delete confirm={text.confirm} delete={text.delete} cancel={text.cancel} onDelete={deleteAccount} />
             }
         </div>
-        <hr/><br/>
+        <hr /><br />
         <FilterGroup label={text.filters} holder={text.filtersHolder} add={text.add} />
-        <br/>
+        <br />
         <FormGroup type="select" label={text.perpage} value={context.perpage}
             onChange={ev => context.setPerpage(ev.target.value)}
-            opts={{10: 10, 30: 30, 50: 50}} />
-        <br/>
+            opts={{ 10: 10, 30: 30, 50: 50 }} />
+        <br />
         <FormGroup type="select" label={text.openin} value={context.openin}
             onChange={ev => context.setOpenIn(ev.target.value)}
-            opts={{...text.opinopts}} />
-        <br/>
+            opts={{ ...text.opinopts }} />
+        <br />
         <FormGroup type="select" label={text.language} value={context.lang} onChange={selectLanguage}
-            opts={{en: "English", ru: "Русский"}} />
+            opts={{ en: "English", ru: "Русский" }} />
         {
             loading && <Loading />
         }

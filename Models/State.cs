@@ -127,7 +127,7 @@ namespace Rooms.Models
                 room = room
             };
         }
-        public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId)
+        public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId, byte limit)
         {
             ActiveRoom room;
             lock (_activeRooms)
@@ -139,6 +139,8 @@ namespace Rooms.Models
                     room = new ActiveRoom(roomId);
                     _activeRooms[roomId] = room;
                 }
+                var user = room.User(userId, guid);
+                if (user == null && room.Online >= limit) return null;
                 room.AddUser(connectionId, name, icon, userId, guid);
             }
             _activeUsers[connectionId] = roomId;

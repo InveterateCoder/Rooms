@@ -22,7 +22,7 @@ namespace Rooms.Hubs
         }
         public async Task<IEnumerable<RoomsMsg>> GetMessages(long oldestMsgTime, int count)
         {
-            
+
             return await Task.Run(async () =>
                 {
                     Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
@@ -78,6 +78,19 @@ namespace Rooms.Hubs
                 });
             }
         }
+        public async Task ChangeLanguage(string lang)
+        {
+            await Task.Run(async () =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                if (id.UserId != 0)
+                {
+                    var connectionIds = _state.UserConnections(id.UserId);
+                    if (connectionIds.Count() > 0)
+                        await Clients.Clients(connectionIds).SendAsync("langChanged", lang);
+                }
+            });
+        }
         public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password, int msgsCount)
         {
             try
@@ -89,7 +102,8 @@ namespace Rooms.Hubs
                     var room = _context.Rooms.Include(r => r.Messages).FirstOrDefault(r => r.Slug == slug);
                     if (room == null) return new ReturnSignal<RoomInfo> { Code = "noroom" };
                     if (room.UserId != id.UserId && room.Password != password) return new ReturnSignal<RoomInfo> { Code = "password" };
-                    ActiveRoom active = _state.ConnectUser(id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId);
+                    ActiveRoom active = _state.ConnectUser(id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId, room.Limit);
+                    if (active == null) return new ReturnSignal<RoomInfo> { Code = "limit" };
                     RoomInfo info = new RoomInfo()
                     {
                         MyId = id.UserId,

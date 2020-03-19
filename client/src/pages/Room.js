@@ -79,6 +79,7 @@ export class Room extends Component {
             myId: 0,
             name: context.name,
             icon: context.icon,
+            lang: context.lang,
             flag: "??",
             roomname: null,
             users: [],
@@ -103,6 +104,7 @@ export class Room extends Component {
         this.connection.on("usernameChanged", this.usernameChanged);
         this.connection.on("iconChanged", this.iconChanged);
         this.connection.on("roomChanged", this.roomChanged);
+        this.connection.on("langChanged", this.langChanged);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -428,8 +430,9 @@ export class Room extends Component {
             ev.target.focus();
         else this.setState({ inputFocused: false });
     }
+    langChanged = lang => this.setState({ lang });
     render() {
-        text.setLanguage(this.context.lang);
+        text.setLanguage(this.state.lang);
         if (this.state.failed || this.state.warning) return <div id="failed">
             <FontAwesomeIcon icon={faExclamationTriangle} size="4x" color={this.state.warning ? "orange" : "red"} />
             <h5 className={`mt-3 text-${this.state.warning ? "warning" : "danger"} h5`}>{this.state.warning ? this.state.warning : this.state.failed}</h5>
