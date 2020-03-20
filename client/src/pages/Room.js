@@ -473,7 +473,7 @@ export class Room extends Component {
                         onInput={this.inputChanged} onKeyPress={this.msgInputKeyPressed} className="form-control"
                         placeholder={text.placeholder} onBlur={this.inputBlur} />
                     <div className="input-group-append">
-                        <button id="sendBtn" className={`btn btn-success ml-${this.state.inputFocused ? "1 mr-1" : "2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
+                        <button id="sendBtn" className={`btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>
                 <div ref={this.msgpanel} id="msgpanel"></div>
@@ -488,6 +488,8 @@ export class Room extends Component {
         if (this.state.scrolledDown)
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         this.inputChanged();
+        if (this.state.menuopen)
+            this.setState({ menuopen: false });
     }
     async componentDidMount() {
         window.addEventListener("scroll", this.windowScrolled);
