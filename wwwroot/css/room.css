@@ -13,6 +13,22 @@
 #toasts > div button {
     outline: none;
 }
+#fetcher {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 55px;
+    background-color: rgba(52, 58, 64, .5);
+    box-shadow: 0 2px 7px 1px #343a40;
+}
+#fetcher > div {
+    margin: auto;
+}
+#fetcher > div > svg {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
 #scrollDown {
     position: fixed;
     right: 70px;

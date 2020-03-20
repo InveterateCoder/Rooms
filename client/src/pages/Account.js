@@ -68,6 +68,7 @@ export function Account(props) {
             connection.stop();
             connection = null;
         }
+         //eslint-disable-next-line
     }, []);
     const nameChanged = ev => {
         setName(ev.target.value);
