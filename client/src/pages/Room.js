@@ -120,8 +120,11 @@ export class Room extends Component {
         this.isMobile = isMobileTablet();
     }
     openmenu = () => {
-        this.menu.current.focus();
-        this.setState({ menuopen: true });
+        this.setState({ menuopen: true }, () => {
+            this.menu.current.focus();
+            this.keyboardResizeTime = true;
+            setTimeout(() => this.keyboardResizeTime = false, 300);
+        });
     }
     closemenu = () => this.setState({ menuopen: false });
     windowScrolled = () => {
@@ -264,7 +267,7 @@ export class Room extends Component {
         elem.className = "media p-3 mb-3";
         elem.innerHTML = `<img src="/img/${msg.icon}.m.svg" alt="icon" class="mr-3" />
         <div class="media-body">
-        <h5 class="text-info">${msg.secret ? sec : pub}${msg.sender}<small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></h5>
+        <div class="text-muted">${msg.secret ? sec : pub}<strong>${msg.sender}</strong><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
         <pre>${msg.text}</pre>
         </div>`;
         return elem;
@@ -488,7 +491,7 @@ export class Room extends Component {
         if (this.state.scrolledDown)
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         this.inputChanged();
-        if (this.state.menuopen)
+        if (this.state.menuopen && !this.keyboardResizeTime)
             this.setState({ menuopen: false });
     }
     async componentDidMount() {

@@ -164,7 +164,7 @@
     transform: translateY(-50%);
 }
 #msgpanel > div > img {
-    width: 40px;
+    width: 32px;
     user-select: none;
     -webkit-user-drag: none;
 }
@@ -175,11 +175,16 @@
     margin-left: 2px;
     white-space: pre-wrap;
     margin-bottom: 0;
+    color: black !important;
 }
-#msgpanel > div > div > h5 > svg {
+#msgpanel > div > div > div {
+    font-size: 1.1rem;
+    margin-bottom: .60rem;
+}
+#msgpanel > div > div > div > svg {
     margin-right: .60rem;
 }
-#msgpanel > div > div > h5 > small {
+#msgpanel > div > div > div > small {
     user-select: none;
 }
 #roompass {

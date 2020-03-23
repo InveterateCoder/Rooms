@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faGlobe, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 
 const text = {
-    en: "Register to use secret messages and sound",
+    en: "Register to use secret messaging and sound",
     ru: "Зарегистрируйтесь, чтобы использовать секретные сообщения и звук"
 };
 
