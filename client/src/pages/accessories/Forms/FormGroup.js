@@ -40,7 +40,7 @@ export function FormGroup(props) {
     }
     return <div className="form-group">
         <div className="row">
-            <div className={`col-${props.type === "text" || props.type === "search" ? "sm-3" : "6"}`}>
+            <div className={`col-${props.type === "text" || props.type === "search" ? props.lang ? "sm-4" : "sm-3" : "6"}`}>
                 {
                     !props.flag
                         ?

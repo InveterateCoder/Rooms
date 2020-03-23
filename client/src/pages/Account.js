@@ -15,7 +15,7 @@ import * as signalR from "@aspnet/signalr";
 const text = new LocalizedStrings({
     en: {
         name: "Username",
-        filters: "Filters",
+        filters: "Search filters",
         filtersHolder: "Select language",
         add: "Add",
         current: "Current password",
@@ -34,7 +34,7 @@ const text = new LocalizedStrings({
     },
     ru: {
         name: "Пользователь",
-        filters: "Фильтры",
+        filters: "Фильтры поиска",
         filtersHolder: "Выберете язык",
         add: "Добавить",
         current: "Текущий пароль",

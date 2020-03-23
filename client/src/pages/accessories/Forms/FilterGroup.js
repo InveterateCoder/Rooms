@@ -45,7 +45,7 @@ export function FilterGroup(props) {
         setFilters(temp);
     }
     return <>
-        <FormGroup label={props.label} value={input} type="search" error={error} holder={props.holder}
+        <FormGroup label={props.label} value={input} type="search" error={error} holder={props.holder} lang={true}
             inputChanged={inputChanged} list={Object.keys(Langs)} add={addFilter} addTitle={props.add} />
         {
             filters && Object.keys(filters).length > 0 &&
