@@ -73,8 +73,8 @@ export class Room extends Component {
     constructor(props, context) {
         super(props, context);
         this.state = {
-            failed: "",
-            warning: "",
+            failed: null,
+            warning: null,
             loading: true,
             blocked: false,
             password: "",
@@ -98,7 +98,7 @@ export class Room extends Component {
         this.oldestMsgTime = null;
         this.connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
             { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
-        this.connection.onclose(() => this.setState({ failed: text.wrong }));
+        this.connection.onclose(() => this.fail(text.wrong));
         this.connection.on("addUser", this.addUser);
         this.connection.on("removeUser", this.removeUser);
         this.connection.on("recieveMessage", this.recieveMessage);
@@ -118,6 +118,10 @@ export class Room extends Component {
         this.soundNotif = new Audio(window.location.origin + "/notif.ogg");
         this.inputHeight = 41;
         this.isMobile = isMobileTablet();
+    }
+    fail = (failed, warning) => {
+        if (!this.unmounted)
+            this.setState({ failed, warning }, this.componentWillUnmount);
     }
     openmenu = () => {
         this.setState({ menuopen: true }, () => {
@@ -200,13 +204,13 @@ export class Room extends Component {
                 this.setState({ loading: false, blocked: true });
                 break;
             case "limit":
-                this.setState({ warning: text.limit });
+                this.fail(null, text.limit);
                 break;
             case "noroom":
-                this.setState({ warning: text.noroom });
+                this.fail(null, text.noroom);
                 break;
             default:
-                this.setState({ failed: data.code });
+                this.fail(data.code || text.wrong);
         }
     }
     confirmPassword = () => {
@@ -219,7 +223,7 @@ export class Room extends Component {
                 if (data.code === "password") alert(text.access);
                 this.processEnter(data);
             } catch (err) {
-                this.setState({ failed: err.message });
+                this.fail(err.message || text.wrong);
             }
         });
     }
@@ -331,7 +335,7 @@ export class Room extends Component {
             if (!resp || isNaN(resp)) this.setState({ failed: text.wrong });
             else
                 element.getElementsByTagName("small")[0].innerHTML = `<code>${this.formTime(resp, new Date())}</code>`;
-        }).catch(err => this.setState({ failed: err.message || text.wrong }));
+        }).catch(err => this.fail(err.message || text.wrong));
     }
     msgInputKeyPressed = ev => {
         if (ev.which === 13) {
@@ -349,11 +353,11 @@ export class Room extends Component {
     }
     roomDeleted = () => {
         this.connection.stop();
-        this.setState({ warning: text.deleted });
+        this.fail(null, text.deleted);
     }
     userRemoved = () => {
         this.connection.stop();
-        this.setState({ warning: text.userRemoved });
+        this.fail(null, text.userRemoved);
     }
     usernameChanged = creds => {
         if (creds.id === this.state.myId)
@@ -439,6 +443,13 @@ export class Room extends Component {
         else this.setState({ inputFocused: false });
     }
     langChanged = lang => this.setState({ lang });
+    windowResized = () => {
+        if (this.state.scrolledDown)
+            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
+        this.inputChanged();
+        if (this.state.menuopen && !this.keyboardResizeTime)
+            this.setState({ menuopen: false });
+    }
     render() {
         text.setLanguage(this.state.lang);
         if (this.state.failed || this.state.warning) return <div id="failed">
@@ -487,13 +498,6 @@ export class Room extends Component {
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />
         </div>
     }
-    windowResized = () => {
-        if (this.state.scrolledDown)
-            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
-        this.inputChanged();
-        if (this.state.menuopen && !this.keyboardResizeTime)
-            this.setState({ menuopen: false });
-    }
     async componentDidMount() {
         window.addEventListener("scroll", this.windowScrolled);
         window.addEventListener("resize", this.windowResized);
@@ -508,8 +512,11 @@ export class Room extends Component {
         }
     }
     componentWillUnmount() {
-        window.removeEventListener("scroll", this.windowScrolled);
-        window.removeEventListener("resize", this.windowResized);
-        this.connection.stop();
+        if (!this.unmounted) {
+            this.unmounted = true;
+            window.removeEventListener("scroll", this.windowScrolled);
+            window.removeEventListener("resize", this.windowResized);
+            this.connection.stop();
+        }
     }
 }

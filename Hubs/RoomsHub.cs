@@ -73,7 +73,7 @@ namespace Rooms.Hubs
                 {
                     Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
                     var connectionIds = _state.ChangeUser(id.UserId, icon: icon);
-                    if (connectionIds.Count() > 0)
+                    if (connectionIds.Length > 0)
                         await Clients.Clients(connectionIds).SendAsync("iconChanged", new { id = id.UserId, icon = icon });
                 });
             }
