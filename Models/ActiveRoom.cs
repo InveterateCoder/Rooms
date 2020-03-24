@@ -1,78 +1,134 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Rooms.Models
 {
     public class ActiveRoom
     {
-        private readonly long roomId;
-        private readonly List<ActiveUser> _users = new List<ActiveUser>();
+        private readonly ConcurrentDictionary<long, ActiveUser> _registered_users = new ConcurrentDictionary<long, ActiveUser>();
+        private readonly ConcurrentDictionary<string, ActiveUser> _guest_users = new ConcurrentDictionary<string, ActiveUser>();
         private readonly SortedList<long, InMemoryMessage> _messages = new SortedList<long, InMemoryMessage>();
-        public byte Online { get => Convert.ToByte(_users.Count); }
+        public byte Online { get => Convert.ToByte(_registered_users.Count() + _guest_users.Count()); }
+        public readonly long roomId;
         public ActiveRoom(long roomId) => this.roomId = roomId;
         public void AddUser(string connectionId, string name, string icon, long id, string guid)
         {
-            Func<ActiveUser, bool> filter;
-            if (id != 0) filter = u => u.userId == id;
-            else if (!string.IsNullOrEmpty(guid)) filter = u => u.guid == guid;
-            else throw new ArgumentException("Wrong credentials");
-            lock (_users)
+            var user = new ActiveUser(icon, name);
+            if (id != 0) _registered_users.GetOrAdd(id, user).AddConnection(connectionId);
+            else if (guid != null) _guest_users.GetOrAdd(guid, user).AddConnection(connectionId);
+            else throw new ArgumentException("Either id or guid must be provided.");
+        }
+        public byte RemoveUser(ActiveUser user)
+        {
+            var key = _registered_users.FirstOrDefault(p => p.Value == user).Key;
+            if (key != default)
+                _registered_users.Remove(key, out _);
+            else
             {
-                var user = _users.FirstOrDefault(filter);
-                if (user != null)
-                    user.AddConnection(connectionId);
-                else _users.Add(new ActiveUser(id, icon, name, guid, connectionId));
+                var guid = _guest_users.FirstOrDefault(p => p.Value == user).Key;
+                if (guid != default)
+                    _guest_users.Remove(guid, out _);
             }
+            return Online;
         }
-        public int RemoveUser(ActiveUser user)
-        {
-            lock (_users)
-            {
-                _users.Remove(user);
-                return _users.Count();
-            }
-        }
-        public ActiveUser UserByConnectionId(string connectionId)
-        {
-            lock (_users)
-                return _users.First(u => u.ContainsConnection(connectionId));
-        }
-        public IEnumerable<string> ConnectionsByUser(long userId)
-        {
-            lock (_users)
-                return _users.FirstOrDefault(u => u.userId == userId)?.connectionIds;
-        }
+        public ActiveUser UserByConnectionId(string connectionId) =>
+            _registered_users.Values.Concat(_guest_users.Values).First(u => u.ContainsConnection(connectionId));
         public int GetOpenConnections(long id, string guid)
         {
-            Func<ActiveUser, bool> filter;
-            if (id > 0) filter = u => u.userId == id;
-            else if (guid != null) filter = u => u.guid == guid;
-            else throw new ArgumentException("Either id or guid must be provided");
-            lock (_users) return _users.First(filter).connectionIds.Count();
+            if (id != 0) return _registered_users[id].connectionIds.Count();
+            else if (guid != null) return _guest_users[guid].connectionIds.Count();
+            else throw new ArgumentException("Either id or guid must be provided.");
         }
-        public IEnumerable<ActiveUser> Users(long id = 0, string guid = null)
+        public string[] GetConnections(long userId = 0, string guid = null, string connectionId = null, long[] ids = null)
         {
-            Func<ActiveUser, bool> filter;
-            if (id != 0) filter = u => u.userId != id;
-            else if (!string.IsNullOrEmpty(guid)) filter = u => u.guid != guid;
-            else return _users;
-            lock (_users) return _users.Where(filter);
+            if (userId != 0) return _registered_users.Where(p => p.Key != userId)
+               .SelectMany(p => p.Value.connectionIds).Concat(_guest_users.Values.SelectMany(u => u.connectionIds)).ToArray();
+            else if (guid != null) return _registered_users.Values.SelectMany(u => u.connectionIds).Concat(_guest_users
+                .Where(p => p.Key != guid).SelectMany(p => p.Value.connectionIds)).ToArray();
+            else if (connectionId != null)
+            {
+                if (ids != null)
+                    return _registered_users.Where(p => ids.Contains(p.Key))
+                        .SelectMany(p => p.Value.connectionIds).Where(id => id != connectionId).ToArray();
+                else
+                    return _registered_users.Values.Concat(_guest_users.Values)
+                        .SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
+            }
+            else return _registered_users.Values.Concat(_guest_users.Values).SelectMany(u => u.connectionIds).ToArray();
+        }
+        public IEnumerable<string> GetUserConnectionsById(long userId) =>
+            _registered_users.GetValueOrDefault(userId)?.connectionIds;
+        public IEnumerable<RoomsUser> Users(long id = 0, string guid = null)
+        {
+            if (id != 0) return _registered_users.Where(p => p.Key != id).Select(p => new RoomsUser
+            {
+                Id = p.Key,
+                Name = p.Value.name,
+                Guid = null,
+                Icon = p.Value.icon
+            }).Concat(_guest_users.Select(p => new RoomsUser
+            {
+                Id = 0,
+                Name = p.Value.name,
+                Guid = p.Key,
+                Icon = p.Value.icon
+            }));
+            else if (guid != null) return _registered_users.Select(p => new RoomsUser
+            {
+                Id = p.Key,
+                Name = p.Value.name,
+                Guid = null,
+                Icon = p.Value.icon
+            }).Concat(_guest_users.Where(p => p.Key != guid).Select(p => new RoomsUser
+            {
+                Id = 0,
+                Name = p.Value.name,
+                Guid = p.Key,
+                Icon = p.Value.icon
+            }));
+            else throw new ArgumentException("Either id or guid must be provided.");
         }
         public ActiveUser User(long id, string guid)
         {
-            Func<ActiveUser, bool> filter;
-            if (id != 0) filter = u => u.userId == id;
-            else if (!string.IsNullOrEmpty(guid)) filter = u => u.guid == guid;
+            if (id != 0) return _registered_users.GetValueOrDefault(id);
+            else if (guid != null) return _guest_users.GetValueOrDefault(guid);
             else throw new ArgumentException("Either id or guid must be provided.");
-            lock (_users) return _users.FirstOrDefault(filter);
         }
-        public IEnumerable<InMemoryMessage> GetMessages(bool reverse = false)
+        public int MsgCount
+        {
+            get
+            {
+                lock (_messages)
+                    return _messages.Count();
+            }
+        }
+        public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds)
+        {
+            var time = DateTime.UtcNow.Ticks;
+            ActiveUser user = UserByConnectionId(connectionId);
+            var msg = new InMemoryMessage(roomId, time, user.name, user.icon, accessIds, message);
+            lock (_messages) _messages.Add(time, msg);
+            return msg;
+        }
+        public IEnumerable<RoomsMsg> GetMessages(long id, string guid)
         {
             lock (_messages)
-                if (reverse)
-                    return _messages.Values.Reverse();
-                else return _messages.Values;
+            {
+                IEnumerable<InMemoryMessage> msgs;
+                if (id != 0) msgs = _messages.Values.Reverse().Where(m => m.accessIds == null || m.accessIds.Contains(id));
+                else if (guid != null) msgs = _messages.Values.Reverse().Where(m => m.accessIds == null);
+                else throw new ArgumentException("Either id or guid must be provided.");
+                return msgs.Select(m => new RoomsMsg
+                {
+                    Icon = m.senderIcon,
+                    Secret = m.accessIds != null,
+                    Sender = m.senderName,
+                    Text = m.text,
+                    Time = m.timeStamp
+                });
+            }
         }
         public List<Message> DumpMessages()
         {
@@ -95,58 +151,17 @@ namespace Rooms.Models
                 return result;
             }
         }
-        public int MsgCount
-        {
-            get
-            {
-                lock (_messages)
-                    return _messages.Count();
-            }
-        }
-        public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds)
-        {
-            var time = DateTime.UtcNow.Ticks;
-            ActiveUser user;
-            lock (_users) user = _users.First(u => u.connectionIds.Contains(connectionId));
-            var msg = new InMemoryMessage(roomId, time, user.name, user.icon, accessIds, message);
-            lock (_messages) _messages.Add(time, msg);
-            return msg;
-        }
-        public string[] GetConnections(long userId = 0, string guid = null, string connectionId = null, long[] ids = null)
-        {
-            lock (_users)
-            {
-                if (userId != 0)
-                    return _users.Where(u => u.userId != userId).SelectMany(u => u.connectionIds).ToArray();
-                else if (guid != null)
-                    return _users.Where(u => u.guid != guid).SelectMany(u => u.connectionIds).ToArray();
-                else if (connectionId != null)
-                {
-                    if (ids != null)
-                        return _users.Where(u => ids.Contains(u.userId)).SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
-                    else
-                        return _users.SelectMany(u => u.connectionIds).Where(id => id != connectionId).ToArray();
-                }
-                else
-                    return _users.SelectMany(u => u.connectionIds).ToArray();
-            }
-        }
     }
     public class ActiveUser
     {
         public List<string> connectionIds;
-        public long userId;
         public string icon;
         public string name;
-        public string guid;
-        public ActiveUser(long userId, string icon, string name, string guid, string connectionId)
+        public ActiveUser(string icon, string name)
         {
-            this.userId = userId;
             this.icon = icon;
             this.name = name;
-            this.guid = guid;
             this.connectionIds = new List<string>();
-            connectionIds.Add(connectionId);
         }
         public void AddConnection(string connectionId)
         {

@@ -54,9 +54,9 @@ namespace Rooms.Controllers
                     if (page > total_pages) page = total_pages;
                     int activeCount = 0;
                     IQueryable<Room> activeRooms = null;
-                    if (_state.ActiveRoomsCount > 0)
+                    if (_state.RoomsCount > 0)
                     {
-                        var activeIds = _state.ActiveRoomsKeys;
+                        var activeIds = _state.RoomsKeys;
                         activeRooms = rooms.Where(r => activeIds.Contains(r.RoomId));
                         activeCount = activeRooms.Count();
                         if (activeCount > 0)

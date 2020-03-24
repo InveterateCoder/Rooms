@@ -117,14 +117,7 @@ namespace Rooms.Hubs
                         if (id.UserId > 0) filter = m => m.accessIds == null || m.accessIds.Contains(id.UserId);
                         else if (id.Guest != null) filter = m => m.accessIds == null;
                         else throw new HubException("Couldn't read neither id nor guid.");
-                        messages.AddRange(active.GetMessages(true).Where(filter).Select(m => new RoomsMsg
-                        {
-                            Icon = m.senderIcon,
-                            Sender = m.senderName,
-                            Time = m.timeStamp,
-                            Text = m.text,
-                            Secret = m.accessIds != null
-                        }));
+                        messages.AddRange(active.GetMessages(id.UserId, id.Guest));
                     }
                     var remnant = msgsCount - active.MsgCount;
                     if (remnant > 0 && room.Messages.Count() > 0)
@@ -142,13 +135,7 @@ namespace Rooms.Hubs
                                 Secret = m.AccessIdsJson != null
                             }));
                     }
-                    info.Users = active.Users(id.UserId, id.Guest).Select(u => new RoomsUser
-                    {
-                        Id = u.userId,
-                        Name = u.name,
-                        Guid = u.guid,
-                        Icon = u.icon
-                    });
+                    info.Users = active.Users(id.UserId, id.Guest);
                     info.Messages = messages;
                     if (active.GetOpenConnections(id.UserId, id.Guest) <= 1)
                         await Clients.Clients(active.GetConnections(id.UserId, id.Guest))
