@@ -169,7 +169,9 @@
     -webkit-user-drag: none;
 }
 #msgpanel > div {
-    border: 1px dashed #cecece;
+    /*border: 1px dashed #cecece;*/
+    box-shadow: 0 0 5px #343a40;
+    border-radius: 35px 0 35px 0;
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;

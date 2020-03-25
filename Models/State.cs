@@ -82,7 +82,7 @@ namespace Rooms.Models
                 removed = false
             };
             var roomId = _activeUsers.GetValueOrDefault(connectionId);
-            if (roomId == default) return data;
+            if (roomId == 0) return data;
             data.room = _activeRooms[roomId];
             var user = data.room.UserByConnectionId(connectionId);
             if (user.RemoveConnection(connectionId) == 0)

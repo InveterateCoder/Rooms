@@ -23,12 +23,12 @@ namespace Rooms.Models
         public byte RemoveUser(ActiveUser user)
         {
             var key = _registered_users.FirstOrDefault(p => p.Value == user).Key;
-            if (key != default)
+            if (key != 0)
                 _registered_users.Remove(key, out _);
             else
             {
                 var guid = _guest_users.FirstOrDefault(p => p.Value == user).Key;
-                if (guid != default)
+                if (guid != null)
                     _guest_users.Remove(guid, out _);
             }
             return Online;

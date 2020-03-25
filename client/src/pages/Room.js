@@ -114,6 +114,7 @@ export class Room extends Component {
         this.scrDownBtnRef = React.createRef();
         this.inputRef = React.createRef();
         this.toastTimer = null;
+        this.toastsSpaceBottom = 150;
         this.soundMsg = new Audio(window.location.origin + "/msg.ogg");
         this.soundNotif = new Audio(window.location.origin + "/notif.ogg");
         this.inputHeight = 41;
@@ -238,17 +239,7 @@ export class Room extends Component {
                 <Toast.Body>{msg}</Toast.Body>
             </Toast>);
         clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => {
-            this.toastsRef.current.scrollTo(0, 0);
-            let heightBoundry = document.scrollingElement.clientHeight - 300
-            if (!this.toastsMaxSet && this.toastsRef.current.scrollHeight > heightBoundry) {
-                this.toastsMaxSet = true;
-                this.toastsRef.current.style.maxHeight = heightBoundry + 147 + "px";
-            } else if (this.toastsMaxSet && this.toastsRef.current.scrollHeight <= heightBoundry) {
-                this.toastsMaxSet = false;
-                this.toastsRef.current.style.bottom = "";
-            }
-        }, 300);
+        this.toastTimer = setTimeout(() => this.toastsRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" }), 300);
         return toasts;
     }
     formTime = (ticks, today) => {
@@ -434,8 +425,8 @@ export class Room extends Component {
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollTop + diff);
         let style = getComputedStyle(this.scrDownBtnRef.current);
         this.scrDownBtnRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
-        style = getComputedStyle(this.toastsRef.current);
-        this.toastsRef.current.style.bottom = parseInt(style.bottom) + diff + "px";
+        this.toastsSpaceBottom += diff;
+        this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px";
     }
     inputBlur = ev => {
         if (ev.relatedTarget && ev.relatedTarget.id === "sendBtn")
@@ -444,6 +435,7 @@ export class Room extends Component {
     }
     langChanged = lang => this.setState({ lang });
     windowResized = () => {
+        this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px";
         if (this.state.scrolledDown)
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         this.inputChanged();
@@ -501,6 +493,7 @@ export class Room extends Component {
     async componentDidMount() {
         window.addEventListener("scroll", this.windowScrolled);
         window.addEventListener("resize", this.windowResized);
+        setTimeout(() => this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px", 300);
         try {
             await this.connection.start();
             let data = await this.connection.invoke("Enter", this.props.match.params["room"],
