@@ -148,8 +148,8 @@ namespace Rooms.Models
                     });
                 }
                 _messages.Clear();
-                return result;
             }
+            return result;
         }
     }
     public class ActiveUser

@@ -37,13 +37,15 @@ namespace Rooms.Models
             _activeRooms[_activeUsers[connectionId]].GetMessages(userId, guid).Where(m => m.Time < time);
         public string[] RemoveRoom(long roomId)
         {
-            // TODO Needs Lock with ConnectUser and DisconnectUser
             ActiveRoom room = null;
             if (_activeRooms.Remove(roomId, out room))
             {
-                var users = _activeUsers.Where(u => u.Value == roomId);
-                foreach (var user in users)
-                    _activeUsers.Remove(user.Key, out _);
+                lock (room)
+                {
+                    var users = _activeUsers.Where(u => u.Value == roomId);
+                    foreach (var user in users)
+                        _activeUsers.Remove(user.Key, out _);
+                }
             }
             return room?.GetConnections();
         }
@@ -68,10 +70,13 @@ namespace Rooms.Models
         public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId, byte limit)
         {
             ActiveRoom room = _activeRooms.GetOrAdd(roomId, new ActiveRoom(roomId));
-            var user = room.User(userId, guid);
-            if (user == null && room.Online >= limit) return null;
-            room.AddUser(connectionId, name, icon, userId, guid);
-            _activeUsers[connectionId] = roomId;
+            lock (room)
+            {
+                var user = room.User(userId, guid);
+                if (user == null && room.Online >= limit) return null;
+                room.AddUser(connectionId, name, icon, userId, guid);
+                _activeUsers[connectionId] = roomId;
+            }
             return room;
         }
         public UsersRoom DisconnectUser(string connectionId)
@@ -84,14 +89,17 @@ namespace Rooms.Models
             var roomId = _activeUsers.GetValueOrDefault(connectionId);
             if (roomId == 0) return data;
             data.room = _activeRooms[roomId];
-            var user = data.room.UserByConnectionId(connectionId);
-            if (user.RemoveConnection(connectionId) == 0)
-                if (data.room.RemoveUser(user) == 0)
-                {
-                    _activeRooms.Remove(roomId, out _);
-                    data.removed = true;
-                }
-            _activeUsers.Remove(connectionId, out _);
+            lock (data.room)
+            {
+                var user = data.room.UserByConnectionId(connectionId);
+                if (user.RemoveConnection(connectionId) == 0)
+                    if (data.room.RemoveUser(user) == 0)
+                    {
+                        _activeRooms.Remove(roomId, out _);
+                        data.removed = true;
+                    }
+                _activeUsers.Remove(connectionId, out _);
+            }
             return data;
         }
     }
