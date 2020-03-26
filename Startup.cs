@@ -24,12 +24,12 @@ namespace Rooms
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            services.AddSpaStaticFiles(config => config.RootPath = "client/build");
-            services.AddSignalR();
             var settingsSection = Configuration.GetSection("Settings");
             services.Configure<Settings>(settingsSection);
             var settings = settingsSection.Get<Settings>();
+            services.AddControllers();
+            services.AddSpaStaticFiles(config => config.RootPath = "client/build");
+            services.AddSignalR().AddAzureSignalR(settings.SignalREndpoint);
             services.AddDbContext<RoomsDBContext>(opts => opts.UseMySql(settings.DBString));
             services.AddCors();
             var key = Encoding.ASCII.GetBytes(settings.Secret);
@@ -78,9 +78,9 @@ namespace Rooms
                 .AllowAnyHeader());
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(endpoints => {
-                endpoints.MapControllers();
-                endpoints.MapHub<RoomsHub>("/hubs/rooms");
+            app.UseEndpoints(routes => {
+                routes.MapControllers();
+                routes.MapHub<RoomsHub>("/hubs/rooms");
             });
             app.UseSpa(spa =>
             {

@@ -58,7 +58,8 @@ namespace Rooms.Hubs
                     if (accessIds != null && id.UserId > 0)
                         ids = accessIds.Append(id.UserId);
                     var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
-                    await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
+                    if (data.connectionIds.Length > 0)
+                        await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
                     if (data.room.MsgCount > 50) await SaveRoom(data.room);
                     return data.message.Time;
                 });
@@ -86,7 +87,7 @@ namespace Rooms.Hubs
                 if (id.UserId != 0)
                 {
                     var connectionIds = _state.UserConnections(id.UserId);
-                    if (connectionIds.Count() > 0)
+                    if (connectionIds.Length > 0)
                         await Clients.Clients(connectionIds).SendAsync("langChanged", lang);
                 }
             });
@@ -138,8 +139,12 @@ namespace Rooms.Hubs
                     info.Users = active.Users(id.UserId, id.Guest);
                     info.Messages = messages;
                     if (active.GetOpenConnections(id.UserId, id.Guest) <= 1)
-                        await Clients.Clients(active.GetConnections(id.UserId, id.Guest))
-                            .SendAsync("addUser", new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = icon, Name = id.Name });
+                    {
+                        var connectionIds = active.GetConnections(id.UserId, id.Guest);
+                        if (connectionIds.Length > 0)
+                            await Clients.Clients(connectionIds)
+                                .SendAsync("addUser", new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = icon, Name = id.Name });
+                    }
                     return new ReturnSignal<RoomInfo>
                     {
                         Code = "ok",
@@ -163,8 +168,12 @@ namespace Rooms.Hubs
                     if (!data.removed)
                     {
                         if (data.room.User(id.UserId, id.Guest) == null)
-                            await Clients.Clients(data.room.GetConnections()).SendAsync("removeUser",
-                                new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
+                        {
+                            var connectionIds = data.room.GetConnections();
+                            if (connectionIds.Length > 0)
+                                await Clients.Clients(connectionIds).SendAsync("removeUser",
+                                    new RoomsUser { Id = id.UserId, Guid = id.Guest, Icon = null, Name = id.Name });
+                        }
                     }
                     else await SaveRoom(data.room);
                 }
