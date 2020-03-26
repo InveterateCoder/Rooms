@@ -8,8 +8,8 @@ using Rooms.Models;
 namespace Rooms.Migrations
 {
     [DbContext(typeof(RoomsDBContext))]
-    [Migration("20200220162906_Migration_1")]
-    partial class Migration_1
+    [Migration("20200326143803_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,32 +24,30 @@ namespace Rooms.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("Encrypted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("From")
-                        .IsRequired()
-                        .HasColumnType("varchar(34) CHARACTER SET utf8mb4")
-                        .HasMaxLength(34);
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasColumnType("varchar(5) CHARACTER SET utf8mb4")
-                        .HasMaxLength(5);
+                    b.Property<string>("AccessIdsJson")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasMaxLength(5000);
 
                     b.Property<long>("RoomId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("SenderIcon")
+                        .IsRequired()
+                        .HasColumnType("varchar(5) CHARACTER SET utf8mb4")
+                        .HasMaxLength(5);
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasColumnType("varchar(34) CHARACTER SET utf8mb4")
+                        .HasMaxLength(34);
+
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
-                        .HasMaxLength(10000);
+                        .HasColumnType("varchar(2000) CHARACTER SET utf8mb4")
+                        .HasMaxLength(2000);
 
                     b.Property<long>("TimeStamp")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("ToNamesJson")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("MessageId");
 

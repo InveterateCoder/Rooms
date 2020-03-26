@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Rooms.Migrations
 {
-    public partial class Migration_1 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -70,13 +70,12 @@ namespace Rooms.Migrations
                 {
                     MessageId = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    TimeStamp = table.Column<long>(nullable: false),
                     RoomId = table.Column<long>(nullable: false),
-                    From = table.Column<string>(maxLength: 34, nullable: false),
-                    Icon = table.Column<string>(maxLength: 5, nullable: false),
-                    ToNamesJson = table.Column<string>(nullable: true),
-                    Text = table.Column<string>(maxLength: 10000, nullable: false),
-                    Encrypted = table.Column<bool>(nullable: false)
+                    TimeStamp = table.Column<long>(nullable: false),
+                    AccessIdsJson = table.Column<string>(maxLength: 5000, nullable: true),
+                    SenderName = table.Column<string>(maxLength: 34, nullable: false),
+                    SenderIcon = table.Column<string>(maxLength: 5, nullable: false),
+                    Text = table.Column<string>(maxLength: 2000, nullable: false)
                 },
                 constraints: table =>
                 {
