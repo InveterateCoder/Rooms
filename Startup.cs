@@ -64,15 +64,12 @@ namespace Rooms
             services.AddSingleton<State>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseRouting();
+            app.UseHsts();
+            app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseRouting();
             app.UseCors(opts => opts.AllowAnyOrigin()
                 .AllowAnyMethod()
                 .AllowAnyHeader());
@@ -85,8 +82,6 @@ namespace Rooms
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "client";
-                if (env.IsDevelopment())
-                    spa.UseReactDevelopmentServer(npmScript: "start");
             });
         }
     }
