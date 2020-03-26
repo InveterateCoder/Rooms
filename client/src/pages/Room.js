@@ -493,7 +493,8 @@ export class Room extends Component {
     async componentDidMount() {
         window.addEventListener("scroll", this.windowScrolled);
         window.addEventListener("resize", this.windowResized);
-        setTimeout(() => this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px", 300);
+        this.toaster = setTimeout(() => this.toastsRef.current.style.maxHeight =
+            document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px", 300);
         try {
             await this.connection.start();
             let data = await this.connection.invoke("Enter", this.props.match.params["room"],
@@ -506,6 +507,7 @@ export class Room extends Component {
     }
     componentWillUnmount() {
         if (!this.unmounted) {
+            clearTimeout(this.toaster);
             this.unmounted = true;
             window.removeEventListener("scroll", this.windowScrolled);
             window.removeEventListener("resize", this.windowResized);

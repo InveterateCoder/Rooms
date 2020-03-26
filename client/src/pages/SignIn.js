@@ -30,11 +30,11 @@ export function SignIn(props) {
     const nav = <Nav justify variant="tabs" defaultActiveKey={props.match.params.as}>
         <Nav.Item>
             <Nav.Link style={getStyle("guest")} as={Link}
-                to="/signin/guest" eventKey="guest" replace>{text.Guest}</Nav.Link>
+                to={`/signin/guest${props.location.search}`} eventKey="guest" replace>{text.Guest}</Nav.Link>
         </Nav.Item>
         <Nav.Item>
             <Nav.Link style={getStyle("user")} as={Link}
-                to="/signin/user/sign" eventKey="user" replace>{text.User}</Nav.Link>
+                to={`/signin/user/sign${props.location.search}`} eventKey="user" replace>{text.User}</Nav.Link>
         </Nav.Item>
     </Nav>
     const jumbo = <div className="jumbotron">

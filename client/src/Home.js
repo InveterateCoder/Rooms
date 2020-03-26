@@ -13,15 +13,6 @@ const TopMenuWithRouter = withRouter(TopMenu);
 
 export function Home(props) {
     const context = useContext(Context);
-    let routes = [];
-    if(context.jwt){
-        routes.push(<Route key="lobby" path="/lobby/:page(\d+)" exact={true} component={Lobby} />);
-        if(context.registered){
-            routes.push(<Route key="account" path="/account" exact={true} component={Account} />);
-            routes.push(<Route key="myroom" path="/myroom" exact={true} component={MyRoom} />);
-        }
-        routes.push(<Redirect key="tolobby" to="/lobby/1" />);
-    } else routes.push(<Redirect key="tosign" to="/signin/guest" />);
     return <>
         {
             context.jwt && <TopMenuWithRouter />
@@ -32,7 +23,21 @@ export function Home(props) {
             }
             <Route path="/fatal" component={Fatal} />
             <Route path="/econfirm/:number(\d{9})" exact={true} strict={true} component={EConfirm} />
-            {routes}
+            {
+                context.jwt
+                    ? <>
+                        <Route key="lobby" path="/lobby/:page(\d+)" exact={true} component={Lobby} />
+                        {
+                            context.registered && <>
+                                <Route key="account" path="/account" exact={true} component={Account} />
+                                <Route key="myroom" path="/myroom" exact={true} component={MyRoom} />
+                            </>
+                        }
+                        <Redirect key="tolobby" to="/lobby/1" />
+                    </>
+                    : <Redirect key="tosign" to={`/signin/guest${props.location.pathname.startsWith("/signin") ? ""
+                        : `${props.location.pathname.startsWith("/room/") ? "?room=" + props.location.pathname.substring(6) : ""}`}`} />
+            }
         </Switch>
     </>
 }

@@ -131,14 +131,17 @@ export function AsUserForm(props) {
                     Post(urls.signInAsUser,
                         { email: state.email, password: state.password }, context.lang)
                         .then(data => {
-                            if (data) context.signInAsUser(data);
+                            let addr = null;
+                            if (props.location.search.startsWith("?room="))
+                                addr = "/room/" + props.location.search.substring(6);
+                            if (data) context.signInAsUser(data, addr);
                             else setLoading(false);
                         }).catch(() => props.history.push("/fatal"));
                     break;
                 case "recover":
                     Post(urls.recover, state.email, context.lang)
                         .then(data => {
-                            if(data)
+                            if (data)
                                 setRstPswd(true);
                             setLoading(false);
                         }).catch(() => props.history.push("/fatal"));
@@ -188,7 +191,7 @@ export function AsUserForm(props) {
                                 index === 0
                                     ? <button key={to} onClick={submit} className="btn btn-block btn-primary">
                                         <FontAwesomeIcon icon={icon} /> {name}</button>
-                                    : <Link key={to} to={to} className="btn btn-block btn-outline-secondary">
+                                    : <Link key={to} to={to + props.location.search} className="btn btn-block btn-outline-secondary">
                                         <FontAwesomeIcon icon={icon} /> {name}</Link>
                             )
                     }

@@ -48,11 +48,11 @@ export default class App extends Component {
             return "ru";
         else return "en";
     }
-    signInAsGuest = (jwt, name) => {
+    signInAsGuest = (jwt, name, addr) => {
         localStorage.setItem("jwt", jwt);
-        this.setState({ jwt, name }, () => this.props.history.replace("/lobby/1"));
+        this.setState({ jwt, name }, () => this.props.history.replace(addr || "/lobby/1"));
     }
-    signInAsUser = data => {
+    signInAsUser = (data, addr) => {
         localStorage.setItem("jwt", data.jwt);
         localStorage.setItem("registered", true);
         let codes = this.getCountries(this.state.filters);
@@ -68,7 +68,7 @@ export default class App extends Component {
             },
             lang: localStorage.getItem("lang") || this.bestLang(),
             c_codes: codes
-        }, () => this.props.history.replace("/lobby/1"));
+        }, () => this.props.history.replace(addr || "/lobby/1"));
     }
     userRegistered = data => {
         localStorage.setItem("jwt", data.jwt);
@@ -183,7 +183,7 @@ export default class App extends Component {
                                     description: data.room.description ? data.room.description : ""
                                 }
                             });
-                        else this.setState({name: data});
+                        else this.setState({ name: data });
                     }
                     else this.signOut();
                 }).catch(() => {

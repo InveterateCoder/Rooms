@@ -5,7 +5,7 @@ import { Alert } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignInAlt } from "@fortawesome/free-solid-svg-icons";
 import LocalizedStrings from "react-localization";
-import {Get} from "../../../utils/requests";
+import { Get } from "../../../utils/requests";
 import urls from "../../../utils/Urls";
 import { Loading } from "../../../Loading";
 
@@ -43,7 +43,10 @@ export function AsGuestForm(props) {
         else {
             setLoading(true);
             Get(urls.signInAsGuest + input.current.value, context.lang).then(jwt => {
-                if(jwt) context.signInAsGuest(jwt, input.current.value);
+                let addr = null;
+                if (props.location.search.startsWith("?room="))
+                    addr = "/room/" + props.location.search.substring(6);
+                if (jwt) context.signInAsGuest(jwt, input.current.value, addr);
                 else setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }

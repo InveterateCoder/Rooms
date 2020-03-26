@@ -5,10 +5,12 @@ import Flag from "react-flags";
 import LocalizedStrings from "react-localization";
 const text = new LocalizedStrings({
     en: {
+        online: "Online",
         sorry: "SORRY",
         norecord: "No records yet"
     },
     ru: {
+        online: "В сети",
         sorry: "ЖАЛЬ",
         norecord: "Пока нет записей"
     }
@@ -19,7 +21,7 @@ export function Presenter(props) {
     const getContent = item => {
         return <><h4 className="card-title">{item.locked && <img src="/img/lock.png" width="32" alt="lock imag" />}
             <span><Flag name={item.flag} format="png" pngSize={32} alt={"flat" + item.flag} basePath="/img" /></span><span>{item.name}</span></h4>
-            <strong className="text-dark">Online: <span className="badge badge-secondary">{item.online}</span></strong>
+            <strong className="text-dark">{text.online}: <span className="badge badge-secondary">{item.online}</span></strong>
             <p className="card-text text-dark">{item.description}</p></>
     }
     const newWindow = addr => {
