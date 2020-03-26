@@ -54,7 +54,7 @@ namespace Rooms
                     {
                         var accessToken = context.Request.Query["access_token"];
                         var path = context.HttpContext.Request.Path;
-                        if(!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/rooms"))
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/rooms"))
                             context.Token = accessToken;
                         return Task.CompletedTask;
                     }
@@ -64,7 +64,7 @@ namespace Rooms
             services.AddSingleton<State>();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             app.UseHsts();
             app.UseHttpsRedirection();
@@ -75,13 +75,16 @@ namespace Rooms
                 .AllowAnyHeader());
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseEndpoints(routes => {
+            app.UseEndpoints(routes =>
+            {
                 routes.MapControllers();
                 routes.MapHub<RoomsHub>("/hubs/rooms");
             });
             app.UseSpa(spa =>
             {
                 spa.Options.SourcePath = "client";
+                if (env.IsDevelopment())
+                    spa.UseReactDevelopmentServer("start");
             });
         }
     }

@@ -37,14 +37,15 @@ export default class App extends Component {
         }
     }
     bestLang = () => {
+        debugger;
         let navlang = navigator.language.toLowerCase();
-        if (navlang === "ru" ||
-            navlang === "kk" || navlang === "ky" ||
-            navlang === "be" || navlang === "uk" ||
-            navlang === "uz" || navlang === "mo" ||
-            navlang === "tk" || navlang === "tg" ||
-            navlang === "ab" || navlang === "oc" ||
-            navlang === "hy" || navlang === "az")
+        if (navlang.startsWith("ru") ||
+            navlang.startsWith("kk") || navlang.startsWith("ky") ||
+            navlang.startsWith("be") || navlang.startsWith("uk") ||
+            navlang.startsWith("uz") || navlang.startsWith("mo") ||
+            navlang.startsWith("tk") || navlang.startsWith("tg") ||
+            navlang.startsWith("ab") || navlang.startsWith("oc") ||
+            navlang.startsWith("hy") || navlang.startsWith("az"))
             return "ru";
         else return "en";
     }
