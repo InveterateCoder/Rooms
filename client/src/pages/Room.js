@@ -314,8 +314,8 @@ export class Room extends Component {
         this.inputChanged();
         let ids = this.state.selusers.length > 0 && !this.state.public ? this.state.selusers.map(u => u.id) : null;
         let msg = {
-            sender: this.context.name,
-            icon: this.context.icon,
+            sender: this.state.name,
+            icon: this.state.icon,
             secret: ids !== null,
             text: val
         }
