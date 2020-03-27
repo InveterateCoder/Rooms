@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -57,7 +58,7 @@ namespace Rooms.Hubs
                     IEnumerable<long> ids = null;
                     if (accessIds != null && id.UserId > 0)
                         ids = accessIds.Append(id.UserId);
-                    var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
+                    var data = _state.SendMessage(Context.ConnectionId, WebUtility.HtmlEncode(message), ids?.ToArray());
                     if (data.connectionIds.Length > 0)
                         await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
                     if (data.room.MsgCount > 50) await SaveRoom(data.room);

@@ -317,7 +317,7 @@ export class Room extends Component {
             sender: this.state.name,
             icon: this.state.icon,
             secret: ids !== null,
-            text: val
+            text: String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
         }
         let element = this.formMessage(msg, null);
         this.appendMessage(element);
