@@ -39,7 +39,7 @@ namespace Rooms
                 opts.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(opts =>
             {
-                opts.RequireHttpsMetadata = false;
+                opts.RequireHttpsMetadata = true;
                 opts.SaveToken = true;
                 opts.TokenValidationParameters = new TokenValidationParameters
                 {
