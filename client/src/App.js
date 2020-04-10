@@ -141,7 +141,6 @@ export default class App extends Component {
         this.setState({ openin: value });
     }
     setTheme = theme => {
-        if (theme !== "light" && theme !== "dark") return;
         localStorage.setItem("theme", theme);
         this.setState({ theme }, () => document.body.className = `bg-${theme}`);
     }

@@ -85,6 +85,53 @@ namespace Rooms.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
+        [HttpGet("set/icon/{icon}")]
+        public async Task<IActionResult> ChangeIcon(string icon)
+        {
+            if (icon != "user" && icon != "man" && icon != "woman")
+                return BadRequest();
+            else
+            {
+                await Task.Run(async () =>
+                {
+                    Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                    var connectionIds = _state.ChangeUser(id.UserId, icon: icon);
+                    if (connectionIds.Length > 0)
+                        await _hub.Clients.Clients(connectionIds).SendAsync("iconChanged", new { id = id.UserId, icon = icon });
+                });
+            }
+            return Ok("ok");
+        }
+        [HttpGet("set/lang/{lang}")]
+        public async Task<IActionResult> ChangeLanguage(string lang)
+        {
+            await Task.Run(async () =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                if (id.UserId != 0)
+                {
+                    var connectionIds = _state.UserConnections(id.UserId);
+                    if (connectionIds.Length > 0)
+                        await _hub.Clients.Clients(connectionIds).SendAsync("langChanged", lang);
+                }
+            });
+            return Ok("ok");
+        }
+        [HttpGet("set/theme/{theme}")]
+        public async Task<IActionResult> ChangeTheme(string theme)
+        {
+            await Task.Run(async () =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                if (id.UserId != 0)
+                {
+                    var connectionIds = _state.UserConnections(id.UserId);
+                    if (connectionIds.Length > 0)
+                        await _hub.Clients.Clients(connectionIds).SendAsync("themeChanged", theme);
+                }
+            });
+            return Ok("ok");
+        }
         [HttpGet("info")]
         public async Task<IActionResult> Info()
         {

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
+import { Context } from "./data/Context";
 
 export function Preloader(props) {
-    return <div id="preloader">
+    const context = useContext(Context);
+    return <div id="preloader" className={context.theme === "dark" ? "dark" : ""}>
         <svg x="0" y="0" width="258" height="258">
             <g clipPath="url(#clip-path)">
                 <path className="tree" d="M207.03
@@ -221,8 +223,8 @@ export function Preloader(props) {
 2.06-2.7 2.06-4.5S237.49 75.85 237.11 73.67"/>
             </g>
             <clipPath id="clip-path">
-    
-    <path className="circle-mask" fill="#E73E0D" d="M232.009,72.205c-2.574,3.095-1.604,0.029-4.117,1.29
+
+                <path className="circle-mask" fill="#E73E0D" d="M232.009,72.205c-2.574,3.095-1.604,0.029-4.117,1.29
                     c-2.828,1.419-3.344,0.516-5.529-1.162c-1.18-0.904-1.416-5.936-3.312-3.263c-2.672,3.768-1.934-1.811-3.119-2.286
                     c-2.57-1.031-4.371,0.774-5.402,1.937c-1.027,1.162-4.629,0.645-6.172-2.066c-1.543-2.71,1.158-3.485,1.932-2.193
                     c0.77,1.292,3.6-0.129,2.186-2.066c-1.416-1.935,5.143-2.707,7.585-3.613c2.444-0.903,0-2.323-2.058-2.193
@@ -303,8 +305,8 @@ export function Preloader(props) {
                     c-0.645-1.937,1.283-2.194,3.857-0.388c2.572,1.807,1.414,3.355,2.828,4.002c1.416,0.645,3.217,2.709,5.914,0
                     c2.701-2.71,2.701-0.518,5.402-2.195c2.701-1.678,5.402,0,6.559-1.678c1.158-1.678,1.288-1.419,4.888,0s2.314-1.031,2.188-5.937
                     c-0.129-4.904,2.058-2.709,2.058-4.516s-1.672-0.515-2.057-2.708C236.896,70.784,234.58,69.108,232.009,72.205z"/>
-    
-    </clipPath>
+
+            </clipPath>
         </svg>
     </div>
 }

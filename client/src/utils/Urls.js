@@ -7,6 +7,9 @@ export default {
     accountChange: "/api/account/change",
     accountInfo: "/api/account/info",
     accountDelete: "/api/account/delete",
+    accountSetIcon: "/api/account/set/icon",
+    accountSetLang: "/api/account/set/lang",
+    accountSetTheme: "/api/account/set/theme",
     roomChange: "/api/room/change",
     roomDelete: "/api/room/delete",
     lobbySearch: "/api/lobby/search"

@@ -49,6 +49,10 @@ body {
     fill: #343a40;
   }
   
+  #preloader.dark .tree {
+    fill: #f8f9fa;
+  }
+
   #preloader .circle-mask {
     transform-origin: 50% 90%;
     animation: scale 3s infinite ease-out;

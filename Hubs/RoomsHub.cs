@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -58,40 +57,12 @@ namespace Rooms.Hubs
                     IEnumerable<long> ids = null;
                     if (accessIds != null && id.UserId > 0)
                         ids = accessIds.Append(id.UserId);
-                    var data = _state.SendMessage(Context.ConnectionId, WebUtility.HtmlEncode(message), ids?.ToArray());
+                    var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
                     if (data.connectionIds.Length > 0)
                         await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
                     if (data.room.MsgCount > 50) await SaveRoom(data.room);
                     return data.message.Time;
                 });
-        }
-        public async Task ChangeIcon(string icon)
-        {
-            if (icon != "user" && icon != "man" && icon != "woman")
-                Context.Abort();
-            else
-            {
-                await Task.Run(async () =>
-                {
-                    Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                    var connectionIds = _state.ChangeUser(id.UserId, icon: icon);
-                    if (connectionIds.Length > 0)
-                        await Clients.Clients(connectionIds).SendAsync("iconChanged", new { id = id.UserId, icon = icon });
-                });
-            }
-        }
-        public async Task ChangeLanguage(string lang)
-        {
-            await Task.Run(async () =>
-            {
-                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                if (id.UserId != 0)
-                {
-                    var connectionIds = _state.UserConnections(id.UserId);
-                    if (connectionIds.Length > 0)
-                        await Clients.Clients(connectionIds).SendAsync("langChanged", lang);
-                }
-            });
         }
         public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password, int msgsCount)
         {

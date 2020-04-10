@@ -98,7 +98,8 @@ export class Room extends Component {
             sound: false,
             scrolledDown: true,
             inputFocused: false,
-            fetching: false
+            fetching: false,
+            theme: context.theme
         }
         this.msgsCount = 50;
         this.oldestMsgTime = null;
@@ -114,6 +115,7 @@ export class Room extends Component {
         this.connection.on("iconChanged", this.iconChanged);
         this.connection.on("roomChanged", this.roomChanged);
         this.connection.on("langChanged", this.langChanged);
+        this.connection.on("themeChanged", this.themeChanged);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -136,6 +138,10 @@ export class Room extends Component {
             this.keyboardResizeTime = true;
             setTimeout(() => this.keyboardResizeTime = false, 300);
         });
+    }
+    themeChanged = theme => {
+        if (theme === "dark" || theme === "light")
+            this.setState({ theme }, () => document.body.className = `bg-${theme}`);
     }
     closemenu = () => this.setState({ menuopen: false });
     windowScrolled = () => {
@@ -261,15 +267,18 @@ export class Room extends Component {
         time += `${date.getHours()}:${date.getMinutes()}`;
         return time;
     }
-    formMessage = (msg, today) => {
+    htmlEncode = text =>
+        String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    formMessage = (msg, today, highlight = false) => {
+        let msgText = highlight ? this.highlight(msg.text) : this.htmlEncode(msg.text);
         let time = "";
         if (today) time = this.formTime(msg.time, today);
         let elem = document.createElement("div");
         elem.className = "media p-3 mb-3";
-        elem.innerHTML = `<img src="/img/${msg.icon}.${this.context.theme}.svg" alt="icon" class="mr-3" />
+        elem.innerHTML = `<img src="/img/${msg.icon}.${this.state.theme}.svg" alt="icon" class="mr-3" />
         <div class="media-body">
-        <div>${msg.secret ? sec(this.context.theme) : pub}<strong class="text-info">${msg.sender}</strong><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
-        <pre>${msg.text}</pre>
+        <div>${msg.secret ? sec(this.state.theme) : pub}<span class="text-info">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
+        <pre>${msgText}</pre>
         </div>`;
         return elem;
     }
@@ -305,6 +314,18 @@ export class Room extends Component {
         this.setState({ users: this.state.users.filter(u => u !== user), selusers: selusers, public: pub });
         this.notify(`"${usr.name}" ${text.left}`);
     }
+    highlight = text => {
+        text = this.htmlEncode(text);
+        let name = this.htmlEncode(this.state.name);
+        let regex = new RegExp(name, "g");
+        text = text.replace(regex, `<span class="text-info">${name}</span>`);
+        this.state.users.forEach(user => {
+            name = this.htmlEncode(user.name);
+            regex = new RegExp(name, "g");
+            text = text.replace(regex, `<span class="text-info">${name}</span>`);
+        });
+        return text;
+    }
     sendMsg = () => {
         let val = this.inputRef.current.value.trim();
         if (!val) return;
@@ -323,9 +344,9 @@ export class Room extends Component {
             sender: this.state.name,
             icon: this.state.icon,
             secret: ids !== null,
-            text: String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+            text: val
         }
-        let element = this.formMessage(msg, null);
+        let element = this.formMessage(msg, null, true);
         this.appendMessage(element);
         document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         this.connection.invoke("SendMessage", val, ids).then(resp => {
@@ -344,7 +365,7 @@ export class Room extends Component {
         }
     }
     recieveMessage = msg => {
-        this.appendMessage(this.formMessage(msg, new Date()));
+        this.appendMessage(this.formMessage(msg, new Date(), true));
         if (this.state.sound) this.soundMsg.play();
         if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
@@ -488,9 +509,9 @@ export class Room extends Component {
                         <button id="sendBtn" className={`btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>
-                <div ref={this.msgpanel} id="msgpanel" className={`${this.context.theme === "dark" ? "dark" : ""}`}></div>
+                <div ref={this.msgpanel} id="msgpanel" className={`${this.state.theme === "dark" ? "dark" : ""}`}></div>
             </div>
-            <Menu theme={this.context.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
+            <Menu theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
                 closemenu={this.closemenu} icon={this.state.icon} name={this.state.name} users={this.state.users}
                 selusers={this.state.selusers} userClicked={this.userClicked} public={this.state.public}
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />

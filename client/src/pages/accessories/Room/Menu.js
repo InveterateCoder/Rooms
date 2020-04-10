@@ -28,7 +28,7 @@ export function Menu(props) {
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
             <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
-            <img src={`/img/${props.icon + "." + props.theme}.svg`} draggable={false}
+            <img src={`/img/${props.icon}.dark.svg`} draggable={false}
                 className="mr-3 rounded-circle" alt="icon" />
             <span className={`navbar-brand${props.registered ? "" : " text-muted"}`}>{props.name}</span>
         </nav>

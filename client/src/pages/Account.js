@@ -10,7 +10,6 @@ import LocalizedStrings from "react-localization";
 import { Loading } from "../Loading";
 import { Post, Get } from "../utils/requests";
 import urls from "../utils/Urls";
-import * as signalR from "@aspnet/signalr";
 
 const text = new LocalizedStrings({
     en: {
@@ -58,7 +57,6 @@ const text = new LocalizedStrings({
         dark: "Тёмная"
     }
 });
-let connection = null;
 
 export function Account(props) {
     const context = useContext(Context);
@@ -66,16 +64,6 @@ export function Account(props) {
     const [name, setName] = useState(context.name);
     const [newpassword, setNewPassword] = useState("");
     const [nameError, setNameError] = useState("");
-    useEffect(() => {
-        connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
-            { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
-        connection.start();
-        return () => {
-            connection.stop();
-            connection = null;
-        }
-        //eslint-disable-next-line
-    }, []);
     const nameChanged = ev => {
         setName(ev.target.value);
         setNameError(validator.name(ev.target.value, context.lang));
@@ -86,11 +74,13 @@ export function Account(props) {
     }
     const selectLanguage = ev => {
         setNameError(validator.name(name, ev.target.value));
-        connection.invoke("ChangeLanguage", ev.target.value).catch(err => alert(err.message));
         context.setLanguage(ev.target.value);
+        Get(urls.accountSetLang + "/" + ev.target.value, context.lang, context.jwt);
     }
     const selectTheme = ev => {
+        if (ev.target.value !== "light" && ev.target.value !== "dark") return;
         context.setTheme(ev.target.value);
+        Get(urls.accountSetTheme + "/" + ev.target.value, context.lang, context.jwt);
     }
     const hasFormChanged = () => {
         if (newpassword !== "" || name !== context.name)
@@ -129,8 +119,8 @@ export function Account(props) {
             }).catch(() => props.history.push("/fatal"));
     }
     const changeIcon = icon => {
-        connection.invoke("ChangeIcon", icon).catch(err => alert(err.message));
-        context.changeIcon(icon)
+        context.changeIcon(icon);
+        Get(urls.accountSetIcon + "/" + icon, context.lang, context.jwt);
     }
     text.setLanguage(context.lang);
     return <div className={`container formpage${context.theme === "dark" ? " dark" : ""}`}>
