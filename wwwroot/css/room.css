@@ -171,6 +171,7 @@
 #msgpanel > div {
     box-shadow: 0 0 5px #343a40;
     border-radius: 35px 0 35px 0;
+    overflow: hidden;
 }
 #msgpanel.dark > div {
     box-shadow: 0 0 5px #f8f9fa;
@@ -178,7 +179,7 @@
 #msgpanel > div > div > pre {
     margin-left: 2px;
     white-space: pre-wrap;
-    word-break: break-all;
+    word-wrap: break-word;
     margin-bottom: 0;
     color: black !important;
 }
