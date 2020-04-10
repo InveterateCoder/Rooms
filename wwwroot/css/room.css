@@ -169,9 +169,11 @@
     -webkit-user-drag: none;
 }
 #msgpanel > div {
-    /*border: 1px dashed #cecece;*/
     box-shadow: 0 0 5px #343a40;
     border-radius: 35px 0 35px 0;
+}
+#msgpanel.dark > div {
+    box-shadow: 0 0 5px #f8f9fa;
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;
@@ -179,8 +181,11 @@
     margin-bottom: 0;
     color: black !important;
 }
+#msgpanel.dark > div > div > pre {
+    color: #f8f9fa !important;
+}
 #msgpanel > div > div > div {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin-bottom: .60rem;
 }
 #msgpanel > div > div > div > svg {

@@ -59,7 +59,7 @@ export class Lobby extends Component {
             (this.state.total && page > this.state.total && this.state.page !== this.state.total) ||
             (page > 0 && page <= this.state.total && page !== this.state.page))
                 loading = true;
-        return <div id="lobby" className="container-fluid">
+        return <div id="lobby" className={`container-fluid${this.context.theme === "dark" ? " dark" : ""}`}>
             {
                 loading
                     ? <Loading />

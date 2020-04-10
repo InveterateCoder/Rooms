@@ -30,7 +30,10 @@ const text = new LocalizedStrings({
             "nw": "New window",
             "nt": "New tab",
             "st": "Same tab"
-        }
+        },
+        theme: "Theme",
+        light: "Light",
+        dark: "Dark"
     },
     ru: {
         name: "Пользователь",
@@ -49,7 +52,10 @@ const text = new LocalizedStrings({
             "nw": "Новое окно",
             "nt": "Новая вкладка",
             "st": "Та же вкладка"
-        }
+        },
+        theme: "Тема",
+        light: "Светлая",
+        dark: "Тёмная"
     }
 });
 let connection = null;
@@ -68,7 +74,7 @@ export function Account(props) {
             connection.stop();
             connection = null;
         }
-         //eslint-disable-next-line
+        //eslint-disable-next-line
     }, []);
     const nameChanged = ev => {
         setName(ev.target.value);
@@ -82,6 +88,9 @@ export function Account(props) {
         setNameError(validator.name(name, ev.target.value));
         connection.invoke("ChangeLanguage", ev.target.value).catch(err => alert(err.message));
         context.setLanguage(ev.target.value);
+    }
+    const selectTheme = ev => {
+        context.setTheme(ev.target.value);
     }
     const hasFormChanged = () => {
         if (newpassword !== "" || name !== context.name)
@@ -124,8 +133,8 @@ export function Account(props) {
         context.changeIcon(icon)
     }
     text.setLanguage(context.lang);
-    return <div className="container formpage">
-        <Avatar image={context.icon} selectImage={icon => changeIcon(icon)} />
+    return <div className={`container formpage${context.theme === "dark" ? " dark" : ""}`}>
+        <Avatar image={context.icon} selectImage={icon => changeIcon(icon)} theme={context.theme} />
         <FormGroup type="text" label={text.name} value={name} name="name"
             inputChanged={nameChanged} error={nameError} />
         <PasswordGroup type="password" lang={context.lang} newpassword={newpassword}
@@ -156,5 +165,8 @@ export function Account(props) {
         {
             loading && <Loading />
         }
+        <br />
+        <FormGroup type="select" label={text.theme} value={context.theme} onChange={selectTheme}
+            opts={{ light: text.light, dark: text.dark }} />
     </div>
 }

@@ -16,21 +16,25 @@ export function Menu(props) {
             return 1;
         return 0;
     });
+    const formUser = user => {
+        let selected = !props.public && props.selusers.includes(user);
+        return <div className={`p-2 pl-3 pr-3${user.guid ? " text-muted" : props.registered ? ` user${selected ? " selected" : ""}` : ""}`}
+            key={user.guid ? user.guid : user.id} onClick={!user.guid && props.registered ? () => props.userClicked(user) : null}>
+            <img src={`/img/${user.icon}.${user.guid ? "m" : selected ? "light" : "dark"}.svg`} draggable={false}
+                className="mr-3 rounded-circle" alt="icon" />
+            <span>{user.name}</span>
+        </div>
+    }
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
             <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
-            <img src={`/img/${props.icon}.svg`} draggable={false}
-                className={`mr-3 rounded-circle bg-${props.registered ? "light" : "secondary"}`} alt="icon" />
+            <img src={`/img/${props.icon + "." + props.theme}.svg`} draggable={false}
+                className="mr-3 rounded-circle" alt="icon" />
             <span className={`navbar-brand${props.registered ? "" : " text-muted"}`}>{props.name}</span>
         </nav>
         <div id="names" className="text-light">
             {
-                users.map(user => <div className={`p-2 pl-3 pr-3${user.guid ? " text-muted" : props.registered ? ` user${!props.public && props.selusers.includes(user) ? " selected" : ""}` : ""}`}
-                    key={user.guid ? user.guid : user.id} onClick={!user.guid && props.registered ? () => props.userClicked(user) : null}>
-                    <img src={`/img/${user.icon}.svg`} draggable={false}
-                        className={`mr-3 rounded-circle bg-${user.guid ? "secondary" : "light"}`} alt="icon" />
-                    <span>{user.name}</span>
-                </div>)
+                users.map(user => formUser(user))
             }
         </div>
         {

@@ -19,10 +19,12 @@ const text = new LocalizedStrings({
 export function Presenter(props) {
     const context = useContext(Context);
     const getContent = item => {
+        let textColor = context.theme === "dark" ? "light" : "dark";
         return <><h4 className="card-title">{item.locked && <img src="/img/lock.png" width="32" alt="lock imag" />}
-            <span><Flag name={item.flag} format="png" pngSize={32} alt={"flat" + item.flag} basePath="/img" /></span><span>{item.name}</span></h4>
-            <strong className="text-dark">{text.online}: <span className="badge badge-secondary">{item.online}</span></strong>
-            <p className="card-text text-dark">{item.description}</p></>
+            <span><Flag name={item.flag} format="png" pngSize={32} alt={"flat" + item.flag} basePath="/img" /></span><span className="name">{item.name}</span></h4>
+            <strong className={`text-${textColor}`}>
+                {text.online}: <span className={`badge badge-${textColor} text-${context.theme}`}>{item.online}</span></strong>
+            <p className={`card-text text-${textColor}`}>{item.description}</p></>
     }
     const newWindow = addr => {
         window.open(addr, "", `width=${window.outerWidth * 0.85},height=${window.outerHeight * 0.85}`);

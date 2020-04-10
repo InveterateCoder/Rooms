@@ -135,7 +135,7 @@ export function MyRoom(props) {
         }
     }
     text.setLanguage(context.lang);
-    return <div className="container formpage">
+    return <div className={`container formpage${context.theme === "dark" ? " dark" : ""}`}>
         <FlagGroup country={rcountry} lock={rpassword} setCountry={setCountry}
             holder={text.choose} add={text.set} />
         <FormGroup type="text" label={text.name} value={rname} inputChanged={nameChanged} error={rnameError} />
@@ -146,7 +146,7 @@ export function MyRoom(props) {
         </div>
         <PasswordGroup lang={context.lang} newpassword={rpassword} onChange={rpasswordChanged} />
         <div className="form-group mt-5">
-            <label className="h5">{text.active} <span className="badge badge-dark ml-2 p-2">{rlimit}</span></label>
+            <label className="h5">{text.active} <span className={`badge badge-${context.theme === "dark" ? "light text-dark" : "dark"} ml-2 p-2`}>{rlimit}</span></label>
             <input type="range" className="custom-range" min="2" max="50"
                 onChange={limitChanged} value={rlimit} id="roomrange" />
         </div>

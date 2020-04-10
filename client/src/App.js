@@ -17,9 +17,11 @@ export default class App extends Component {
         let lang = localStorage.getItem("lang");
         if (!lang || !registered)
             lang = this.bestLang();
+        let theme = localStorage.getItem("theme") || "light";
+        document.body.className = `bg-${theme}`;
         this.state = {
             jwt: localStorage.getItem("jwt"),
-            registered: registered,
+            registered,
             name: "",
             room: {
                 name: "",
@@ -28,16 +30,16 @@ export default class App extends Component {
                 password: "",
                 limit: 20
             },
-            lang: lang,
-            filters: filters,
+            lang,
+            filters,
             c_codes: registered ? localStorage.getItem("c_codes") : null,
             icon: registered ? localStorage.getItem("icon") || "user" : "user",
             perpage: registered ? localStorage.getItem("perpage") || 30 : 30,
-            openin: registered ? localStorage.getItem("opin") || "nw" : "nw"
+            openin: registered ? localStorage.getItem("opin") || "nw" : "nw",
+            theme
         }
     }
     bestLang = () => {
-        debugger;
         let navlang = navigator.language.toLowerCase();
         if (navlang.startsWith("ru") ||
             navlang.startsWith("kk") || navlang.startsWith("ky") ||
@@ -138,14 +140,22 @@ export default class App extends Component {
         localStorage.setItem("opin", value);
         this.setState({ openin: value });
     }
+    setTheme = theme => {
+        if (theme !== "light" && theme !== "dark") return;
+        localStorage.setItem("theme", theme);
+        this.setState({ theme }, () => document.body.className = `bg-${theme}`);
+    }
     signOut = () => {
         localStorage.removeItem("jwt");
         localStorage.removeItem("registered");
         localStorage.removeItem("c_codes");
+        localStorage.removeItem("theme");
+        document.body.className = "bg-light";
         this.setState({
             jwt: null,
             registered: false,
-            lang: this.bestLang()
+            lang: this.bestLang(),
+            theme: "light"
         });
     }
     render() {
@@ -156,7 +166,7 @@ export default class App extends Component {
             changeRoom: this.changeRoom, changeIcon: this.changeIcon,
             userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
             signInAsGuest: this.signInAsGuest, setPerpage: this.setPerpage,
-            setOpenIn: this.setOpenIn
+            setOpenIn: this.setOpenIn, setTheme: this.setTheme
         }}>
             {
                 this.state.jwt && !this.state.name
