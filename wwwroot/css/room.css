@@ -178,6 +178,7 @@
 #msgpanel > div > div > pre {
     margin-left: 2px;
     white-space: pre-wrap;
+    word-break: break-all;
     margin-bottom: 0;
     color: black !important;
 }
