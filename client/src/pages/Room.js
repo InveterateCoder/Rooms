@@ -314,14 +314,15 @@ export class Room extends Component {
         this.setState({ users: this.state.users.filter(u => u !== user), selusers: selusers, public: pub });
         this.notify(`"${usr.name}" ${text.left}`);
     }
+    regexEscape = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     highlight = text => {
         text = this.htmlEncode(text);
         let name = this.htmlEncode(this.state.name);
-        let regex = new RegExp(name, "g");
+        let regex = new RegExp(this.regexEscape(name), "g");
         text = text.replace(regex, `<span class="text-info">${name}</span>`);
         this.state.users.forEach(user => {
             name = this.htmlEncode(user.name);
-            regex = new RegExp(name, "g");
+            regex = new RegExp(this.regexEscape(name), "g");
             text = text.replace(regex, `<span class="text-info">${name}</span>`);
         });
         return text;
