@@ -274,8 +274,8 @@ export class Room extends Component {
         let time = "";
         if (today) time = this.formTime(msg.time, today);
         let elem = document.createElement("div");
-        elem.className = "media p-3 mb-3";
-        elem.innerHTML = `<img src="/img/${msg.icon}.${this.state.theme}.svg" alt="icon" class="mr-3" />
+        elem.className = "media p-2 mb-3";
+        elem.innerHTML = `<img src="/img/${msg.icon}.${this.state.theme}.svg" alt="icon" class="mr-2 mt-2" />
         <div class="media-body">
         <div>${msg.secret ? sec(this.state.theme) : pub}<span class="text-info">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
         <pre>${msgText}</pre>
