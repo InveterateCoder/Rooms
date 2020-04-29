@@ -14,6 +14,10 @@ namespace Rooms.Models
         public long GetRoomId(string connectionId) => _activeUsers[connectionId];
         public ActiveRoom GetRoom(long roomId) => _activeRooms[roomId];
         private ActiveRoom GetRoom(string connectionId) => GetRoom(_activeUsers[connectionId]);
+        public string[] ConnectVoiceUser(long id, string guid, string connectionId) =>
+            this.GetRoom(connectionId).ConnectVoiceUser(id, guid, connectionId);
+        public void DisconnectVoiceUser(long id, string guid, string connectionId) =>
+            this.GetRoom(connectionId).DisconnectVoiceUser(id, guid, connectionId);
         public string[] UserConnections(long userId) =>
             _activeRooms.Values.Where(r => r.User(userId, null) != null).SelectMany(r => r.GetUserConnectionsById(userId)).ToArray();
         public string[] Connections(long roomId) => _activeRooms.GetValueOrDefault(roomId)?.GetConnections();

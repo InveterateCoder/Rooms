@@ -64,6 +64,36 @@ namespace Rooms.Hubs
                     return data.message.Time;
                 });
         }
+        public async Task ConnectVoice()
+        {
+            await Task.Run(async () =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                var voiceUsers = _state.ConnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                if (voiceUsers.Length > 0)
+                    await Clients.Clients(voiceUsers).SendAsync("connectVoice", Context.ConnectionId);
+            });
+        }
+        public async Task DisconnectVoice()
+        {
+            await Task.Run(() =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+            });
+        }
+        public async Task PipeCandidate(string connectionId, object candidate)
+        {
+            await Clients.Client(connectionId).SendAsync("candidate", Context.ConnectionId, candidate);
+        }
+        public async Task PipeOffer(string connectionId, object offer)
+        {
+            await Clients.Client(connectionId).SendAsync("offer", Context.ConnectionId, offer);
+        }
+        public async Task PipeAnswer(string connectionId, object answer)
+        {
+            await Clients.Client(connectionId).SendAsync("answer", Context.ConnectionId, answer);
+        }
         public async Task<ReturnSignal<RoomInfo>> Enter(string slug, string icon, string password, int msgsCount)
         {
             try
@@ -131,9 +161,10 @@ namespace Rooms.Hubs
         }
         public async override Task OnDisconnectedAsync(Exception exception)
         {
-            Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
             await Task.Run(async () =>
             {
+                Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
                 var data = _state.DisconnectUser(Context.ConnectionId);
                 if (data.room != null)
                 {

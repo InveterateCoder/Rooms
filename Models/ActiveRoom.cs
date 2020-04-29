@@ -35,6 +35,30 @@ namespace Rooms.Models
         }
         public ActiveUser UserByConnectionId(string connectionId) =>
             _registered_users.Values.Concat(_guest_users.Values).First(u => u.ContainsConnection(connectionId));
+        public string[] GetVoiceUsers(long id = 0, string guid = null)
+        {
+            if (id != 0) return _registered_users.Where(p => p.Key != id && p.Value.voiceConnection != null)
+                 .Select(p => p.Value.voiceConnection).Concat(_guest_users.Values
+                 .Where(u => u.voiceConnection != null).Select(u => u.voiceConnection)).ToArray();
+            else if (guid != null) return _registered_users.Values.Where(u => u.voiceConnection != null).Select(u => u.voiceConnection)
+                 .Concat(_guest_users.Where(p => p.Key != guid && p.Value.voiceConnection != null).Select(p => p.Value.voiceConnection)).ToArray();
+            else return _registered_users.Values.Where(u => u.voiceConnection != null).Select(u => u.voiceConnection)
+                .Concat(_guest_users.Values.Where(u => u.voiceConnection != null).Select(u => u.voiceConnection)).ToArray();
+        }
+        public string[] ConnectVoiceUser(long id, string guid, string connectionId)
+        {
+            var user = this.User(id, guid);
+            if (user.voiceConnection != null)
+                return null;
+            user.voiceConnection = connectionId;
+            return GetVoiceUsers(id, guid);
+        }
+        public void DisconnectVoiceUser(long id, string guid, string connectionId)
+        {
+            var user = this.User(id, guid);
+            if (user.voiceConnection == connectionId)
+                user.voiceConnection = null;
+        }
         public int GetOpenConnections(long id, string guid)
         {
             if (id != 0) return _registered_users[id].connectionIds.Count();
@@ -155,6 +179,7 @@ namespace Rooms.Models
     public class ActiveUser
     {
         public List<string> connectionIds;
+        public string voiceConnection;
         public string icon;
         public string name;
         public ActiveUser(string icon, string name)

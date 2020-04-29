@@ -28,7 +28,7 @@ namespace Rooms.Models
         public string Country { get; set; }
         [StringLength(16, MinimumLength = 6)]
         public string Password { get; set; }
-        [Required, Range(2, 50)]
+        [Required, Range(2, 25)]
         public byte Limit { get; set; }
     }
     public class UserChangeForm

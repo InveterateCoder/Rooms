@@ -1,10 +1,10 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faGlobe, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faMicrophone, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 
 const text = {
-    en: "Register to use secret messaging and sound",
-    ru: "Зарегистрируйтесь, чтобы использовать секретные сообщения и звук"
+    en: "Register to Enable",
+    ru: "Регистрируйтесь, чтобы Включить "
 };
 
 export function Menu(props) {
@@ -25,6 +25,10 @@ export function Menu(props) {
             <span>{user.name}</span>
         </div>
     }
+    const setPublic = () => {
+        if (!props.public) props.setPublic(true);
+        else if (props.selusers.length > 0) props.setPublic(false);
+    }
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
             <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
@@ -37,24 +41,23 @@ export function Menu(props) {
                 users.map(user => formUser(user))
             }
         </div>
-        {
-            props.registered
-                ? <div id="menubtns" className="row">
-                    <div className={`col btn btn-dark${props.public ? " active" : ""}`}
-                        onClick={() => { if (!props.public) props.setPublic(true) }}>
-                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faGlobe} />
-                    </div>
-                    <div className={`col btn btn-dark${props.public ? "" : " active"}`}
-                        onClick={() => { if (props.public && props.selusers.length > 0) props.setPublic(false) }}>
+        <div id="menubtns" className="row">
+            <div className={`col btn btn-dark disabled`}>
+                <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faMicrophone} /> {props.voiceOnline}
+            </div>
+            {
+                props.registered
+                    ? <div className={`col btn btn-dark${props.public ? "" : " active"}`}
+                        onClick={setPublic}>
                         <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faUserFriends} />
                     </div>
-                    <div className={`col btn btn-dark${props.sound ? " active" : ""}`} onClick={props.soundClicked}>
-                        <FontAwesomeIcon size="2x" color="#f8f9fa" icon={props.sound ? faVolumeUp : faVolumeMute} />
+                    : <div className="col text-warning p-2 text-center" style={{ fontSize: ".8rem" }}>
+                        {text[props.lang]}
                     </div>
-                </div>
-                : <div id="menubtns">
-                    <span className="text-warning p-2">{text[props.lang]}</span>
-                </div>
-        }
+            }
+            <div className={`col btn btn-dark${props.sound ? " active" : ""}`} onClick={props.soundClicked}>
+                <FontAwesomeIcon size="2x" color="#f8f9fa" icon={props.sound ? faVolumeUp : faVolumeMute} />
+            </div>
+        </div>
     </div>
 }

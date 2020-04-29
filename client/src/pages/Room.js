@@ -95,11 +95,12 @@ export class Room extends Component {
             public: true,
             selusers: [],
             toasts: [],
-            sound: false,
+            sound: localStorage.getItem("sound") ? true : false,
             scrolledDown: true,
             inputFocused: false,
             fetching: false,
-            theme: context.theme
+            theme: context.theme,
+            voiceOnline: 0
         }
         this.msgsCount = 50;
         this.oldestMsgTime = null;
@@ -116,6 +117,10 @@ export class Room extends Component {
         this.connection.on("roomChanged", this.roomChanged);
         this.connection.on("langChanged", this.langChanged);
         this.connection.on("themeChanged", this.themeChanged);
+        this.connection.on("connectVoice", this.connectVoice);
+        this.connection.on("offer", this.offer);
+        this.connection.on("answer", this.answer);
+        this.connection.on("candidate", this.candidate);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -127,6 +132,63 @@ export class Room extends Component {
         this.soundNotif = new Audio(window.location.origin + "/notif.ogg");
         this.inputHeight = 41;
         this.isMobile = isMobileTablet();
+        this.micStream = null;
+        this.voiceConnections = {};
+        this.voiceAudios = {};
+    }
+    setupRTCPeerConnection = connectionId => {
+        let conn = new RTCPeerConnection();
+        conn.onicecandidate = event => {
+            if (event.candidate)
+                this.connection.invoke("PipeCandidate", connectionId, event.candidate);
+        }
+        conn.ontrack = event => {
+            if (!this.voiceAudios[connectionId])
+                this.voiceAudios[connectionId] = new Audio();
+            else this.voiceAudios[connectionId].pause();
+            this.voiceAudios[connectionId].srcObject = event.streams[0];
+            this.voiceAudios[connectionId].play();
+        }
+        conn.onconnectionstatechange = () => {
+            switch (conn.connectionState) {
+                case "disconnected":
+                case "failed":
+                case "closed":
+                    if (this.voiceAudios[connectionId]) {
+                        this.voiceAudios[connectionId].pause();
+                        delete audios[connectionId];
+                    }
+                    if (this.voiceConnections[connectionId]) {
+                        this.voiceConnections[connectionId].close();
+                        delete this.voiceConnections[connectionId];
+                    }
+            }
+        }
+        for (const track of this.micStream.getTracks())
+            conn.addTrack(track, this.micStream);
+        this.voiceConnections[connectionId] = conn;
+        return conn;
+    }
+    connectVoice = connectionId => {
+        let conn = this.setupRTCPeerConnection(connectionId);
+        conn.createOffer().then(offer => {
+            conn.setLocalDescription(offer);
+            this.connection.invoke("PipeOffer", connectionId, offer);
+        });
+    }
+    offer = (connectionId, data) => {
+        let conn = this.setupRTCPeerConnection(connectionId);
+        conn.setRemoteDescription(data);
+        conn.createAnswer().then(answer => {
+            conn.setLocalDescription(answer);
+            this.connection.invoke("PipeAnswer", connectionId, answer);
+        });
+    }
+    answer = (connectionId, data) => {
+        this.voiceConnections[connectionId].setRemoteDescription(data);
+    }
+    candidate = (connectionId, data) => {
+        this.voiceConnections[connectionId].addIceCandidate(data);
     }
     fail = (failed, warning) => {
         if (!this.unmounted)
@@ -184,9 +246,9 @@ export class Room extends Component {
     }
     soundClicked = () => {
         if (this.state.sound)
-            this.setState({ sound: false });
+            this.setState({ sound: false }, () => localStorage.removeItem("sound"));
         else
-            this.setState({ sound: true });
+            this.setState({ sound: true }, () => localStorage.setItem("sound", "on"));
     }
     passwordChanged = val => this.setState({ password: val });
     passwordKeyPressed = ev => {
@@ -288,7 +350,13 @@ export class Room extends Component {
         let time = `${date.getHours()}:${date.getMinutes()}`;
         let timeoutId = setTimeout(() => this.removeNotification(id), 7000);
         this.setState({ toasts: [[id, time, msg, timeoutId], ...this.state.toasts] },
-            () => this.state.sound && this.soundNotif.play());
+            () => {
+                if (this.state.sound) {
+                    try {
+                        this.soundNotif.play();
+                    } catch{ };
+                }
+            });
     }
     removeNotification = id => {
         let notif = this.state.toasts.find(el => el[0] === id);
@@ -367,7 +435,11 @@ export class Room extends Component {
     }
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date(), true));
-        if (this.state.sound) this.soundMsg.play();
+        if (this.state.sound) {
+            try {
+                this.soundNotif.play();
+            } catch{ };
+        }
         if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     roomDeleted = () => {
@@ -512,7 +584,7 @@ export class Room extends Component {
                 </div>
                 <div ref={this.msgpanel} id="msgpanel" className={`${this.state.theme === "dark" ? "dark" : ""}`}></div>
             </div>
-            <Menu theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
+            <Menu voiceOnline={this.state.voiceOnline} theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
                 closemenu={this.closemenu} icon={this.state.icon} name={this.state.name} users={this.state.users}
                 selusers={this.state.selusers} userClicked={this.userClicked} public={this.state.public}
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />
