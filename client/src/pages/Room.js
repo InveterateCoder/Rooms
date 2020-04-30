@@ -479,7 +479,7 @@ export class Room extends Component {
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date(), true));
         if (this.state.sound)
-            this.soundNotif.play().catch(() => { });
+            this.soundMsg.play().catch(() => { });
         if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     roomDeleted = () => {
@@ -571,7 +571,7 @@ export class Room extends Component {
     inputBlur = ev => {
         if (ev.relatedTarget && (ev.relatedTarget.id === "sendBtn" ||
             (ev.relatedTarget.tagName === "SPAN" && ev.relatedTarget.tabIndex === -1)))
-            ev.stopPropagation();
+            ev.target.focus();
         else this.setState({ inputFocused: false });
     }
     langChanged = lang => this.setState({ lang });
