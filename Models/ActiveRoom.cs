@@ -10,6 +10,7 @@ namespace Rooms.Models
         private readonly ConcurrentDictionary<long, ActiveUser> _registered_users = new ConcurrentDictionary<long, ActiveUser>();
         private readonly ConcurrentDictionary<string, ActiveUser> _guest_users = new ConcurrentDictionary<string, ActiveUser>();
         private readonly SortedList<long, InMemoryMessage> _messages = new SortedList<long, InMemoryMessage>();
+        public int VoiceUsersCount { get; set; } = 0;
         public byte Online { get => Convert.ToByte(_registered_users.Count() + _guest_users.Count()); }
         public readonly long roomId;
         public ActiveRoom(long roomId) => this.roomId = roomId;
@@ -50,14 +51,20 @@ namespace Rooms.Models
             var user = this.User(id, guid);
             if (user.voiceConnection != null)
                 return null;
+            VoiceUsersCount++;
             user.voiceConnection = connectionId;
             return GetVoiceUsers(id, guid);
         }
-        public void DisconnectVoiceUser(long id, string guid, string connectionId)
+        public int DisconnectVoiceUser(long id, string guid, string connectionId)
         {
             var user = this.User(id, guid);
             if (user.voiceConnection == connectionId)
+            {
+                this.VoiceUsersCount--;
                 user.voiceConnection = null;
+                return this.VoiceUsersCount;
+            }
+            return -1;
         }
         public int GetOpenConnections(long id, string guid)
         {
@@ -82,8 +89,12 @@ namespace Rooms.Models
             }
             else return _registered_users.Values.Concat(_guest_users.Values).SelectMany(u => u.connectionIds).ToArray();
         }
-        public IEnumerable<string> GetUserConnectionsById(long userId) =>
-            _registered_users.GetValueOrDefault(userId)?.connectionIds;
+        public IEnumerable<string> GetUserConnections(long userId, string guid)
+        {
+            if (userId != 0) return _registered_users.GetValueOrDefault(userId)?.connectionIds;
+            else if (guid != null) return _guest_users.GetValueOrDefault(guid)?.connectionIds;
+            else throw new ArgumentException("Either id or guid must be provided.");
+        }
         public IEnumerable<RoomsUser> Users(long id = 0, string guid = null)
         {
             if (id != 0) return _registered_users.Where(p => p.Key != id).Select(p => new RoomsUser

@@ -9,5 +9,6 @@ namespace Rooms.Models
         public string Name { get; set; }
         public IEnumerable<RoomsUser> Users { get; set; }
         public IEnumerable<RoomsMsg> Messages { get; set; }
+        public int VoiceUserCount { get; set; }
     }
 }

@@ -6,6 +6,15 @@ const text = {
     en: "Register to Enable",
     ru: "Регистрируйтесь, чтобы Включить "
 };
+const supportAlert = {
+    en: "Sorry, your browser is not supported.",
+    ru: "Извините, ваш браузер не поддерживается."
+}
+const mediaSupport = {
+    en: "Something went wrong. Check your microphone and the permissions.",
+    ru: "Что-то пошло не так. Проверьте свой микрофон и разрешения."
+}
+const voiceSupport = 'RTCPeerConnection' in window && 'mediaDevices' in navigator;
 
 export function Menu(props) {
     const users = props.users;
@@ -29,6 +38,23 @@ export function Menu(props) {
         if (!props.public) props.setPublic(true);
         else if (props.selusers.length > 0) props.setPublic(false);
     }
+    const voiceClick = () => {
+        if (!voiceSupport) alert(supportAlert[props.lang]);
+        else {
+            if (props.voiceActive)
+                props.voicButtonClick(null);
+            else {
+                navigator.mediaDevices.getUserMedia({ video: false, audio: true })
+                    .then(stream => {
+                        debugger;
+                        props.voicButtonClick(stream);
+                    }).catch(() => {
+                        debugger;
+                        alert(mediaSupport[props.lang]);
+                    })
+            }
+        }
+    }
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
             <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
@@ -42,7 +68,7 @@ export function Menu(props) {
             }
         </div>
         <div id="menubtns" className="row">
-            <div className={`col btn btn-dark disabled`}>
+            <div className={`col btn btn-${props.voiceActive ? "danger" : "dark"}`} onClick={voiceClick}>
                 <FontAwesomeIcon size="2x" color="#f8f9fa" icon={faMicrophone} /> {props.voiceOnline}
             </div>
             {

@@ -169,12 +169,16 @@
     -webkit-user-drag: none;
 }
 #msgpanel > div {
-    box-shadow: 0 0 5px #343a40;
-    border-radius: 35px 0 35px 0;
+    border-bottom: 1px solid rgba(52, 58, 64, .3);
+    border-left: 1px solid rgba(52, 58, 64, .3);
+    border-radius: 25px 0 25px 0;
     overflow: hidden;
 }
 #msgpanel.dark > div {
-    box-shadow: 0 0 5px #f8f9fa;
+    border-color: rgba(248, 249, 250, .3);
+}
+#msgpanel > div > div > div > span {
+    cursor: pointer;
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;

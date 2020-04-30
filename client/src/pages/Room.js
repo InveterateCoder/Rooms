@@ -44,7 +44,8 @@ const text = new LocalizedStrings({
         flagChanged: "The room's flag has changed.",
         bothChanged: "The room's name and flag have changed.",
         rmspassword: "Room's password",
-        pswdplcholder: "Enter password"
+        pswdplcholder: "Enter password",
+        oneInstance: "Something went wrong. Make sure only one instance of the room requires voice connection."
     },
     ru: {
         placeholder: "Введите сообщение ...",
@@ -67,10 +68,11 @@ const text = new LocalizedStrings({
         flagChanged: "Флаг комнаты изменился.",
         bothChanged: "Название комнаты и флаг изменились.",
         rmspassword: "Пароль комнаты",
-        pswdplcholder: "Введите пароль"
+        pswdplcholder: "Введите пароль",
+        oneInstance: "Что-то пошло не так. Убедитесь, что только один экземпляр комнаты требует голосового соединения."
     }
 })
-const pub = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="globe" class="svg-inline--fa fa-globe fa-w-16 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" color="#007bff"><path fill="currentColor" d="M336.5 160C322 70.7 287.8 8 248 8s-74 62.7-88.5 152h177zM152 256c0 22.2 1.2 43.5 3.3 64h185.3c2.1-20.5 3.3-41.8 3.3-64s-1.2-43.5-3.3-64H155.3c-2.1 20.5-3.3 41.8-3.3 64zm324.7-96c-28.6-67.9-86.5-120.4-158-141.6 24.4 33.8 41.2 84.7 50 141.6h108zM177.2 18.4C105.8 39.6 47.8 92.1 19.3 160h108c8.7-56.9 25.5-107.8 49.9-141.6zM487.4 192H372.7c2.1 21 3.3 42.5 3.3 64s-1.2 43-3.3 64h114.6c5.5-20.5 8.6-41.8 8.6-64s-3.1-43.5-8.5-64zM120 256c0-21.5 1.2-43 3.3-64H8.6C3.2 212.5 0 233.8 0 256s3.2 43.5 8.6 64h114.6c-2-21-3.2-42.5-3.2-64zm39.5 96c14.5 89.3 48.7 152 88.5 152s74-62.7 88.5-152h-177zm159.3 141.6c71.4-21.2 129.4-73.7 158-141.6h-108c-8.8 56.9-25.6 107.8-50 141.6zM19.3 352c28.6 67.9 86.5 120.4 158 141.6-24.4-33.8-41.2-84.7-50-141.6h-108z"></path></svg>';
+//const pub = '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="globe" class="svg-inline--fa fa-globe fa-w-16 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" color="#007bff"><path fill="currentColor" d="M336.5 160C322 70.7 287.8 8 248 8s-74 62.7-88.5 152h177zM152 256c0 22.2 1.2 43.5 3.3 64h185.3c2.1-20.5 3.3-41.8 3.3-64s-1.2-43.5-3.3-64H155.3c-2.1 20.5-3.3 41.8-3.3 64zm324.7-96c-28.6-67.9-86.5-120.4-158-141.6 24.4 33.8 41.2 84.7 50 141.6h108zM177.2 18.4C105.8 39.6 47.8 92.1 19.3 160h108c8.7-56.9 25.5-107.8 49.9-141.6zM487.4 192H372.7c2.1 21 3.3 42.5 3.3 64s-1.2 43-3.3 64h114.6c5.5-20.5 8.6-41.8 8.6-64s-3.1-43.5-8.5-64zM120 256c0-21.5 1.2-43 3.3-64H8.6C3.2 212.5 0 233.8 0 256s3.2 43.5 8.6 64h114.6c-2-21-3.2-42.5-3.2-64zm39.5 96c14.5 89.3 48.7 152 88.5 152s74-62.7 88.5-152h-177zm159.3 141.6c71.4-21.2 129.4-73.7 158-141.6h-108c-8.8 56.9-25.6 107.8-50 141.6zM19.3 352c28.6 67.9 86.5 120.4 158 141.6-24.4-33.8-41.2-84.7-50-141.6h-108z"></path></svg>';
 function sec(theme) {
     return `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user-friends" class="svg-inline--fa fa-user-friends fa-w-20 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" color="${theme === "dark" ? "#f8f9fa" : "#343a40"}"><path fill="currentColor" d="M192 256c61.9 0 112-50.1 112-112S253.9 32 192 32 80 82.1 80 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C51.6 288 0 339.6 0 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zM480 256c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zm48 32h-3.8c-13.9 4.8-28.6 8-44.2 8s-30.3-3.2-44.2-8H432c-20.4 0-39.2 5.9-55.7 15.4 24.4 26.3 39.7 61.2 39.7 99.8v38.4c0 2.2-.5 4.3-.6 6.4H592c26.5 0 48-21.5 48-48 0-61.9-50.1-112-112-112z"></path></svg>`;
 }
@@ -100,7 +102,8 @@ export class Room extends Component {
             inputFocused: false,
             fetching: false,
             theme: context.theme,
-            voiceOnline: 0
+            voiceOnline: 0,
+            micStream: null
         }
         this.msgsCount = 50;
         this.oldestMsgTime = null;
@@ -121,6 +124,8 @@ export class Room extends Component {
         this.connection.on("offer", this.offer);
         this.connection.on("answer", this.answer);
         this.connection.on("candidate", this.candidate);
+        this.connection.on("voiceCount", count => this.setState({ voiceOnline: count }));
+        this.connection.on("logout", this.logout);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -132,7 +137,6 @@ export class Room extends Component {
         this.soundNotif = new Audio(window.location.origin + "/notif.ogg");
         this.inputHeight = 41;
         this.isMobile = isMobileTablet();
-        this.micStream = null;
         this.voiceConnections = {};
         this.voiceAudios = {};
     }
@@ -156,7 +160,7 @@ export class Room extends Component {
                 case "closed":
                     if (this.voiceAudios[connectionId]) {
                         this.voiceAudios[connectionId].pause();
-                        delete audios[connectionId];
+                        delete this.voiceAudios[connectionId];
                     }
                     if (this.voiceConnections[connectionId]) {
                         this.voiceConnections[connectionId].close();
@@ -164,8 +168,8 @@ export class Room extends Component {
                     }
             }
         }
-        for (const track of this.micStream.getTracks())
-            conn.addTrack(track, this.micStream);
+        for (const track of this.state.micStream.getTracks())
+            conn.addTrack(track, this.state.micStream);
         this.voiceConnections[connectionId] = conn;
         return conn;
     }
@@ -189,6 +193,42 @@ export class Room extends Component {
     }
     candidate = (connectionId, data) => {
         this.voiceConnections[connectionId].addIceCandidate(data);
+    }
+    voicButtonClick = stream => {
+        if (!stream) {
+            this.connection.invoke("DisconnectVoice");
+            for (let key in this.voiceAudios) {
+                this.voiceAudios[key].pause();
+                delete this.voiceAudios[key];
+            }
+            for (let key in this.voiceConnections) {
+                this.voiceConnections[key].close();
+                delete this.voiceConnections[key];
+            }
+            for (let track of this.state.micStream.getTracks())
+                track.stop();
+            this.setState({ micStream: null });
+        } else {
+            this.connection.invoke("ConnectVoice").then(() => this.setState({ micStream: stream }))
+                .catch(() => alert(text.oneInstance));
+        }
+    }
+    logout = () => {
+        this.connection.stop().then(() => {
+            for (let key in this.voiceAudios) {
+                this.voiceAudios[key].pause();
+                delete this.voiceAudios[key];
+            }
+            for (let key in this.voiceConnections) {
+                this.voiceConnections[key].close();
+                delete this.voiceConnections[key];
+            }
+            if (this.state.micStream) {
+                for (let track of this.state.micStream.getTracks())
+                    track.stop();
+                this.setState({ micStream: null });
+            }
+        });
     }
     fail = (failed, warning) => {
         if (!this.unmounted)
@@ -264,7 +304,8 @@ export class Room extends Component {
                     myId: data.payload.myId,
                     flag: data.payload.flag,
                     roomname: data.payload.name,
-                    users: data.payload.users
+                    users: data.payload.users,
+                    voiceOnline: data.payload.voiceUserCount
                 }, () => {
                     let length = data.payload.messages.length;
                     if (length < this.msgsCount)
@@ -329,6 +370,10 @@ export class Room extends Component {
         time += `${date.getHours()}:${date.getMinutes()}`;
         return time;
     }
+    msgNameClick = evnt => {
+        this.inputRef.current.setRangeText(evnt.target.innerText,
+            this.inputRef.current.selectionStart, this.inputRef.current.selectionEnd, "end");
+    }
     htmlEncode = text =>
         String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     formMessage = (msg, today, highlight = false) => {
@@ -336,12 +381,13 @@ export class Room extends Component {
         let time = "";
         if (today) time = this.formTime(msg.time, today);
         let elem = document.createElement("div");
-        elem.className = "media p-2 mb-3";
+        elem.className = "media p-1 mb-1";
         elem.innerHTML = `<img src="/img/${msg.icon}.${this.state.theme}.svg" alt="icon" class="mr-2 mt-2" />
         <div class="media-body">
-        <div>${msg.secret ? sec(this.state.theme) : pub}<span class="text-info">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
+        <div class="mb-1">${msg.secret ? sec(this.state.theme) : ""}<span tabindex="-1" class="text-primary${!msg.secret ? " ml-1" : ""}">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
         <pre>${msgText}</pre>
         </div>`;
+        elem.querySelector("span.text-primary").addEventListener("click", this.msgNameClick);
         return elem;
     }
     notify = msg => {
@@ -351,11 +397,8 @@ export class Room extends Component {
         let timeoutId = setTimeout(() => this.removeNotification(id), 7000);
         this.setState({ toasts: [[id, time, msg, timeoutId], ...this.state.toasts] },
             () => {
-                if (this.state.sound) {
-                    try {
-                        this.soundNotif.play();
-                    } catch{ };
-                }
+                if (this.state.sound)
+                    this.soundNotif.play().catch(() => { });
             });
     }
     removeNotification = id => {
@@ -435,11 +478,8 @@ export class Room extends Component {
     }
     recieveMessage = msg => {
         this.appendMessage(this.formMessage(msg, new Date(), true));
-        if (this.state.sound) {
-            try {
-                this.soundNotif.play();
-            } catch{ };
-        }
+        if (this.state.sound)
+            this.soundNotif.play().catch(() => { });
         if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     roomDeleted = () => {
@@ -529,8 +569,9 @@ export class Room extends Component {
         this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px";
     }
     inputBlur = ev => {
-        if (ev.relatedTarget && ev.relatedTarget.id === "sendBtn")
-            ev.target.focus();
+        if (ev.relatedTarget && (ev.relatedTarget.id === "sendBtn" ||
+            (ev.relatedTarget.tagName === "SPAN" && ev.relatedTarget.tabIndex === -1)))
+            ev.stopPropagation();
         else this.setState({ inputFocused: false });
     }
     langChanged = lang => this.setState({ lang });
@@ -579,12 +620,13 @@ export class Room extends Component {
                         onInput={this.inputChanged} onKeyPress={this.msgInputKeyPressed} className="form-control"
                         placeholder={text.placeholder} onBlur={this.inputBlur} />
                     <div className="input-group-append">
-                        <button id="sendBtn" className={`btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
+                        <button id="sendBtn" className={`pl-3 pr-3 btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>
                 <div ref={this.msgpanel} id="msgpanel" className={`${this.state.theme === "dark" ? "dark" : ""}`}></div>
             </div>
-            <Menu voiceOnline={this.state.voiceOnline} theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
+            <Menu voicButtonClick={this.voicButtonClick} voiceActive={this.state.micStream !== null} voiceOnline={this.state.voiceOnline}
+                theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
                 closemenu={this.closemenu} icon={this.state.icon} name={this.state.name} users={this.state.users}
                 selusers={this.state.selusers} userClicked={this.userClicked} public={this.state.public}
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />

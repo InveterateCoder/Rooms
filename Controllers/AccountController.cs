@@ -132,6 +132,19 @@ namespace Rooms.Controllers
             });
             return Ok("ok");
         }
+        [HttpGet("logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            await Task.Run(async () =>
+            {
+                Identity id = JsonSerializer.Deserialize<Identity>(User.Identity.Name);
+                var connectionIds = _state.UserConnections(id.UserId, id.Guest);
+                if (connectionIds.Length > 0)
+                    await _hub.Clients.Clients(connectionIds.Concat(_state._waitingPassword.Where(p =>
+                        p.Value == (id.UserId, id.Guest)).Select(p => p.Key)).ToArray()).SendAsync("logout");
+            });
+            return Ok("ok");
+        }
         [HttpGet("info")]
         public async Task<IActionResult> Info()
         {

@@ -69,17 +69,21 @@ namespace Rooms.Hubs
             await Task.Run(async () =>
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                var voiceUsers = _state.ConnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
-                if (voiceUsers.Length > 0)
+                (var voiceUsers, var count) = _state.ConnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                if (voiceUsers == null) throw new HubException("active");
+                else if (voiceUsers.Length > 0)
                     await Clients.Clients(voiceUsers).SendAsync("connectVoice", Context.ConnectionId);
+                await Clients.Clients(_state.Connections(Context.ConnectionId)).SendAsync("voiceCount", count);
             });
         }
         public async Task DisconnectVoice()
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                var count = _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                if (count > -1)
+                    await Clients.Clients(_state.Connections(Context.ConnectionId)).SendAsync("voiceCount", count);
             });
         }
         public async Task PipeCandidate(string connectionId, object candidate)
@@ -104,7 +108,13 @@ namespace Rooms.Hubs
                 {
                     var room = _context.Rooms.Include(r => r.Messages).FirstOrDefault(r => r.Slug == slug);
                     if (room == null) return new ReturnSignal<RoomInfo> { Code = "noroom" };
-                    if (room.UserId != id.UserId && room.Password != password) return new ReturnSignal<RoomInfo> { Code = "password" };
+                    if (room.UserId != id.UserId && room.Password != password)
+                    {
+                        if (!_state._waitingPassword.ContainsKey(Context.ConnectionId))
+                            _state._waitingPassword[Context.ConnectionId] = (id.UserId, id.Guest);
+                        return new ReturnSignal<RoomInfo> { Code = "password" };
+                    }
+                    else _state._waitingPassword.TryRemove(Context.ConnectionId, out _);
                     ActiveRoom active = _state.ConnectUser(id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId, room.Limit);
                     if (active == null) return new ReturnSignal<RoomInfo> { Code = "limit" };
                     RoomInfo info = new RoomInfo()
@@ -140,6 +150,7 @@ namespace Rooms.Hubs
                     }
                     info.Users = active.Users(id.UserId, id.Guest);
                     info.Messages = messages;
+                    info.VoiceUserCount = active.VoiceUsersCount;
                     if (active.GetOpenConnections(id.UserId, id.Guest) <= 1)
                     {
                         var connectionIds = active.GetConnections(id.UserId, id.Guest);
@@ -164,7 +175,10 @@ namespace Rooms.Hubs
             await Task.Run(async () =>
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                var count = _state.DisconnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
+                if (count > -1)
+                    await Clients.Clients(_state.Connections(Context.ConnectionId)).SendAsync("voiceCount", count);
+                _state._waitingPassword.TryRemove(Context.ConnectionId, out _);
                 var data = _state.DisconnectUser(Context.ConnectionId);
                 if (data.room != null)
                 {

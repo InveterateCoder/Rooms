@@ -145,17 +145,22 @@ export default class App extends Component {
         this.setState({ theme }, () => document.body.className = `bg-${theme}`);
     }
     signOut = () => {
-        localStorage.removeItem("jwt");
-        localStorage.removeItem("registered");
-        localStorage.removeItem("c_codes");
-        localStorage.removeItem("theme");
-        document.body.className = "bg-light";
-        this.setState({
-            jwt: null,
-            registered: false,
-            lang: this.bestLang(),
-            theme: "light"
-        });
+        Get(urls.accountLogout, this.state.lang, this.state.jwt)
+            .then(success => {
+                if (success) {
+                    localStorage.removeItem("jwt");
+                    localStorage.removeItem("registered");
+                    localStorage.removeItem("c_codes");
+                    localStorage.removeItem("theme");
+                    document.body.className = "bg-light";
+                    this.setState({
+                        jwt: null,
+                        registered: false,
+                        lang: this.bestLang(),
+                        theme: "light"
+                    });
+                }
+            });
     }
     render() {
         return <Context.Provider value={{

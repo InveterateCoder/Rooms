@@ -7,6 +7,7 @@ export default {
     accountChange: "/api/account/change",
     accountInfo: "/api/account/info",
     accountDelete: "/api/account/delete",
+    accountLogout: "/api/account/logout",
     accountSetIcon: "/api/account/set/icon",
     accountSetLang: "/api/account/set/lang",
     accountSetTheme: "/api/account/set/theme",

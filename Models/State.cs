@@ -9,18 +9,23 @@ namespace Rooms.Models
     {
         private readonly ConcurrentDictionary<long, ActiveRoom> _activeRooms = new ConcurrentDictionary<long, ActiveRoom>();
         private readonly ConcurrentDictionary<string, long> _activeUsers = new ConcurrentDictionary<string, long>();
+        public readonly ConcurrentDictionary<string, (long, string)> _waitingPassword = new ConcurrentDictionary<string, (long, string)>();
         public int RoomsCount { get => _activeRooms.Count; }
         public IEnumerable<long> RoomsKeys { get => _activeRooms.Keys; }
         public long GetRoomId(string connectionId) => _activeUsers[connectionId];
         public ActiveRoom GetRoom(long roomId) => _activeRooms[roomId];
         private ActiveRoom GetRoom(string connectionId) => GetRoom(_activeUsers[connectionId]);
-        public string[] ConnectVoiceUser(long id, string guid, string connectionId) =>
-            this.GetRoom(connectionId).ConnectVoiceUser(id, guid, connectionId);
-        public void DisconnectVoiceUser(long id, string guid, string connectionId) =>
+        public (string[], int) ConnectVoiceUser(long id, string guid, string connectionId)
+        {
+            var room = this.GetRoom(connectionId);
+            return (room.ConnectVoiceUser(id, guid, connectionId), room.VoiceUsersCount);
+        }
+        public int DisconnectVoiceUser(long id, string guid, string connectionId) =>
             this.GetRoom(connectionId).DisconnectVoiceUser(id, guid, connectionId);
-        public string[] UserConnections(long userId) =>
-            _activeRooms.Values.Where(r => r.User(userId, null) != null).SelectMany(r => r.GetUserConnectionsById(userId)).ToArray();
+        public string[] UserConnections(long userId, string guid = null) =>
+            _activeRooms.Values.Where(r => r.User(userId, guid) != null).SelectMany(r => r.GetUserConnections(userId, guid)).ToArray();
         public string[] Connections(long roomId) => _activeRooms.GetValueOrDefault(roomId)?.GetConnections();
+        public string[] Connections(string connectionId) => this.Connections(this._activeUsers[connectionId]);
         public string[] ChangeUser(long userId, string name = null, string icon = null)
         {
 
