@@ -379,6 +379,7 @@ export class Room extends Component {
         return time;
     }
     msgNameClick = evnt => {
+        this.inputRef.current.focus();
         this.inputRef.current.setRangeText(evnt.target.innerText + ' ',
             this.inputRef.current.selectionStart, this.inputRef.current.selectionEnd, "end");
     }
