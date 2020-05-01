@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faMicrophone, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faMicrophone, faUserFriends, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 
 const text = {
     en: "Register to Enable",
@@ -46,10 +46,8 @@ export function Menu(props) {
             else {
                 navigator.mediaDevices.getUserMedia({ video: false, audio: true })
                     .then(stream => {
-                        debugger;
                         props.voicButtonClick(stream);
                     }).catch(() => {
-                        debugger;
                         alert(mediaSupport[props.lang]);
                     })
             }
@@ -57,7 +55,7 @@ export function Menu(props) {
     }
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">
-            <button onClick={props.closemenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowLeft} /></button>
+            <button onClick={props.closemenu} className="btnmenu btn btn-outline-light mr-3"><FontAwesomeIcon icon={faBars} /></button>
             <img src={`/img/${props.icon}.dark.svg`} draggable={false}
                 className="mr-3 rounded-circle" alt="icon" />
             <span className={`navbar-brand${props.registered ? "" : " text-muted"}`}>{props.name}</span>

@@ -5,7 +5,7 @@ import { Menu } from "./accessories/Room/Menu";
 import { Toast } from "react-bootstrap";
 import Flag from "react-flags";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faInfoCircle, faExclamationTriangle, faSignInAlt, faArrowCircleDown, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faInfoCircle, faExclamationTriangle, faSignInAlt, faArrowCircleDown, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Spinner from "react-loading";
 import LocalizedStrings from "react-localization";
 import Password from "react-type-password";
@@ -141,7 +141,15 @@ export class Room extends Component {
         this.voiceAudios = {};
     }
     setupRTCPeerConnection = connectionId => {
-        let conn = new RTCPeerConnection();
+        let conn = new RTCPeerConnection({
+            iceServers: [{
+                urls: [
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun.services.mozilla.com",
+                    "stun:stun.skyway.io:3478"
+                ]
+            }]
+        });
         conn.onicecandidate = event => {
             if (event.candidate)
                 this.connection.invoke("PipeCandidate", connectionId, event.candidate);
@@ -611,7 +619,7 @@ export class Room extends Component {
                 onClick={() => document.scrollingElement.scrollTo({ top: document.scrollingElement.scrollHeight, left: 0, behavior: "smooth" })}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
             <div id="roomcont" className="container-fluid">
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
-                    <button onClick={this.openmenu} className="btnmenu btn btn-dark mr-3"><FontAwesomeIcon icon={faArrowRight} /></button>
+                    <button onClick={this.openmenu} className="btnmenu btn btn-outline-light mr-3"><FontAwesomeIcon icon={faBars} /></button>
                     <Flag className="mr-3" name={this.state.flag} format="png" pngSize={24} shiny={true} basePath="/img" />
                     <span className="navbar-brand">{this.state.roomname}</span>
                 </nav>
