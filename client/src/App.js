@@ -124,7 +124,7 @@ export default class App extends Component {
                     description: "",
                     country: "gb",
                     password: "",
-                    limit: 20
+                    limit: 10
                 }
             });
     }

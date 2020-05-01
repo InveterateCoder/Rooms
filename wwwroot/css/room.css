@@ -163,10 +163,32 @@
     text-align: center;
     transform: translateY(-50%);
 }
-#msgpanel > div > img {
+#msgpanel > div > span {
     width: 32px;
+    height: 32px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
     user-select: none;
     -webkit-user-drag: none;
+}
+#msgpanel > div > span.man {
+    background-image: url("/img/man.light.svg");
+}
+#msgpanel > div > span.woman {
+    background-image: url("/img/woman.light.svg");
+}
+#msgpanel > div > span.user {
+    background-image: url("/img/user.light.svg");
+}
+#msgpanel.dark > div > span.man {
+    background-image: url("/img/man.dark.svg");
+}
+#msgpanel.dark > div > span.woman {
+    background-image: url("/img/woman.dark.svg");
+}
+#msgpanel.dark > div > span.user {
+    background-image: url("/img/user.dark.svg");
 }
 #msgpanel > div {
     border-bottom: 1px solid rgba(52, 58, 64, .3);
@@ -179,6 +201,13 @@
 }
 #msgpanel > div > div > div > span {
     cursor: pointer;
+    font-weight: 700;
+    color: #343a40;
+    text-decoration: underline;
+}
+#msgpanel.dark > div > div > div > span {
+    color: #f8f9fa;
+    font-weight: 600;
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;

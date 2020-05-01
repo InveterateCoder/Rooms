@@ -72,7 +72,7 @@ export function MyRoom(props) {
             setRPassword(pswd);
     }
     const limitChanged = ev => {
-        if (ev.target.value >= 2 && ev.target.value <= 25)
+        if (ev.target.value >= 2 && ev.target.value <= 15)
             setRLimit(Number(ev.target.value));
     }
     const hasFormChanged = () => {
@@ -147,7 +147,7 @@ export function MyRoom(props) {
         <PasswordGroup lang={context.lang} newpassword={rpassword} onChange={rpasswordChanged} />
         <div className="form-group mt-5">
             <label className="h5">{text.active} <span className={`badge badge-${context.theme === "dark" ? "light text-dark" : "dark"} ml-2 p-2`}>{rlimit}</span></label>
-            <input type="range" className="custom-range" min="2" max="25"
+            <input type="range" className="custom-range" min="2" max="15"
                 onChange={limitChanged} value={rlimit} id="roomrange" />
         </div>
         <div id="conf_acc_change" className={`${!hasFormChanged() ? "invisible" : ""}`}>
