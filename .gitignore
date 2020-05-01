@@ -3,4 +3,5 @@
 /obj
 /appsettings.json
 /client/node_modules
+/client/build
 /wwwroot/img

@@ -27,7 +27,9 @@ export function Presenter(props) {
             <p className={`card-text text-${textColor}`}>{item.description}</p></>
     }
     const newWindow = addr => {
-        window.open(addr, "", `width=${window.outerWidth * 0.85},height=${window.outerHeight * 0.85}`);
+        let width = window.innerWidth < 1355 ? window.innerWidth : 1355;
+        let height = window.innerHeight < 830 ? window.innerHeight : 830;
+        window.open(addr, "", `width=${width},height=${height}`);
     }
     text.setLanguage(context.lang);
     return <div id="content">
