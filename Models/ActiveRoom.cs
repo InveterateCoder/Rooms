@@ -139,11 +139,11 @@ namespace Rooms.Models
                     return _messages.Count();
             }
         }
-        public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds)
+        public InMemoryMessage AddMessage(long roomId, string connectionId, string message, long[] accessIds, long id, string guid)
         {
             var time = DateTime.UtcNow.Ticks;
             ActiveUser user = UserByConnectionId(connectionId);
-            var msg = new InMemoryMessage(roomId, time, user.name, user.icon, accessIds, message);
+            var msg = new InMemoryMessage(roomId, id, guid, time, user.name, user.icon, accessIds, message);
             lock (_messages) _messages.Add(time, msg);
             return msg;
         }
@@ -157,6 +157,8 @@ namespace Rooms.Models
                 else throw new ArgumentException("Either id or guid must be provided.");
                 return msgs.Select(m => new RoomsMsg
                 {
+                    UserId = m.userId,
+                    UserGuid = m.userGuid,
                     Icon = m.senderIcon,
                     Secret = m.accessIds != null,
                     Sender = m.senderName,
@@ -174,6 +176,8 @@ namespace Rooms.Models
                 {
                     result.Add(new Message
                     {
+                        UserId = m.userId,
+                        GUID = m.userGuid,
                         AccessIds = m.accessIds,
                         RoomId = m.roomId,
                         SenderIcon = m.senderIcon,
@@ -220,10 +224,12 @@ namespace Rooms.Models
     }
     public class InMemoryMessage
     {
-        public InMemoryMessage(long roomId, long timeStamp, string senderName,
+        public InMemoryMessage(long roomId, long userId, string userGuid, long timeStamp, string senderName,
             string senderIcon, IEnumerable<long> accessIds, string text)
         {
             this.roomId = roomId;
+            this.userId = userId;
+            this.userGuid = userGuid;
             this.timeStamp = timeStamp;
             this.accessIds = accessIds;
             this.senderName = senderName;
@@ -231,6 +237,8 @@ namespace Rooms.Models
             this.text = text;
         }
         public long roomId;
+        public long userId;
+        public string userGuid;
         public long timeStamp;
         public IEnumerable<long> accessIds;
         public string senderName;

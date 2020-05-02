@@ -58,15 +58,17 @@ namespace Rooms.Models
             }
             return room?.GetConnections();
         }
-        public UserMsg SendMessage(string connectionId, string message, long[] accessIds)
+        public UserMsg SendMessage(string connectionId, string message, long[] accessIds, long id, string guid)
         {
             ActiveRoom room = _activeRooms[_activeUsers[connectionId]];
-            var msg = room.AddMessage(room.roomId, connectionId, message, accessIds);
+            var msg = room.AddMessage(room.roomId, connectionId, message, accessIds, id, guid);
             return new UserMsg
             {
                 connectionIds = room.GetConnections(connectionId: connectionId, ids: accessIds),
                 message = new RoomsMsg
                 {
+                    UserId = msg.userId,
+                    UserGuid = msg.userGuid,
                     Time = msg.timeStamp,
                     Icon = msg.senderIcon,
                     Secret = accessIds != null,

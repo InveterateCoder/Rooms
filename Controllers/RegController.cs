@@ -23,46 +23,12 @@ namespace Rooms.Controllers
             Helper = helper;
             _context = context;
         }
-        /*[HttpGet("seed/{quantity:min(10)}")]
-        public IActionResult Seed(int quantity)
-        {
-            const string name = "Name{0}";
-            const string email = "name{0}@email.com";
-            const string password = "fakepassword";
-            const string roomName = "Group{0}";
-            const string description = "Fake description here!";
-            try
-            {
-                for(int i = 1; i <= quantity; i++){
-                    var user = _context.Users.Add(new Models.User {
-                        Name = string.Format(name, i),
-                        Email = string.Format(email, i),
-                        Password = password
-                    });
-                    _context.SaveChanges();
-                    _context.Rooms.Add(new Room {
-                        Name = string.Format(roomName, i),
-                        Description = description,
-                        Country = "gb",
-                        Limit = 20,
-                        Slug = string.Format(roomName, i).ToLower(),
-                        UserId = user.Entity.UserId
-                    });
-                }
-                _context.SaveChanges();
-                return Ok("ok");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex);
-            }
-        }*/
         [HttpPost("reg")]
         public async Task<IActionResult> Register([FromBody]RegForm data)
         {
             try
             {
-                if(!Helper.isRightName(data.Name)) return BadRequest(Errors.BadName);
+                if (!Helper.isRightName(data.Name)) return BadRequest(Errors.BadName);
                 if (_context.Users.FirstOrDefault(u => u.Email == data.Email) != null)
                     return BadRequest(Errors.EmailTaken);
                 var limit = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)).Ticks;
@@ -109,7 +75,8 @@ namespace Rooms.Controllers
                 });
                 _context.RegQueue.Remove(entity);
                 await _context.SaveChangesAsync();
-                Identity id = new Identity {
+                Identity id = new Identity
+                {
                     UserId = user.Entity.UserId,
                     Name = user.Entity.Name
                 };
@@ -132,14 +99,20 @@ namespace Rooms.Controllers
                 var user = _context.Users.Include(u => u.Room).FirstOrDefault(u => u.Email == form.Email);
                 if (user == null || user.Password != form.Password)
                     return BadRequest(Errors.EmailOrPassInc);
-                 Identity id = new Identity {
+                Identity id = new Identity
+                {
                     UserId = user.UserId,
-                    Name = user.Name
+                    Name = user.Name,
+                    Guest = null
                 };
-                return Ok(new {
+                return Ok(new
+                {
                     jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
+                    userId = id.UserId,
+                    userGuid = id.Guest,
                     name = user.Name,
-                    room = user.Room == null ? null : new {
+                    room = user.Room == null ? null : new
+                    {
                         name = user.Room.Name,
                         description = user.Room.Description,
                         country = user.Room.Country,
@@ -157,12 +130,18 @@ namespace Rooms.Controllers
         public IActionResult SignInGuest([Required, StringLength(10, MinimumLength = 4)]string name)
         {
             if (!Helper.isRightName(name)) return BadRequest(Errors.BadName);
-            Identity id = new Identity {
+            Identity id = new Identity
+            {
                 UserId = 0,
                 Name = name,
                 Guest = Guid.NewGuid().ToString("n")
             };
-            return Ok(Helper.GetToken(JsonSerializer.Serialize(id)));
+            return Ok(new
+            {
+                jwt = Helper.GetToken(JsonSerializer.Serialize(id)),
+                userId = id.UserId,
+                userGuid = id.Guest
+            });
         }
         [HttpPost("recover")]
         public async Task<IActionResult> Recover([Required, FromBody, StringLength(320, MinimumLength = 6)]string email)
@@ -170,7 +149,7 @@ namespace Rooms.Controllers
             try
             {
                 var user = _context.Users.FirstOrDefault(u => u.Email == email);
-                if(user == null)
+                if (user == null)
                     return BadRequest(Errors.NotRegistered);
                 string content = $"Hello {user.Name}. Your password is {user.Password}";
                 if (!await Helper.SendMail(user.Email, content))

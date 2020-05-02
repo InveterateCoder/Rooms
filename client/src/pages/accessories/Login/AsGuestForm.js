@@ -42,11 +42,11 @@ export function AsGuestForm(props) {
             setError(newError);
         else {
             setLoading(true);
-            Get(urls.signInAsGuest + input.current.value, context.lang).then(jwt => {
+            Get(urls.signInAsGuest + input.current.value, context.lang).then(data => {
                 let addr = null;
                 if (props.location.search.startsWith("?room="))
                     addr = "/room/" + props.location.search.substring(6);
-                if (jwt) context.signInAsGuest(jwt, input.current.value, addr);
+                if (data) context.signInAsGuest(data, input.current.value, addr);
                 else setLoading(false);
             }).catch(() => props.history.push("/fatal"));
         }

@@ -156,6 +156,8 @@ namespace Rooms.Controllers
                 if (user == null) throw new Exception("Invalid Token");
                 return Ok(new
                 {
+                    userId = id.UserId,
+                    userGuid = id.Guest,
                     name = user.Name,
                     room = user.Room == null ? null : new
                     {

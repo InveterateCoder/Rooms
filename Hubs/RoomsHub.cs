@@ -49,19 +49,18 @@ namespace Rooms.Hubs
                     return messages;
                 });
         }
-        public async Task<long> SendMessage(string message, long[] accessIds)
+        public async Task SendMessage(string message, long[] accessIds)
         {
-            return await Task.Run(async () =>
+            await Task.Run(async () =>
                 {
                     Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
                     IEnumerable<long> ids = null;
                     if (accessIds != null && id.UserId > 0)
                         ids = accessIds.Append(id.UserId);
-                    var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray());
+                    var data = _state.SendMessage(Context.ConnectionId, message, ids?.ToArray(), id.UserId, id.Guest);
                     if (data.connectionIds.Length > 0)
                         await Clients.Clients(data.connectionIds).SendAsync("recieveMessage", data.message);
                     if (data.room.MsgCount > 50) await SaveRoom(data.room);
-                    return data.message.Time;
                 });
         }
         public async Task ConnectVoice()
@@ -141,6 +140,8 @@ namespace Rooms.Hubs
                         messages.AddRange(filtered.Take(remnant)
                             .Select(m => new RoomsMsg
                             {
+                                UserId = m.UserId,
+                                UserGuid = m.GUID,
                                 Icon = m.SenderIcon,
                                 Sender = m.SenderName,
                                 Time = m.TimeStamp,

@@ -258,6 +258,9 @@
 #msgpanel.dark > div > div > pre {
     color: #f8f9fa !important;
 }
+#msgpanel > div > div > pre.secret {
+    color: #dc3545 !important;
+}
 #msgpanel > div > div > div {
     font-size: 1rem;
     margin-bottom: .60rem;
@@ -266,6 +269,7 @@
     margin-right: .60rem;
 }
 #msgpanel > div > div > div > small {
+    float: right;
     user-select: none;
 }
 #roompass {

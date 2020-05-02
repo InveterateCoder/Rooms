@@ -22,6 +22,8 @@ export default class App extends Component {
         this.state = {
             jwt: localStorage.getItem("jwt"),
             registered,
+            userId: 0,
+            userGuid: null,
             name: "",
             room: {
                 name: "",
@@ -51,9 +53,12 @@ export default class App extends Component {
             return "ru";
         else return "en";
     }
-    signInAsGuest = (jwt, name, addr) => {
-        localStorage.setItem("jwt", jwt);
-        this.setState({ jwt, name }, () => this.props.history.replace(addr || "/lobby/1"));
+    signInAsGuest = (data, name, addr) => {
+        localStorage.setItem("jwt", data.jwt);
+        this.setState({
+            jwt: data.jwt, name: name,
+            userId: data.userId, userGuid: data.userGuid
+        }, () => this.props.history.replace(addr || "/lobby/1"));
     }
     signInAsUser = (data, addr) => {
         localStorage.setItem("jwt", data.jwt);
@@ -62,6 +67,8 @@ export default class App extends Component {
         localStorage.setItem("c_codes", codes);
         this.setState({
             jwt: data.jwt,
+            userId: data.userId,
+            userGuid: data.userGuid,
             registered: true,
             name: data.name,
             room: !data.room ? this.state.room : {
@@ -155,6 +162,8 @@ export default class App extends Component {
                     document.body.className = "bg-light";
                     this.setState({
                         jwt: null,
+                        userId: 0,
+                        userGuid: null,
                         registered: false,
                         lang: this.bestLang(),
                         theme: "light"
@@ -191,6 +200,8 @@ export default class App extends Component {
                     if (data) {
                         if (this.state.registered)
                             this.setState({
+                                userId: data.userId,
+                                userGuid: data.userGuid,
                                 name: data.name,
                                 room: !data.room ? this.state.room : {
                                     ...data.room,

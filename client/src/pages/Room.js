@@ -73,9 +73,6 @@ const text = new LocalizedStrings({
         oneInstance: "Что-то пошло не так. Убедитесь, что только один экземпляр комнаты требует голосового соединения."
     }
 })
-function sec(theme) {
-    return `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="user-friends" class="svg-inline--fa fa-user-friends fa-w-20 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" color="${theme === "dark" ? "#f8f9fa" : "#343a40"}"><path fill="currentColor" d="M192 256c61.9 0 112-50.1 112-112S253.9 32 192 32 80 82.1 80 144s50.1 112 112 112zm76.8 32h-8.3c-20.8 10-43.9 16-68.5 16s-47.6-6-68.5-16h-8.3C51.6 288 0 339.6 0 403.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-28.8c0-63.6-51.6-115.2-115.2-115.2zM480 256c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zm48 32h-3.8c-13.9 4.8-28.6 8-44.2 8s-30.3-3.2-44.2-8H432c-20.4 0-39.2 5.9-55.7 15.4 24.4 26.3 39.7 61.2 39.7 99.8v38.4c0 2.2-.5 4.3-.6 6.4H592c26.5 0 48-21.5 48-48 0-61.9-50.1-112-112-112z"></path></svg>`;
-}
 export class Room extends Component {
     static contextType = Context;
     constructor(props, context) {
@@ -141,6 +138,12 @@ export class Room extends Component {
         this.voiceConnections = {};
         this.voiceAudios = {};
         this.canSendMessage = true;
+        this.lastMessage = {
+            userId: 0,
+            userGuid: null,
+            elem: undefined,
+            time: undefined
+        }
     }
     setupRTCPeerConnection = connectionId => {
         let conn = new RTCPeerConnection({
@@ -368,7 +371,11 @@ export class Room extends Component {
         return toasts;
     }
     formTime = (ticks, today) => {
-        let date = new Date((ticks - 621355968000000000) / 10000);
+        let date;
+        if (!ticks || !today)
+            today = date = new Date();
+        else
+            date = new Date((ticks - 621355968000000000) / 10000);
         let time = "";
         let year = date.getFullYear();
         let month = date.getMonth();
@@ -387,18 +394,32 @@ export class Room extends Component {
     }
     htmlEncode = text =>
         String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    formMessage = (msg, today, highlight = false) => {
+    formMessage = (msgs, today, highlight = false) => {
+        let msg;
+        if (Array.isArray(msgs))
+            msg = msgs[0];
+        else msg = msgs;
         let msgText = highlight ? this.highlight(msg.text) : this.htmlEncode(msg.text);
-        let time = "";
-        if (today) time = this.formTime(msg.time, today);
+        let time = this.formTime(msg.time, today);
         let elem = document.createElement("div");
         elem.className = "media p-1 mb-1";
-        elem.innerHTML = `<span class="mr-2 mt-2 ${msg.icon}"></span>
+        let inHTML = `<span class="mr-2 mt-2 ${msg.icon}"></span>
         <div class="media-body">
-        <div class="mb-1">${msg.secret ? sec(this.state.theme) : ""}<span tabindex="-1" class="${!msg.secret ? "ml-1" : ""}">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
-        <pre>${msgText}</pre>
-        </div>`;
-        elem.querySelector('span[tabindex="-1"]').addEventListener("click", this.msgNameClick);
+        <div class="mb-1"><span tabindex="-1" class="ml-1 name">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
+        <pre ${msg.secret ? 'class="secret"' : ""}>${msgText}</pre>`;
+        if (msg !== msgs) {
+            for (let i = 1; i < msgs.length; i++) {
+                if (msgs[i].time - msgs[i - 1].time > 600000000) {
+                    let time = this.formTime(msgs[i].time, today);
+                    inHTML += `<div class="mb-1"><span style="visibility:hidden" tabindex="-1" class="ml-1">${this.htmlEncode(msgs[i].sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>`;
+                }
+                let msgText = highlight ? this.highlight(msgs[i].text) : this.htmlEncode(msgs[i].text);
+                inHTML += `<pre ${msgs[i].secret ? 'class="secret"' : ""}>${msgText}</pre>`
+            }
+        }
+        inHTML += "</div>";
+        elem.innerHTML = inHTML;
+        elem.querySelector('.name').addEventListener("click", this.msgNameClick);
         return elem;
     }
     notify = msg => {
@@ -419,10 +440,54 @@ export class Room extends Component {
     }
     fillMessages = msgs => {
         let today = new Date();
-        let panel = this.msgpanel.current;
-        msgs.forEach(msg => panel.insertBefore(this.formMessage(msg, today), panel.firstChild));
+        let connectedMsgs = [];
+        msgs.forEach(msg => {
+            if (connectedMsgs.length === 0 ||
+                (connectedMsgs[0].userId === msg.userId && connectedMsgs[0].userGuid === msg.userGuid)) {
+                connectedMsgs.push(msg);
+            } else {
+                let elem = this.formMessage(connectedMsgs.reverse(), today);
+                if (!this.lastMessage.elem) {
+                    this.lastMessage.userId = connectedMsgs[0].userId;
+                    this.lastMessage.userGuid = connectedMsgs[0].userGuid;
+                    this.lastMessage.time = connectedMsgs[connectedMsgs.length - 1].time;
+                    this.lastMessage.elem = elem;
+                }
+                this.msgpanel.current.insertBefore(elem, this.msgpanel.current.firstChild);
+                connectedMsgs = [];
+                connectedMsgs.push(msg);
+            }
+        });
+        if (connectedMsgs.length > 0) {
+            this.msgpanel.current.insertBefore(this.formMessage(connectedMsgs.reverse(), today), this.msgpanel.current.firstChild);
+            connectedMsgs = [];
+        }
     }
-    appendMessage = msg => this.msgpanel.current.appendChild(msg);
+    mergeMessage = (msg, scroll) => {
+        let div, pre;
+        if (msg.time - this.lastMessage.time > 600000000) {
+            let time = this.formTime(msg.time, null);
+            div = document.createElement("div");
+            div.className = "mb-1";
+            div.innerHTML = `<span style="visibility:hidden" tabindex="-1" class="ml-1">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small>`;
+        }
+        pre = document.createElement("pre");
+        if (msg.secret)
+            pre.className = "secret";
+        pre.innerHTML = this.highlight(msg.text);
+        this.lastMessage.time = msg.time;
+        let el = this.lastMessage.elem.querySelector('div');
+        if (div)
+            el.appendChild(div);
+        el.appendChild(pre);
+        if (scroll)
+            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
+    }
+    appendMessage = (msg, scroll) => {
+        this.msgpanel.current.appendChild(msg);
+        if (scroll)
+            document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
+    }
     addUser = usr => {
         this.setState({ users: [...this.state.users, usr] });
         this.notify(`"${usr.name}" ${text.entered}`);
@@ -468,18 +533,22 @@ export class Room extends Component {
             sender: this.state.name,
             icon: this.state.icon,
             secret: ids !== null,
-            text: val
+            text: val,
+            time: Date.now() * 10000 + 621355968000000000
         }
-        let element = this.formMessage(msg, null, true);
-        this.appendMessage(element);
-        document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
+        if (this.lastMessage.userId === this.context.userId && this.lastMessage.userGuid === this.context.userGuid) {
+            this.mergeMessage(msg, true)
+        } else {
+            let element = this.formMessage(msg, null, true);
+            this.lastMessage.userId = this.context.userId;
+            this.lastMessage.userGuid = this.context.userGuid;
+            this.lastMessage.time = msg.time;
+            this.lastMessage.elem = element;
+            this.appendMessage(element, true);
+        }
         this.canSendMessage = false;
         setTimeout(() => this.canSendMessage = true, 700);
-        this.connection.invoke("SendMessage", val, ids).then(resp => {
-            if (!resp || isNaN(resp)) this.setState({ failed: text.wrong });
-            else
-                element.getElementsByTagName("small")[0].innerHTML = `<code>${this.formTime(resp, new Date())}</code>`;
-        }).catch(err => this.fail(err.message || text.wrong));
+        this.connection.invoke("SendMessage", val, ids).catch(err => this.fail(err.message || text.wrong));
     }
     msgInputKeyPressed = ev => {
         if (ev.which === 13) {
@@ -491,10 +560,18 @@ export class Room extends Component {
         }
     }
     recieveMessage = msg => {
-        this.appendMessage(this.formMessage(msg, new Date(), true));
+        if (this.lastMessage.userId === msg.userId && this.lastMessage.userGuid === msg.userGuid) {
+            this.mergeMessage(msg, this.state.scrolledDown);
+        } else {
+            let elem = this.formMessage(msg, null, true);
+            this.appendMessage(elem, this.state.scrolledDown);
+            this.lastMessage.elem = elem;
+            this.lastMessage.userId = msg.userId;
+            this.lastMessage.userGuid = msg.userGuid;
+            this.lastMessage.time = msg.time;
+        }
         if (this.state.sound)
             this.soundMsg.play().catch(() => { });
-        if (this.state.scrolledDown) document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     roomDeleted = () => {
         this.connection.stop();
