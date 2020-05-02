@@ -30,8 +30,8 @@
     transform: translateY(-50%);
 }
 #scrollDown {
-    position: fixed;
-    right: 70px;
+    position: absolute;
+    right: 80px;
     bottom: 80px;
     opacity: .7;
 }
@@ -41,14 +41,14 @@
     padding-top: 72px;
     padding-bottom: 73px;
 }
-#roomcont nav {
+#roomcont nav.navbar {
     position: fixed;
     top: 0;
     left: 23%;
     right: 0;
     transition: left .4s;
 }
-#roomcont nav img {
+#roomcont nav.navbar img {
     user-select: none;
     -webkit-user-drag: none;
 }
@@ -63,18 +63,57 @@
     width: 75%;
     bottom: 25px;
     transition: left .4s, width .4s;
-    transition: bottom .3s;
+    transition: bottom .2s;
 }
 #inpgroup.focused {
     bottom: 10px;
 }
-#inpgroup > div > button {
+#inpgroup aside {
+    position: absolute;
+    bottom: 0;
+    z-index: 10;
+    right: 60px;
+    background-color: #f8f9fa;
+    transition: margin-right .5s;
+}
+#inpgroup.emjclosed aside {
+    margin-right: -380px;
+}
+#inpgroup aside nav {
+    background-color: #f8f9fa;
+}
+#inpgroup.dark aside {
+    background-color: #343a40;
+}
+#inpgroup aside ul::before, #inpgroup aside ul::before {
+    background-color: #f8f9fa;
+}
+#inpgroup.dark aside ul::before, #inpgroup.dark aside ul::before {
+    background-color: #343a40;
+}
+#inpgroup aside > div[style^="position"] {
+    display: none;
+}
+#emoji {
+    padding: 0;
+    position: absolute;
+    right: 11px;
+    bottom: 50px;
+    height: 30px !important;
+    width: 30px !important;
+    border-radius: 10px;
+    transition: transform .7s !important;
+}
+#emoji.open {
+    transform: rotate(180deg);
+}
+#inpgroup > div.input-group-append > button {
     height: 38px;
     margin-top: auto;
     box-shadow: 0 2px 7px 1px gray;
     transition: margin .3s;
 }
-#inpgroup.focused > div > button {
+#inpgroup.focused > div.input-group-append > button:not(#emoji) {
     border-radius: 0;
 }
 #input {
@@ -86,7 +125,7 @@
 }
 .focused #input {
     background-color: white;
-    border-radius: 15px 0 0 15px;
+    border-radius: 10px 0 0 0;
 }
 #roommenu {
     position: fixed;
@@ -96,11 +135,11 @@
     width: 23%;
     transition: margin .4s;
 }
-#roommenu > nav {
+#roommenu > nav.navbar {
     border-bottom: 1px solid #f8f9fa;
     user-select: none;
 }
-#roommenu > nav > img {
+#roommenu > nav.navbar > img {
     width: 32px;
     padding: 1px;
 }
@@ -250,7 +289,7 @@
     #roomcont {
         width: 100%;
     }
-    #roomcont nav {
+    #roomcont nav.navbar {
         left: 0;
     }
     #inpgroup {

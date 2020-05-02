@@ -5,12 +5,13 @@ import { Menu } from "./accessories/Room/Menu";
 import { Toast } from "react-bootstrap";
 import Flag from "react-flags";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faInfoCircle, faExclamationTriangle, faSignInAlt, faArrowCircleDown, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faAngleLeft, faInfoCircle, faExclamationTriangle, faSignInAlt, faArrowCircleDown, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Spinner from "react-loading";
 import LocalizedStrings from "react-localization";
 import Password from "react-type-password";
 import validator from "../utils/validator";
 import * as signalR from "@aspnet/signalr";
+import Picker, { SKIN_TONE_NEUTRAL } from "emoji-picker-react";
 
 function isMobileTablet() {
     var check = false;
@@ -102,9 +103,10 @@ export class Room extends Component {
             fetching: false,
             theme: context.theme,
             voiceOnline: 0,
-            micStream: null
+            micStream: null,
+            emojiClosed: true
         }
-        this.msgsCount = 50;
+        this.msgsCount = 70;
         this.oldestMsgTime = null;
         this.connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
             { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
@@ -448,7 +450,7 @@ export class Room extends Component {
         return text;
     }
     sendMsg = () => {
-        if(!this.canSendMessage) return;
+        if (!this.canSendMessage) return;
         let val = this.inputRef.current.value.trim();
         if (!val) return;
         if (val.length > 2000) {
@@ -556,6 +558,7 @@ export class Room extends Component {
         });
     }
     inputChanged = () => {
+        if (!this.state.emojiClosed) this.setState({ emojiClosed: true });
         this.inputRef.current.style.height = "38px";
         this.inputRef.current.style.height = this.inputRef.current.scrollHeight + 2 + "px";
         let top = this.inputRef.current.scrollTop + this.inputRef.current.offsetHeight;
@@ -570,7 +573,7 @@ export class Room extends Component {
         }
     }
     inputResized = diff => {
-        this.msgpanel.current.style.marginBottom = (parseInt(this.msgpanel.current.style.marginBottom) || 15) + diff + "px";
+        this.msgpanel.current.style.marginBottom = (parseInt(this.msgpanel.current.style.marginBottom) || 7) + diff + "px";
         if (this.state.scrolledDown)
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
         else
@@ -582,9 +585,10 @@ export class Room extends Component {
     }
     inputBlur = ev => {
         if (ev.relatedTarget && (ev.relatedTarget.id === "sendBtn" ||
-            (ev.relatedTarget.tagName === "SPAN" && ev.relatedTarget.tabIndex === -1)))
+            (ev.relatedTarget.tagName === "SPAN" && ev.relatedTarget.tabIndex === -1) ||
+            (ev.relatedTarget.tagName === "BUTTON" && (ev.relatedTarget.type === "button" || ev.relatedTarget.id === "emoji"))))
             ev.target.focus();
-        else this.setState({ inputFocused: false });
+        else this.setState({ inputFocused: false, emojiClosed: true });
     }
     langChanged = lang => this.setState({ lang });
     windowResized = () => {
@@ -594,6 +598,15 @@ export class Room extends Component {
         this.inputChanged();
         if (this.state.menuopen && !this.keyboardResizeTime)
             this.setState({ menuopen: false });
+    }
+    onEmojiClick = (event, emojiObject) => {
+        this.inputRef.current.focus();
+        this.inputRef.current.setRangeText(emojiObject.emoji,
+            this.inputRef.current.selectionStart, this.inputRef.current.selectionEnd, "end");
+    }
+    onEmojiOpenClose = () => {
+        this.inputRef.current.focus();
+        this.setState({ emojiClosed: !this.state.emojiClosed });
     }
     render() {
         text.setLanguage(this.state.lang);
@@ -619,19 +632,22 @@ export class Room extends Component {
                 {this.fillToasts()}
             </div>
             {this.state.fetching && <div id="fetcher"><Spinner type="cylon" color="white" width="80px" /></div>}
-            <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-primary"
-                onClick={() => document.scrollingElement.scrollTo({ top: document.scrollingElement.scrollHeight, left: 0, behavior: "smooth" })}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
             <div id="roomcont" className="container-fluid">
                 <nav className="navbar navbar-expand bg-dark navbar-dark">
                     <button onClick={this.openmenu} className="btnmenu btn btn-outline-light mr-3"><FontAwesomeIcon icon={faBars} /></button>
                     <Flag className="mr-3" name={this.state.flag} format="png" pngSize={24} shiny={true} basePath="/img" />
                     <span className="navbar-brand">{this.state.roomname}</span>
                 </nav>
-                <div id="inpgroup" className={`input-group${this.state.inputFocused ? " focused" : ""}`}>
+                <div id="inpgroup" className={`input-group ${this.state.theme}${this.state.emojiClosed ? " emjclosed" : ""}
+                    ${this.state.inputFocused ? " focused" : ""}`}>
+                    <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-primary"
+                        onClick={() => document.scrollingElement.scrollTo({ top: document.scrollingElement.scrollHeight, left: 0, behavior: "smooth" })}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
+                    <Picker onEmojiClick={this.onEmojiClick} skinTone={SKIN_TONE_NEUTRAL} />
                     <textarea id="input" ref={this.inputRef} onFocus={() => this.setState({ inputFocused: true })}
                         onInput={this.inputChanged} onKeyPress={this.msgInputKeyPressed} className="form-control"
                         placeholder={text.placeholder} onBlur={this.inputBlur} />
                     <div className="input-group-append">
+                        <button id="emoji" className={`btn btn-${this.state.inputFocused ? "warning" : "outline-warning"}${this.state.emojiClosed ? "" : " open"}`} onClick={this.onEmojiOpenClose}><FontAwesomeIcon icon={faAngleLeft} /></button>
                         <button id="sendBtn" className={`pl-3 pr-3 btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>
