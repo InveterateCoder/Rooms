@@ -557,8 +557,9 @@ export class Room extends Component {
             roomname: creds.name
         });
     }
-    inputChanged = () => {
-        if (!this.state.emojiClosed) this.setState({ emojiClosed: true });
+    inputChanged = wndresize => {
+        if (typeof wndresize !== "boolean")
+            if (!this.state.emojiClosed) this.setState({ emojiClosed: true });
         this.inputRef.current.style.height = "38px";
         this.inputRef.current.style.height = this.inputRef.current.scrollHeight + 2 + "px";
         let top = this.inputRef.current.scrollTop + this.inputRef.current.offsetHeight;
@@ -595,7 +596,7 @@ export class Room extends Component {
         this.toastsRef.current.style.maxHeight = document.scrollingElement.clientHeight - this.toastsSpaceBottom + "px";
         if (this.state.scrolledDown)
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
-        this.inputChanged();
+        this.inputChanged(true);
         if (this.state.menuopen && !this.keyboardResizeTime)
             this.setState({ menuopen: false });
     }
