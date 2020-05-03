@@ -240,7 +240,7 @@
 }
 #msgpanel > div > div > div > span {
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
     color: #343a40;
     text-decoration: underline;
 }
