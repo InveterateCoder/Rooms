@@ -37,6 +37,8 @@ namespace Rooms.Hubs
                             (m.AccessIdsJson == null || (id.UserId != 0 && m.AccessIds.Contains(id.UserId))))
                             .OrderByDescending(m => m.TimeStamp).Select(m => new RoomsMsg
                             {
+                                UserId = m.UserId,
+                                UserGuid = m.GUID,
                                 Icon = m.SenderIcon,
                                 Secret = m.AccessIdsJson != null,
                                 Sender = m.SenderName,
