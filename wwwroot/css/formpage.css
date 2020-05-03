@@ -22,6 +22,9 @@
     background-color: transparent;
     border-bottom: 1px solid #343a40;
 }
+.formpage.dark input[type=text]:not(:focus){
+    border-color: #f8f9fa;
+}
 .formpage label {
     position: relative;
     top: 50%;
