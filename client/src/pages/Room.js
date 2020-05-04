@@ -121,7 +121,6 @@ export class Room extends Component {
         this.connection.on("roomChanged", this.roomChanged);
         this.connection.on("langChanged", this.langChanged);
         this.connection.on("themeChanged", this.themeChanged);
-        this.connection.on("connectVoice", this.connectVoice);
         this.connection.on("offer", this.offer);
         this.connection.on("answer", this.answer);
         this.connection.on("candidate", this.candidate);
@@ -206,14 +205,8 @@ export class Room extends Component {
         this.voiceConnections[connectionId] = conn;
         return conn;
     }
-    connectVoice = connectionId => {
-        let conn = this.setupRTCPeerConnection(connectionId);
-        conn.createOffer().then(offer => {
-            conn.setLocalDescription(offer);
-            this.connection.invoke("PipeOffer", connectionId, offer);
-        });
-    }
     offer = (connectionId, data) => {
+        if (!this.state.micStream) return;
         let conn = this.setupRTCPeerConnection(connectionId);
         conn.setRemoteDescription(data);
         conn.createAnswer().then(answer => {
@@ -222,10 +215,12 @@ export class Room extends Component {
         });
     }
     answer = (connectionId, data) => {
-        this.voiceConnections[connectionId].setRemoteDescription(data);
+        if (this.voiceConnections[connectionId])
+            this.voiceConnections[connectionId].setRemoteDescription(data);
     }
     candidate = (connectionId, data) => {
-        this.voiceConnections[connectionId].addIceCandidate(data);
+        if (this.voiceConnections[connectionId])
+            this.voiceConnections[connectionId].addIceCandidate(data);
     }
     voicButtonClick = stream => {
         if (!stream) {
@@ -242,8 +237,32 @@ export class Room extends Component {
                 track.stop();
             this.setState({ micStream: null });
         } else {
-            this.connection.invoke("ConnectVoice").then(() => this.setState({ micStream: stream }))
-                .catch(() => alert(text.oneInstance));
+            this.connection.invoke("ConnectVoice").then(conections => {
+                this.setState({ micStream: stream }, async () => {
+                    for (let connection of conections) {
+                        let conn = this.setupRTCPeerConnection(connection);
+                        let offer = await conn.createOffer();
+                        await conn.setLocalDescription(offer);
+                        await this.connection.invoke("PipeOffer", connection, offer);
+                    }
+                });
+            }).catch(() => {
+                this.connection.invoke("DisconnectVoice");
+                for (let key in this.voiceAudios) {
+                    this.voiceAudios[key].pause();
+                    delete this.voiceAudios[key];
+                }
+                for (let key in this.voiceConnections) {
+                    this.voiceConnections[key].close();
+                    delete this.voiceConnections[key];
+                }
+                if (this.state.micStream) {
+                    for (let track of this.state.micStream.getTracks())
+                        track.stop();
+                    this.setState({ micStream: null });
+                }
+                alert(text.oneInstance);
+            });
         }
     }
     logout = () => {

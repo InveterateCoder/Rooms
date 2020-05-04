@@ -65,16 +65,15 @@ namespace Rooms.Hubs
                     if (data.room.MsgCount > 50) await SaveRoom(data.room);
                 });
         }
-        public async Task ConnectVoice()
+        public async Task<string[]> ConnectVoice()
         {
-            await Task.Run(async () =>
+            return await Task.Run(async () =>
             {
                 Identity id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
                 (var voiceUsers, var count) = _state.ConnectVoiceUser(id.UserId, id.Guest, Context.ConnectionId);
                 if (voiceUsers == null) throw new HubException("active");
-                else if (voiceUsers.Length > 0)
-                    await Clients.Clients(voiceUsers).SendAsync("connectVoice", Context.ConnectionId);
                 await Clients.Clients(_state.Connections(Context.ConnectionId)).SendAsync("voiceCount", count);
+                return voiceUsers;
             });
         }
         public async Task DisconnectVoice()
