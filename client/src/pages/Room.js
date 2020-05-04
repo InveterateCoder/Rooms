@@ -150,9 +150,26 @@ export class Room extends Component {
             iceServers: [{
                 urls: [
                     "stun:stun.l.google.com:19302",
-                    "stun:stun.services.mozilla.com",
-                    "stun:stun.skyway.io:3478"
+                    "stun:stun.l.google.com:19305",
+                    "stun:numb.viagenie.ca",
+                    "stun:stun.schlund.de",
+                    "stun:stun.aa.net.uk:3478",
+                    "stun:stun.acrobits.cz:3478",
+                    "stun:stun.altar.com.pl:3478",
+                    "stun:stun.avigora.fr:3478",
+                    "stun:stun.comtube.ru:3478",
+                    "stun:stun.cope.es:3478",
+                    "stun:stun.demos.ru:3478",
+                    "stun:stun.ippi.fr:3478",
+                    "stun:stun.modulus.gr:3478",
+                    "stun:stun.mywatson.it:3478",
+                    "stun:stun.nottingham.ac.uk:3478",
+                    "stun:stun.nova.is:3478",
                 ]
+            }, {
+                urls: "turn:numb.viagenie.ca",
+                username: "grigart88@yahoo.com",
+                credential: "rooms.2020"
             }]
         });
         conn.onicecandidate = event => {
