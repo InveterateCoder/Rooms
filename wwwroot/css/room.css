@@ -240,9 +240,9 @@
 }
 #msgpanel > div > div > div > span {
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     color: #343a40;
-    text-decoration: underline;
+    letter-spacing: 1px;
 }
 #msgpanel.dark > div > div > div > span {
     color: #f8f9fa;
