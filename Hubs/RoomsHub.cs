@@ -108,20 +108,23 @@ namespace Rooms.Hubs
                 {
                     var room = _context.Rooms.Include(r => r.Messages).FirstOrDefault(r => r.Slug == slug);
                     if (room == null) return new ReturnSignal<RoomInfo> { Code = "noroom" };
-                    if (room.UserId != id.UserId && room.Password != password)
+                    var isAdmin = room.UserId == id.UserId;
+                    if (!isAdmin && room.Password != password)
                     {
                         if (!_state._waitingPassword.ContainsKey(Context.ConnectionId))
                             _state._waitingPassword[Context.ConnectionId] = (id.UserId, id.Guest);
                         return new ReturnSignal<RoomInfo> { Code = "password" };
                     }
                     else _state._waitingPassword.TryRemove(Context.ConnectionId, out _);
-                    ActiveRoom active = _state.ConnectUser(id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId, room.Limit);
+                    ActiveRoom active = _state.ConnectUser(room.UserId, id.UserId, id.Guest, id.Name, icon, Context.ConnectionId, room.RoomId, room.Limit);
                     if (active == null) return new ReturnSignal<RoomInfo> { Code = "limit" };
                     RoomInfo info = new RoomInfo()
                     {
+                        RoomId = room.RoomId,
                         MyId = id.UserId,
                         Flag = room.Country,
-                        Name = room.Name
+                        Name = room.Name,
+                        IsAdmin = isAdmin
                     };
                     List<RoomsMsg> messages = new List<RoomsMsg>();
                     if (active.MsgCount > 0)
@@ -171,6 +174,45 @@ namespace Rooms.Hubs
             {
                 return new ReturnSignal<RoomInfo> { Code = ex.Message };
             }
+        }
+        public async Task BanUser(long id, string guid, int minutes)
+        {
+            await Task.Run(async () =>
+            {
+                Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                if (_id.UserId == 0 || minutes > 120) return;
+                await Clients.Clients(_state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid)).SendAsync("ban", minutes);
+            });
+        }
+        public async Task MuteUser(long id, string guid, int minutes)
+        {
+            await Task.Run(async () =>
+            {
+                Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                if (_id.UserId == 0 || minutes > 120) return;
+                await Clients.Clients(_state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid)).SendAsync("mute", minutes);
+            });
+        }
+        public async Task ClearMessages(long from, long till)
+        {
+            await Task.Run(async () =>
+            {
+                Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                if (_id.UserId == 0) return;
+                if (!_state.ClearMessages(_id.UserId, Context.ConnectionId, from, till)) return;
+                var room = await _context.Rooms.Include(r => r.Messages).FirstOrDefaultAsync(r => r.UserId == _id.UserId);
+                if (room == null) return;
+                if (from == 0 && till == 0)
+                    _context.Messages.RemoveRange(room.Messages);
+                else if (till == 0)
+                    _context.Messages.RemoveRange(room.Messages.Where(m => m.TimeStamp > from));
+                else
+                {
+                    if (from > till) return;
+                    _context.Messages.RemoveRange(room.Messages.Where(m => m.TimeStamp > from && m.TimeStamp < till));
+                }
+                await _context.SaveChangesAsync();
+            });
         }
         public async override Task OnDisconnectedAsync(Exception exception)
         {

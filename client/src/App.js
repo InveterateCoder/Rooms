@@ -7,10 +7,40 @@ import { Room } from "./pages/Room";
 import { Get } from "./utils/requests";
 import urls from "./utils/Urls";
 import Countries from "./data/countries"
+import { JsonHubProtocol } from '@aspnet/signalr';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
+        let timeNow = new Date();
+        let setm = localStorage.getItem("setm");
+        if (!setm) localStorage.setItem("setm", JSON.stringify([]));
+        else {
+            setm = JSON.parse(setm);
+            let filteredSetm = [];
+            for (let id in setm) {
+                let time = new Date(JSON.parse(localStorage.getItem(id + "_m")));
+                if (time > timeNow)
+                    filteredSetm.push(id);
+                else localStorage.removeItem(id + "_m");
+            }
+            localStorage.setItem('setm', JSON.stringify(filteredSetm));
+            setm = filteredSetm;
+        }
+        let setb = localStorage.getItem("setb");
+        if (!setb) localStorage.setItem("setb", JSON.stringify([]));
+        else {
+            setb = JSON.parse(setb);
+            let filteredSetb = [];
+            for (let id in setb) {
+                let time = new Date(JSON.parse(localStorage.getItem(id + "_b")));
+                if (time > timeNow)
+                    filteredSetb.push(id);
+                else localStorage.removeItem(id + "_b");
+            }
+            localStorage.setItem("setb", JSON.stringify(filteredSetb));
+            setb = filteredSetb;
+        }
         let filters = localStorage.getItem("filters");
         filters = filters ? JSON.parse(filters) : {};
         let registered = localStorage.getItem("registered");
@@ -38,7 +68,9 @@ export default class App extends Component {
             icon: registered ? localStorage.getItem("icon") || "user" : "user",
             perpage: registered ? localStorage.getItem("perpage") || 30 : 30,
             openin: registered ? localStorage.getItem("opin") || "nw" : "nw",
-            theme
+            theme,
+            setm,
+            setb
         }
     }
     bestLang = () => {

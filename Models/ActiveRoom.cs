@@ -10,10 +10,30 @@ namespace Rooms.Models
         private readonly ConcurrentDictionary<long, ActiveUser> _registered_users = new ConcurrentDictionary<long, ActiveUser>();
         private readonly ConcurrentDictionary<string, ActiveUser> _guest_users = new ConcurrentDictionary<string, ActiveUser>();
         private readonly SortedList<long, InMemoryMessage> _messages = new SortedList<long, InMemoryMessage>();
+        public long OwnerId { get; set; }
         public int VoiceUsersCount { get; set; } = 0;
         public byte Online { get => Convert.ToByte(_registered_users.Count() + _guest_users.Count()); }
         public readonly long roomId;
-        public ActiveRoom(long roomId) => this.roomId = roomId;
+        public ActiveRoom(long roomId, long ownerId)
+        {
+            this.roomId = roomId;
+            OwnerId = ownerId;
+        }
+        public void ClearMessages(long from, long till)
+        {
+            if (from == 0 && till == 0)
+                _messages.Clear();
+            else if (till == 0)
+            {
+                foreach (var msg in _messages.Where(msg => msg.Value.timeStamp > from))
+                    _messages.Remove(msg.Key);
+            }
+            else
+            {
+                foreach (var msg in _messages.Where(msg => msg.Value.timeStamp > from && msg.Value.timeStamp < till))
+                    _messages.Remove(msg.Key);
+            }
+        }
         public void AddUser(string connectionId, string name, string icon, long id, string guid)
         {
             var user = new ActiveUser(icon, name);

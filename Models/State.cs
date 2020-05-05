@@ -15,6 +15,19 @@ namespace Rooms.Models
         public long GetRoomId(string connectionId) => _activeUsers[connectionId];
         public ActiveRoom GetRoom(long roomId) => _activeRooms[roomId];
         private ActiveRoom GetRoom(string connectionId) => GetRoom(_activeUsers[connectionId]);
+        public string[] AdministrateUser(long adminId, string connectionId, long id, string guid)
+        {
+            var room = this.GetRoom(connectionId);
+            if (room.OwnerId != adminId) return new string[0];
+            return room.GetUserConnections(id, guid).ToArray();
+        }
+        public bool ClearMessages(long adminId, string connectionId, long from, long till)
+        {
+            var room = this.GetRoom(connectionId);
+            if (room.OwnerId != adminId) return false;
+            room.ClearMessages(from, till);
+            return true;
+        }
         public (string[], int) ConnectVoiceUser(long id, string guid, string connectionId)
         {
             var room = this.GetRoom(connectionId);
@@ -78,9 +91,9 @@ namespace Rooms.Models
                 room = room
             };
         }
-        public ActiveRoom ConnectUser(long userId, string guid, string name, string icon, string connectionId, long roomId, byte limit)
+        public ActiveRoom ConnectUser(long ownerId, long userId, string guid, string name, string icon, string connectionId, long roomId, byte limit)
         {
-            ActiveRoom room = _activeRooms.GetOrAdd(roomId, new ActiveRoom(roomId));
+            ActiveRoom room = _activeRooms.GetOrAdd(roomId, new ActiveRoom(roomId, ownerId));
             lock (room)
             {
                 var user = room.User(userId, guid);

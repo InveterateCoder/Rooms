@@ -19,6 +19,7 @@ const text = new LocalizedStrings({
         till: "Till",
         clear: "Clear Messages",
         wrongTiming: "Wrong timing!",
+        confirm: "Are you sure you want to delete all messages?"
     },
     ru: {
         text: "Регистрируйтесь, чтобы Включить",
@@ -34,6 +35,7 @@ const text = new LocalizedStrings({
         till: "До",
         clear: "Почистить Сообщения",
         wrongTiming: "Неправильное время!",
+        confirm: "Вы уверены, что хотите удалить все сообщения?"
     }
 });
 const voiceSupport = 'RTCPeerConnection' in window && 'mediaDevices' in navigator;
@@ -110,9 +112,11 @@ export function Menu(props) {
     const clearMessages = () => {
         let from = datetimeFrom ? (new Date(datetimeFrom)).getTime() * 10000 + 621355968000000000 : datetimeFrom;
         let till = datetimeTill ? (new Date(datetimeTill)).getTime() * 10000 + 621355968000000000 : datetimeTill;
-        console.log(from);
-        console.log(till);
         if (from && till && from >= till) alert(text.wrongTiming);
+        else if (!from && !till) {
+            if (window.confirm(text.confirm))
+                props.clearMessages(from, till);
+        }
         else props.clearMessages(from, till);
     }
     const timeNow = new Date();

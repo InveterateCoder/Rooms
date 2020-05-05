@@ -51,7 +51,8 @@ const text = new LocalizedStrings({
         bothChanged: "The room's name and flag have changed.",
         rmspassword: "Room's password",
         pswdplcholder: "Enter password",
-        oneInstance: "Something went wrong. Make sure only one instance of the room requires voice connection."
+        oneInstance: "Something went wrong. Make sure only one instance of the room requires voice connection.",
+        clearDatabase: "Database has been updated. Refresh the page to see the changes."
     },
     ru: {
         placeholder: "Введите сообщение ...",
@@ -75,7 +76,8 @@ const text = new LocalizedStrings({
         bothChanged: "Название комнаты и флаг изменились.",
         rmspassword: "Пароль комнаты",
         pswdplcholder: "Введите пароль",
-        oneInstance: "Что-то пошло не так. Убедитесь, что только один экземпляр комнаты требует голосового соединения."
+        oneInstance: "Что-то пошло не так. Убедитесь, что только один экземпляр комнаты требует голосового соединения.",
+        clearDatabase: "База данных обновлена. Обновите страницу, чтобы увидеть изменения."
     }
 })
 export class Room extends Component {
@@ -88,6 +90,7 @@ export class Room extends Component {
             loading: true,
             blocked: false,
             password: "",
+            roomId: 0,
             myId: 0,
             name: context.name,
             icon: context.icon,
@@ -129,6 +132,8 @@ export class Room extends Component {
         this.connection.on("candidate", this.candidate);
         this.connection.on("voiceCount", count => this.setState({ voiceOnline: count }));
         this.connection.on("logout", this.logout);
+        this.connection.on("mute", this.mute);
+        this.connection.on("ban", this.ban);
         this.menu = React.createRef();
         this.msgpanel = React.createRef();
         this.toastsRef = React.createRef();
@@ -151,14 +156,19 @@ export class Room extends Component {
         };
     }
     muteUser = (usr, min) => {
-        console.log(usr);
+        this.connection.invoke("MuteUser", usr.id, usr.guid, min);
     }
     banUser = (usr, min) => {
-        console.log(usr);
+        this.connection.invoke("BanUser", usr.id, usr.guid, min);
     }
     clearMessages = (from, till) => {
-        console.log(from);
-        console.log(till);
+        this.connection.invoke("ClearMessages", from ? from : 0, till ? till : 0).then(() => alert(text.clearDatabase));
+    }
+    mute = mins => {
+        
+    }
+    ban = mins => {
+
     }
     setupRTCPeerConnection = connectionId => {
         let conn = new RTCPeerConnection({
@@ -373,11 +383,13 @@ export class Room extends Component {
                 this.setState({
                     loading: false,
                     blocked: false,
+                    roomId: data.payload.roomId,
                     myId: data.payload.myId,
                     flag: data.payload.flag,
                     roomname: data.payload.name,
                     users: this.initializeUsersColors(data.payload.users),
-                    voiceOnline: data.payload.voiceUserCount
+                    voiceOnline: data.payload.voiceUserCount,
+                    isAdmin: data.payload.isAdmin
                 }, () => {
                     let length = data.payload.messages.length;
                     if (length < this.msgsCount)
