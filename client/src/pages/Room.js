@@ -106,7 +106,8 @@ export class Room extends Component {
             theme: context.theme,
             voiceOnline: 0,
             micStream: null,
-            emojiClosed: true
+            emojiClosed: true,
+            isAdmin: false
         }
         this.msgsCount = 70;
         this.oldestMsgTime = null;
@@ -148,6 +149,16 @@ export class Room extends Component {
             elem: undefined,
             time: undefined
         };
+    }
+    muteUser = (usr, min) => {
+        console.log(usr);
+    }
+    banUser = (usr, min) => {
+        console.log(usr);
+    }
+    clearMessages = (from, till) => {
+        console.log(from);
+        console.log(till);
     }
     setupRTCPeerConnection = connectionId => {
         let conn = new RTCPeerConnection({
@@ -793,8 +804,10 @@ export class Room extends Component {
                 </div>
                 <div ref={this.msgpanel} id="msgpanel" className={`${this.state.theme === "dark" ? "dark" : ""}`}></div>
             </div>
-            <Menu voicButtonClick={this.voicButtonClick} voiceActive={this.state.micStream !== null} voiceOnline={this.state.voiceOnline}
-                theme={this.state.theme} registered={this.context.registered} lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
+            <Menu isAdmin={this.state.isAdmin} muteUser={this.muteUser} banUser={this.banUser} clearMessages={this.clearMessages}
+                voicButtonClick={this.voicButtonClick} voiceActive={this.state.micStream !== null}
+                voiceOnline={this.state.voiceOnline} theme={this.state.theme} registered={this.context.registered}
+                lang={this.context.lang} menu={this.menu} open={this.state.menuopen}
                 closemenu={this.closemenu} icon={this.state.icon} name={this.state.name} users={this.state.users}
                 selusers={this.state.selusers} userClicked={this.userClicked} public={this.state.public}
                 setPublic={this.setPublic} sound={this.state.sound} soundClicked={this.soundClicked} />
