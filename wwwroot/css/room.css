@@ -69,10 +69,10 @@
     bottom: 10px;
 }
 #inpgroup aside {
-    position: absolute;
-    bottom: 0;
+    position: fixed;
+    bottom: 14px;
     z-index: 10;
-    right: 60px;
+    right: 73px;
     background-color: #f8f9fa;
     transition: margin-right .5s;
 }
@@ -238,15 +238,102 @@
 #msgpanel.dark > div {
     border-color: rgba(248, 249, 250, .3);
 }
-#msgpanel > div > div > div > span {
+#msgpanel .name {
     cursor: pointer;
     font-weight: 700;
     color: #343a40;
     letter-spacing: 1px;
 }
-#msgpanel.dark > div > div > div > span {
+#msgpanel.dark .name {
     color: #f8f9fa;
     font-weight: 600;
+}
+#msgpanel .line {
+    border-bottom: 2px solid;
+}
+#msgpanel .c0 {
+    border-color: slategray;
+}
+#msgpanel.dark .c0 {
+    border-color: lavender;
+}
+#msgpanel .c1 {
+    border-color: red;
+}
+#msgpanel .c2 {
+    border-color: limegreen;
+}
+#msgpanel.dark .c2 {
+    border-color: lightgreen;
+}
+#msgpanel .c3 {
+    border-color: mediumblue;
+}
+#msgpanel.dark .c3 {
+    border-color: dodgerblue;
+}
+#msgpanel .c4 {
+    border-color: goldenrod;
+}
+#msgpanel.dark .c4 {
+    border-color: orange;
+}
+#msgpanel .c5 {
+    border-color: darkturquoise;
+}
+#msgpanel.dark .c5 {
+    border-color: turquoise;
+}
+#msgpanel .c6 {
+    border-color: orchid;
+}
+#msgpanel.dark .c6 {
+    border-color: violet;
+}
+#msgpanel .c7 {
+    border-color: darkkhaki;
+}
+#msgpanel.dark .c7 {
+    border-color: yellow;
+}
+#msgpanel .c8 {
+    border-color: dodgerblue;
+}
+#msgpanel.dark .c8 {
+    border-color: lightskyblue;
+}
+#msgpanel .c9 {
+    border-color: palevioletred;
+}
+#msgpanel.dark .c9 {
+    border-color: lightcoral;
+}
+#msgpanel .c10 {
+    border-color: mediumpurple;
+}
+#msgpanel .c11 {
+    border-color: firebrick;
+}
+#msgpanel.dark .c11 {
+    border-color: deeppink;
+}
+#msgpanel .c12 {
+    border-color: lightseagreen;
+}
+#msgpanel.dark .c12 {
+    border-color: darkseagreen;
+}
+#msgpanel .c13 {
+    border-color: lightpink;
+}
+#msgpanel.dark .c13 {
+    border-color: peachpuff;
+}
+#msgpanel .c14 {
+    border-color: silver;
+}
+#msgpanel.dark .c14 {
+    border-color: lightslategray;
 }
 #msgpanel > div > div > pre {
     margin-left: 2px;

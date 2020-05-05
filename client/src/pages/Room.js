@@ -26,6 +26,8 @@ function isMobileTablet() {
 const emojiRegex = /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|\ud83c[\ude32-\ude3a]|\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/g;
 const htmlRegex = /(https?:\/\/[^\s]+)/g;
 
+const userColors = [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
 const text = new LocalizedStrings({
     en: {
         placeholder: "Type a message...",
@@ -145,7 +147,7 @@ export class Room extends Component {
             userGuid: null,
             elem: undefined,
             time: undefined
-        }
+        };
     }
     setupRTCPeerConnection = connectionId => {
         let conn = new RTCPeerConnection({
@@ -198,6 +200,8 @@ export class Room extends Component {
                         this.voiceConnections[connectionId].close();
                         delete this.voiceConnections[connectionId];
                     }
+                    break;
+                default: break;
             }
         }
         for (const track of this.state.micStream.getTracks())
@@ -347,6 +351,11 @@ export class Room extends Component {
         if (ev.target.tagName === "INPUT" && ev.which === 13)
             this.confirmPassword();
     }
+    initializeUsersColors = users => {
+        for (let user of users)
+            user.color = userColors.pop();
+        return users;
+    }
     processEnter = data => {
         switch (data.code) {
             case "ok":
@@ -356,7 +365,7 @@ export class Room extends Component {
                     myId: data.payload.myId,
                     flag: data.payload.flag,
                     roomname: data.payload.name,
-                    users: data.payload.users,
+                    users: this.initializeUsersColors(data.payload.users),
                     voiceOnline: data.payload.voiceUserCount
                 }, () => {
                     let length = data.payload.messages.length;
@@ -433,6 +442,13 @@ export class Room extends Component {
     }
     htmlEncode = text =>
         String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    formUserColor = (id, guid) => {
+        if (id === this.context.userId && guid === this.context.userGuid)
+            return " line c0";
+        let item = this.state.users.find(u => u.id === id && u.guid === guid);
+        if (item) return ` line c${item.color}`;
+        return "";
+    }
     formMessage = (msgs, today, highlight = false) => {
         let msg;
         if (Array.isArray(msgs))
@@ -444,7 +460,7 @@ export class Room extends Component {
         elem.className = "media p-1 mb-1";
         let inHTML = `<span class="mr-2 mt-2 ${msg.icon}"></span>
         <div class="media-body">
-        <div class="mb-1"><span tabindex="-1" class="ml-1 name">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
+        <div class="mb-1"><span tabindex="-1" class="ml-1 name${msgs === msg ? this.formUserColor(msg.userId, msg.userGuid) : ""}">${this.htmlEncode(msg.sender)}</span><small class="ml-2">${time ? "<code>" + time + "</code>" : "&#8987;"}</small></div>
         <pre ${msg.secret ? 'class="secret"' : ""}>${msgText}</pre>`;
         if (msg !== msgs) {
             for (let i = 1; i < msgs.length; i++) {
@@ -528,12 +544,15 @@ export class Room extends Component {
             document.scrollingElement.scrollTo(0, document.scrollingElement.scrollHeight);
     }
     addUser = usr => {
+        usr.color = userColors.pop();
         this.setState({ users: [...this.state.users, usr] });
         this.notify(`"${usr.name}" ${text.entered}`);
     }
     removeUser = usr => {
         const filter = usr.id ? u => u.id === usr.id : u => u.guid === usr.guid;
         let user = this.state.users.find(filter);
+        userColors.push(user.color);
+        userColors.sort((a, b) => b - a);
         let selusers = this.state.selusers.filter(u => u !== user);
         let pub = this.state.public;
         if (!pub && selusers.length === 0) pub = !pub;
@@ -571,6 +590,8 @@ export class Room extends Component {
         this.inputChanged();
         let ids = this.state.selusers.length > 0 && !this.state.public ? this.state.selusers.map(u => u.id) : null;
         let msg = {
+            userId: this.context.userId,
+            userGuid: this.context.userGuid,
             sender: this.state.name,
             icon: this.state.icon,
             secret: ids !== null,
