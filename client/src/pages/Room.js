@@ -641,8 +641,12 @@ export class Room extends Component {
         });
         return text;
     }
+    replaceWithEmojis = text => {
+        return text.replace(/\?/g, '❔').replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
+            .replace(/;\)/g, '😉').replace(/:\(/g, '😟').replace(/:D/g, '😄').replace(/:O/g, '😮')
+            .replace(/:\//g, "😠").replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
+    }
     sendMsg = ev => {
-        debugger;
         if (!ev.isTrusted) {
             alert("Automation is not allowed here!");
             return;
@@ -663,6 +667,7 @@ export class Room extends Component {
         if (!this.canSendMessage) return;
         let val = this.inputRef.current.value.trim();
         if (!val) return;
+        val = this.replaceWithEmojis(val);
         if (val.length > 2000) {
             this.notify(text.exceeds);
             return;
