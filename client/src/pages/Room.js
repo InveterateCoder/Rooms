@@ -52,7 +52,16 @@ const text = new LocalizedStrings({
         rmspassword: "Room's password",
         pswdplcholder: "Enter password",
         oneInstance: "Something went wrong. Make sure only one instance of the room requires voice connection.",
-        clearDatabase: "Database has been updated. Refresh the page to see the changes."
+        clearDatabase: "Database has been updated. Refresh the page to see the changes.",
+        userMuted: "User has been successfully muted.",
+        muted: "You have been muted by the Admin for",
+        mutedRemains: "You have been muted. Time remains:",
+        m: "m",
+        s: "s",
+        userBanned: "User has been successfully banned.",
+        banned: "You have been banned by the Admin for",
+        bannedRemains: "You have been banned. Time remains:",
+        min: "min"
     },
     ru: {
         placeholder: "Введите сообщение ...",
@@ -77,7 +86,16 @@ const text = new LocalizedStrings({
         rmspassword: "Пароль комнаты",
         pswdplcholder: "Введите пароль",
         oneInstance: "Что-то пошло не так. Убедитесь, что только один экземпляр комнаты требует голосового соединения.",
-        clearDatabase: "База данных обновлена. Обновите страницу, чтобы увидеть изменения."
+        clearDatabase: "База данных обновлена. Обновите страницу, чтобы увидеть изменения.",
+        userMuted: "Пользователь был успешно заглушен.",
+        muted: "Вы были заглушены администратором на",
+        mutedRemains: "Вы были заглушены. Остаётся времени:",
+        m: "м",
+        s: "с",
+        userBanned: "Пользователь был успешно забанен.",
+        banned: "Вы были забанены администратором на",
+        bannedRemains: "Вы были забанены. Остаётся времени:",
+        min: "мин"
     }
 })
 export class Room extends Component {
@@ -156,19 +174,21 @@ export class Room extends Component {
         };
     }
     muteUser = (usr, min) => {
-        this.connection.invoke("MuteUser", usr.id, usr.guid, min);
+        this.connection.invoke("MuteUser", usr.id, usr.guid, min).then(() => alert(text.userMuted));
     }
     banUser = (usr, min) => {
-        this.connection.invoke("BanUser", usr.id, usr.guid, min);
+        this.connection.invoke("BanUser", usr.id, usr.guid, min).then(() => alert(text.userBanned));
     }
     clearMessages = (from, till) => {
         this.connection.invoke("ClearMessages", from ? from : 0, till ? till : 0).then(() => alert(text.clearDatabase));
     }
     mute = mins => {
-        
+        this.context.setM(this.state.roomId, mins);
+        alert(`${text.muted} ${mins} ${text.min}`);
     }
     ban = mins => {
-
+        this.context.setB(this.state.roomId, mins);
+        this.fail(null, `${text.banned} ${mins} ${text.min}`);
     }
     setupRTCPeerConnection = connectionId => {
         let conn = new RTCPeerConnection({
@@ -308,6 +328,7 @@ export class Room extends Component {
         });
     }
     fail = (failed, warning) => {
+        this.logout();
         if (!this.unmounted)
             this.setState({ failed, warning }, this.componentWillUnmount);
     }
@@ -391,6 +412,22 @@ export class Room extends Component {
                     voiceOnline: data.payload.voiceUserCount,
                     isAdmin: data.payload.isAdmin
                 }, () => {
+                    if (this.context.setb.includes(this.state.roomId)) {
+                        let banTime = Number.parseInt(localStorage.getItem(this.state.roomId + '_b'));
+                        if (!banTime) this.context.remB(this.state.roomId);
+                        else {
+                            let time = Date.now();
+                            if (time < banTime) {
+                                let diff = banTime - time;
+                                let mins = Math.floor(diff / 60000);
+                                let secs = Math.ceil((diff % 60000) / 1000);
+                                this.fail(null, `${text.bannedRemains} ${mins}${text.m} : ${secs}${text.s}`);
+                                return;
+                            } else {
+                                this.context.remB(this.state.roomId);
+                            }
+                        }
+                    }
                     let length = data.payload.messages.length;
                     if (length < this.msgsCount)
                         this.oldestMsgTime = null;
@@ -421,6 +458,7 @@ export class Room extends Component {
                 let data = await this.connection.invoke("Enter", this.props.match.params["room"],
                     this.state.icon, this.state.password, this.msgsCount);
                 if (data.code === "password") alert(text.access);
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 this.processEnter(data);
             } catch (err) {
                 this.fail(err.message || text.wrong);
@@ -438,7 +476,13 @@ export class Room extends Component {
                 <Toast.Body>{msg}</Toast.Body>
             </Toast>);
         clearTimeout(this.toastTimer);
-        this.toastTimer = setTimeout(() => this.toastsRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" }), 300);
+        const setTimer = () => {
+            this.toastTimer = setTimeout(() => {
+                if (this.toastsRef.current)
+                    this.toastsRef.current.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+                else setTimer();
+            }, 300);
+        }
         return toasts;
     }
     formTime = (ticks, today) => {
@@ -597,7 +641,25 @@ export class Room extends Component {
         });
         return text;
     }
-    sendMsg = () => {
+    sendMsg = ev => {
+        debugger;
+        if (!ev.isTrusted) {
+            alert("Automation is not allowed here!");
+            return;
+        }
+        if (this.context.setm.includes(this.state.roomId)) {
+            let banTime = Number.parseInt(localStorage.getItem(this.state.roomId + '_m'));
+            let time = Date.now();
+            if (time < banTime) {
+                let diff = banTime - time;
+                let mins = Math.floor(diff / 60000);
+                let secs = Math.ceil((diff % 60000) / 1000);
+                alert(`${text.mutedRemains} ${mins}${text.m} : ${secs}${text.s}`);
+                return;
+            } else {
+                this.context.remM(this.state.roomId);
+            }
+        }
         if (!this.canSendMessage) return;
         let val = this.inputRef.current.value.trim();
         if (!val) return;
@@ -639,7 +701,7 @@ export class Room extends Component {
         if (ev.which === 13) {
             if (!this.isMobile && !ev.shiftKey) {
                 ev.preventDefault();
-                this.sendMsg();
+                this.sendMsg(ev);
             } else if (ev.target.value[ev.target.value.length - 1] === '\n')
                 ev.preventDefault();
         }
@@ -805,12 +867,18 @@ export class Room extends Component {
                     ${this.state.inputFocused ? " focused" : ""}`}>
                     <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-primary"
                         onClick={() => document.scrollingElement.scrollTo({ top: document.scrollingElement.scrollHeight, left: 0, behavior: "smooth" })}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
-                    <Picker onEmojiClick={this.onEmojiClick} skinTone={SKIN_TONE_NEUTRAL} />
+                    {
+                        !this.state.isMobile &&
+                        <Picker onEmojiClick={this.onEmojiClick} skinTone={SKIN_TONE_NEUTRAL} />
+                    }
                     <textarea id="input" ref={this.inputRef} onFocus={() => this.setState({ inputFocused: true })}
                         onInput={this.inputChanged} onKeyPress={this.msgInputKeyPressed} className="form-control"
                         placeholder={text.placeholder} onBlur={this.inputBlur} />
                     <div className="input-group-append">
-                        <button id="emoji" className={`btn btn-${this.state.inputFocused ? "warning" : "outline-warning"}${this.state.emojiClosed ? "" : " open"}`} onClick={this.onEmojiOpenClose}><FontAwesomeIcon icon={faAngleLeft} /></button>
+                        {
+                            !this.state.isMobile &&
+                            <button id="emoji" className={`btn btn-${this.state.inputFocused ? "warning" : "outline-warning"}${this.state.emojiClosed ? "" : " open"}`} onClick={this.onEmojiOpenClose}><FontAwesomeIcon icon={faAngleLeft} /></button>
+                        }
                         <button id="sendBtn" className={`pl-3 pr-3 btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
                     </div>
                 </div>

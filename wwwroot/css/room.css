@@ -62,8 +62,7 @@
     left: 24%;
     width: 75%;
     bottom: 25px;
-    transition: left .4s, width .4s;
-    transition: bottom .2s;
+    transition: left .4s, bottom .2s, width .4s;
 }
 #inpgroup.focused {
     bottom: 10px;
@@ -74,10 +73,9 @@
     z-index: 10;
     right: 73px;
     background-color: #f8f9fa;
-    transition: margin-right .5s;
 }
 #inpgroup.emjclosed aside {
-    margin-right: -380px;
+    visibility: hidden;
 }
 #inpgroup aside nav {
     background-color: #f8f9fa;
@@ -102,16 +100,15 @@
     height: 30px !important;
     width: 30px !important;
     border-radius: 10px;
-    transition: transform .7s !important;
 }
 #emoji.open {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 #inpgroup > div.input-group-append > button {
     height: 38px;
     margin-top: auto;
     box-shadow: 0 2px 7px 1px gray;
-    transition: margin .3s;
+    transition: margin .2s;
 }
 #inpgroup.focused > div.input-group-append > button:not(#emoji) {
     border-radius: 0;

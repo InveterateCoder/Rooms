@@ -99,25 +99,34 @@ export function Menu(props) {
         let value = userRef.current.value;
         if (!value) return;
         let user = users.find(user => user.id == value || user.guid == value);
-        if (user)
+        if (user){
             props.muteUser(user, penaltyMins);
+            setShowModal(false);
+        }
     }
     const banUser = () => {
         let value = userRef.current.value;
         if (!value) return;
         let user = users.find(user => user.id == value || user.guid == value);
-        if (user)
+        if (user) {
             props.banUser(user, penaltyMins);
+            setShowModal(false);
+        }
     }
     const clearMessages = () => {
         let from = datetimeFrom ? (new Date(datetimeFrom)).getTime() * 10000 + 621355968000000000 : datetimeFrom;
         let till = datetimeTill ? (new Date(datetimeTill)).getTime() * 10000 + 621355968000000000 : datetimeTill;
         if (from && till && from >= till) alert(text.wrongTiming);
         else if (!from && !till) {
-            if (window.confirm(text.confirm))
+            if (window.confirm(text.confirm)) {
                 props.clearMessages(from, till);
+                setShowModal(false);
+            }
         }
-        else props.clearMessages(from, till);
+        else {
+            props.clearMessages(from, till);
+            setShowModal(false);
+        }
     }
     const timeNow = new Date();
     text.setLanguage(props.lang);
@@ -186,13 +195,13 @@ export function Menu(props) {
                                 <div className="input-group-prepend">
                                     <span className="input-group-text">{text.from}</span>
                                 </div>
-                                <input type="datetime-local" min="2020-01-01T12:00:00" max={`${timeNow.getFullYear()}-${timeNow.getMonth().length > 1 ? timeNow.getMonth() : '0' + timeNow.getMonth()}-${timeNow.getDate().length > 1 ? timeNow.getDate() : '0' + timeNow.getDate()}T${timeNow.getHours()}:${timeNow.getMinutes()}:00`} value={datetimeFrom} className="form-control" onChange={datetimeFromChanged} />
+                                <input type="datetime-local" min="2020-01-01T12:00:00" value={datetimeFrom} className="form-control" onChange={datetimeFromChanged} />
                             </div>
                             <div className="form-group input-group">
                                 <div className="input-group-prepend">
                                     <span className="input-group-text">{text.till}</span>
                                 </div>
-                                <input type="datetime-local" min="2020-01-01T12:00:00" max={`${timeNow.getFullYear()}-${timeNow.getMonth().length > 1 ? timeNow.getMonth() : '0' + timeNow.getMonth()}-${timeNow.getDate().length > 1 ? timeNow.getDate() : '0' + timeNow.getDate()}T${timeNow.getHours()}:${timeNow.getMinutes()}:00`} value={datetimeTill} className="form-control" onChange={datetimeTillChanged} />
+                                <input type="datetime-local" min="2020-01-01T12:00:00" value={datetimeTill} className="form-control" onChange={datetimeTillChanged} />
                             </div>
                             <div className="form-group">
                                 <button className="btn btn-outline-warning btn-block" onClick={clearMessages}>{text.clear}</button>

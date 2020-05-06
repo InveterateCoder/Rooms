@@ -128,15 +128,17 @@ export function AsUserForm(props) {
                         }).catch(() => props.history.push("/fatal"));
                     break;
                 case "sign":
-                    Post(urls.signInAsUser,
-                        { email: state.email, password: state.password }, context.lang)
-                        .then(data => {
-                            let addr = null;
-                            if (props.location.search.startsWith("?room="))
-                                addr = "/room/" + props.location.search.substring(6);
-                            if (data) context.signInAsUser(data, addr);
-                            else setLoading(false);
-                        }).catch(() => props.history.push("/fatal"));
+                    setTimeout(() => {
+                        Post(urls.signInAsUser,
+                            { email: state.email, password: state.password }, context.lang)
+                            .then(data => {
+                                let addr = null;
+                                if (props.location.search.startsWith("?room="))
+                                    addr = "/room/" + props.location.search.substring(6);
+                                if (data) context.signInAsUser(data, addr);
+                                else setLoading(false);
+                            }).catch(() => props.history.push("/fatal"));
+                    }, 1000);
                     break;
                 case "recover":
                     Post(urls.recover, state.email, context.lang)

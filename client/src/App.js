@@ -7,36 +7,35 @@ import { Room } from "./pages/Room";
 import { Get } from "./utils/requests";
 import urls from "./utils/Urls";
 import Countries from "./data/countries"
-import { JsonHubProtocol } from '@aspnet/signalr';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
-        let timeNow = new Date();
-        let setm = localStorage.getItem("setm");
-        if (!setm) localStorage.setItem("setm", JSON.stringify([]));
+        let timeNow = Date.now();
+        let setm = localStorage.getItem("setm") || [];
+        if (setm.length === 0) localStorage.setItem("setm", JSON.stringify([]));
         else {
             setm = JSON.parse(setm);
             let filteredSetm = [];
-            for (let id in setm) {
-                let time = new Date(JSON.parse(localStorage.getItem(id + "_m")));
-                if (time > timeNow)
-                    filteredSetm.push(id);
-                else localStorage.removeItem(id + "_m");
+            for (let id of setm) {
+                let time = Number.parseInt(localStorage.getItem(id + "_m"));
+                if (!time || time < timeNow)
+                    localStorage.removeItem(id + "_m");
+                else filteredSetm.push(id);
             }
             localStorage.setItem('setm', JSON.stringify(filteredSetm));
             setm = filteredSetm;
         }
-        let setb = localStorage.getItem("setb");
-        if (!setb) localStorage.setItem("setb", JSON.stringify([]));
+        let setb = localStorage.getItem("setb") || [];
+        if (setb.length === 0) localStorage.setItem("setb", JSON.stringify([]));
         else {
             setb = JSON.parse(setb);
             let filteredSetb = [];
-            for (let id in setb) {
-                let time = new Date(JSON.parse(localStorage.getItem(id + "_b")));
-                if (time > timeNow)
-                    filteredSetb.push(id);
-                else localStorage.removeItem(id + "_b");
+            for (let id of setb) {
+                let time = Number.parseInt(localStorage.getItem(id + "_b"));
+                if (!time || time < timeNow)
+                    localStorage.removeItem(id + "_b");
+                else filteredSetb.push(id);
             }
             localStorage.setItem("setb", JSON.stringify(filteredSetb));
             setb = filteredSetb;
@@ -203,27 +202,60 @@ export default class App extends Component {
                 }
             });
     }
+    setM = (id, min) => {
+        if (min < 2 || min > 120) return;
+        this.setState({ setm: [...this.state.setm, id] },
+            () => {
+                localStorage.setItem('setm', JSON.stringify(this.state.setm));
+                localStorage.setItem(id + '_m', Date.now() + (min * 60000));
+            });
+    }
+    remM = (id) => {
+        this.setState({ setm: this.state.setm.filter(_id => _id !== id) },
+            () => {
+                localStorage.setItem('setm', JSON.stringify(this.state.setm));
+                localStorage.removeItem(id + '_m');
+            });
+    }
+    setB = (id, min) => {
+        if (min < 2 || min > 120) return;
+        this.setState({ setb: [...this.state.setb, id] },
+            () => {
+                localStorage.setItem('setb', JSON.stringify(this.state.setb));
+                localStorage.setItem(id + '_b', Date.now() + min * 60000);
+            });
+    }
+    remB = (id) => {
+        this.setState({ setb: this.state.setb.filter(_id => _id !== id) },
+            () => {
+                localStorage.setItem('setb', JSON.stringify(this.state.setb));
+                localStorage.removeItem(id + '_b');
+            });
+    }
     render() {
-        return <Context.Provider value={{
-            ...this.state,
-            signOut: this.signOut, changeFilters: this.changeFilters,
-            setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
-            changeRoom: this.changeRoom, changeIcon: this.changeIcon,
-            userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
-            signInAsGuest: this.signInAsGuest, setPerpage: this.setPerpage,
-            setOpenIn: this.setOpenIn, setTheme: this.setTheme
-        }}>
-            {
-                this.state.jwt && !this.state.name
-                    ? <Preloader />
-                    : <Switch>
-                        {
-                            this.state.jwt && <Route path="/room/:room" component={Room} />
-                        }
-                        <Route path="/" component={Home} />
-                    </Switch>
-            }
-        </Context.Provider>
+        if (!navigator.webdriver)
+            return <Context.Provider value={{
+                ...this.state,
+                setB: this.setB, setM: this.setM, remB: this.remB, remM: this.remM,
+                signOut: this.signOut, changeFilters: this.changeFilters,
+                setLanguage: this.setLanguage, changeAccaunt: this.changeAccaunt,
+                changeRoom: this.changeRoom, changeIcon: this.changeIcon,
+                userRegistered: this.userRegistered, signInAsUser: this.signInAsUser,
+                signInAsGuest: this.signInAsGuest, setPerpage: this.setPerpage,
+                setOpenIn: this.setOpenIn, setTheme: this.setTheme
+            }}>
+                {
+                    this.state.jwt && !this.state.name
+                        ? <Preloader />
+                        : <Switch>
+                            {
+                                this.state.jwt && <Route path="/room/:room" component={Room} />
+                            }
+                            <Route path="/" component={Home} />
+                        </Switch>
+                }
+            </Context.Provider>
+        else return <Preloader />
     }
     componentDidMount() {
         if (this.state.jwt) {
