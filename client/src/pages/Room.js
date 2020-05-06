@@ -868,7 +868,7 @@ export class Room extends Component {
                     <button id="scrollDown" style={{ visibility: this.state.scrolledDown ? "hidden" : "visible" }} ref={this.scrDownBtnRef} className="btn btn-primary"
                         onClick={() => document.scrollingElement.scrollTo({ top: document.scrollingElement.scrollHeight, left: 0, behavior: "smooth" })}><FontAwesomeIcon icon={faArrowCircleDown} /></button>
                     {
-                        !this.state.isMobile &&
+                        !this.isMobile &&
                         <Picker onEmojiClick={this.onEmojiClick} skinTone={SKIN_TONE_NEUTRAL} />
                     }
                     <textarea id="input" ref={this.inputRef} onFocus={() => this.setState({ inputFocused: true })}
@@ -876,7 +876,7 @@ export class Room extends Component {
                         placeholder={text.placeholder} onBlur={this.inputBlur} />
                     <div className="input-group-append">
                         {
-                            !this.state.isMobile &&
+                            !this.isMobile &&
                             <button id="emoji" className={`btn btn-${this.state.inputFocused ? "warning" : "outline-warning"}${this.state.emojiClosed ? "" : " open"}`} onClick={this.onEmojiOpenClose}><FontAwesomeIcon icon={faAngleLeft} /></button>
                         }
                         <button id="sendBtn" className={`pl-3 pr-3 btn btn-${this.state.inputFocused ? "success ml-1 mr-1" : "outline-success ml-2"}`} onClick={this.sendMsg}><FontAwesomeIcon icon={faPaperPlane} /></button>
