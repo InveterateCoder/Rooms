@@ -644,7 +644,7 @@ export class Room extends Component {
     replaceWithEmojis = text => {
         return text.replace(/\?/g, '❔').replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
             .replace(/;\)/g, '😉').replace(/:\(/g, '😟').replace(/:D/g, '😄').replace(/:O/g, '😮')
-            .replace(/:\//g, "😠").replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
+            .replace(/:\\/g, "😠").replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
     }
     sendMsg = ev => {
         if (!ev.isTrusted) {
