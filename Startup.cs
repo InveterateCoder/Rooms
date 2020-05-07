@@ -18,7 +18,6 @@ namespace Rooms
     public class Startup
     {
         public IConfiguration Configuration { get; }
-
         public Startup(IConfiguration configuration)
             => Configuration = configuration;
 
@@ -27,6 +26,13 @@ namespace Rooms
             var settingsSection = Configuration.GetSection("Settings");
             services.Configure<Settings>(settingsSection);
             var settings = settingsSection.Get<Settings>();
+            services.AddCors(opts =>
+            {
+                opts.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins(settings.CorsOrigins);
+                });
+            });
             services.AddControllers();
             services.AddSpaStaticFiles(config => config.RootPath = "client/build");
             services.AddSignalR().AddAzureSignalR(settings.SignalREndpoint);
@@ -70,9 +76,7 @@ namespace Rooms
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCors(opts => opts.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+            app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(routes =>

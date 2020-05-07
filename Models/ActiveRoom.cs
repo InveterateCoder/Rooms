@@ -25,13 +25,15 @@ namespace Rooms.Models
                 _messages.Clear();
             else if (till == 0)
             {
-                foreach (var msg in _messages.Where(msg => msg.Value.timeStamp > from))
-                    _messages.Remove(msg.Key);
+                var keys = _messages.Where(msg => msg.Value.timeStamp > from).Select(msg => msg.Key).ToArray();
+                foreach (var key in keys)
+                    _messages.Remove(key);
             }
             else
             {
-                foreach (var msg in _messages.Where(msg => msg.Value.timeStamp > from && msg.Value.timeStamp < till))
-                    _messages.Remove(msg.Key);
+                var keys = _messages.Where(msg => msg.Value.timeStamp > from && msg.Value.timeStamp < till).Select(msg => msg.Key).ToArray();
+                foreach (var key in keys)
+                    _messages.Remove(key);
             }
         }
         public void AddUser(string connectionId, string name, string icon, long id, string guid)
