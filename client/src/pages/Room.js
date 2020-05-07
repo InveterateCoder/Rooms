@@ -634,11 +634,11 @@ export class Room extends Component {
         text = text.replace(htmlRegex, '<a href="$&" target="_blank">$&</a>');
         let name = this.htmlEncode(this.state.name);
         let regex = new RegExp(this.regexEscape(name), "g");
-        text = text.replace(regex, `<span class="text-${this.state.theme === "dark" ? "info" : "primary"}">${name}</span>`);
+        text = text.replace(regex, `<span class="c0n nshad">${name}</span>`);
         this.state.users.forEach(user => {
             name = this.htmlEncode(user.name);
             regex = new RegExp(this.regexEscape(name), "g");
-            text = text.replace(regex, `<span class="text-${this.state.theme === "dark" ? "info" : "primary"}">${name}</span>`);
+            text = text.replace(regex, `<span class="${'c' + user.color + 'n'} nshad">${name}</span>`);
         });
         return text;
     }
