@@ -130,7 +130,7 @@ export class Room extends Component {
             emojiClosed: true,
             isAdmin: false
         }
-        this.msgsCount = 70;
+        this.msgsCount = 100;
         this.oldestMsgTime = null;
         this.connection = new signalR.HubConnectionBuilder().withUrl("/hubs/rooms",
             { accessTokenFactory: () => context.jwt }).configureLogging(signalR.LogLevel.Error).build();
@@ -435,6 +435,7 @@ export class Room extends Component {
                         this.oldestMsgTime = data.payload.messages[length - 1].time;
                     this.fillMessages(data.payload.messages);
                     window.scrollTo(0, document.body.scrollHeight);
+                    this.windowScrolled();
                 });
                 break;
             case "password":
@@ -644,7 +645,7 @@ export class Room extends Component {
     replaceWithEmojis = text => {
         return text.replace(/\?/g, '❔').replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
             .replace(/;\)/g, '😉').replace(/:\(/g, '😟').replace(/:D/g, '😄').replace(/:O/g, '😮')
-            .replace(/:\\/g, "😠").replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
+            .replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
     }
     sendMsg = ev => {
         if (!ev.isTrusted) {
