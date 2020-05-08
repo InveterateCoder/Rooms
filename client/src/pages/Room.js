@@ -642,8 +642,12 @@ export class Room extends Component {
         });
         return text;
     }
+    questionReplacer = (match, p1) => {
+        if(p1) return match;
+        else return '❔';
+    }
     replaceWithEmojis = text => {
-        return text.replace(/(?<!https?:\/\/[^\s]+)\?/g, '❔').replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
+        return text.replace(/(https?:\/\/[^\s]+)?\?/g, this.questionReplacer).replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
             .replace(/;\)/g, '😉').replace(/:\(/g, '😟').replace(/:D/g, '😄').replace(/:O/g, '😮')
             .replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
     }
