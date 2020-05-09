@@ -179,18 +179,36 @@ namespace Rooms.Hubs
         {
             await Task.Run(async () =>
             {
-                Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                if (_id.UserId == 0 || minutes > 120) return;
-                await Clients.Clients(_state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid)).SendAsync("ban", minutes);
+                try
+                {
+                    Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                    if (_id.UserId == 0 || minutes > 120) return;
+                    var users = _state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid);
+                    if (users.Length > 0)
+                        await Clients.Clients(users).SendAsync("ban", minutes);
+                }
+                catch (Exception ex)
+                {
+                    throw new HubException(ex.Message);
+                }
             });
         }
         public async Task MuteUser(long id, string guid, int minutes)
         {
             await Task.Run(async () =>
             {
-                Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
-                if (_id.UserId == 0 || minutes > 120) return;
-                await Clients.Clients(_state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid)).SendAsync("mute", minutes);
+                try
+                {
+                    Identity _id = JsonSerializer.Deserialize<Identity>(Context.User.Identity.Name);
+                    if (_id.UserId == 0 || minutes > 120) return;
+                    var users = _state.AdministrateUser(_id.UserId, Context.ConnectionId, id, guid);
+                    if (users.Length > 0)
+                        await Clients.Clients(users).SendAsync("mute", minutes);
+                }
+                catch (Exception ex)
+                {
+                    throw new HubException(ex.Message);
+                }
             });
         }
         public async Task ClearMessages(long from, long till)

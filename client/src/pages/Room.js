@@ -12,6 +12,7 @@ import Password from "react-type-password";
 import validator from "../utils/validator";
 import * as signalR from "@aspnet/signalr";
 import Picker, { SKIN_TONE_NEUTRAL } from "emoji-picker-react";
+import Delayer from "./accessories/Room/Delayer";
 
 function isMobileTablet() {
     var check = false;
@@ -128,7 +129,8 @@ export class Room extends Component {
             voiceOnline: 0,
             micStream: null,
             emojiClosed: true,
-            isAdmin: false
+            isAdmin: false,
+            delayTimer: 3
         }
         this.msgsCount = 100;
         this.oldestMsgTime = null;
@@ -174,10 +176,10 @@ export class Room extends Component {
         };
     }
     muteUser = (usr, min) => {
-        this.connection.invoke("MuteUser", usr.id, usr.guid, min).then(() => alert(text.userMuted));
+        this.connection.invoke("MuteUser", usr.id, usr.guid, min).then(() => alert(text.userMuted)).catch(err => { alert(err.message) });
     }
     banUser = (usr, min) => {
-        this.connection.invoke("BanUser", usr.id, usr.guid, min).then(() => alert(text.userBanned));
+        this.connection.invoke("BanUser", usr.id, usr.guid, min).then(() => alert(text.userBanned)).catch(err => { alert(err.message) });
     }
     clearMessages = (from, till) => {
         this.connection.invoke("ClearMessages", from ? from : 0, till ? till : 0).then(() => alert(text.clearDatabase));
@@ -398,6 +400,12 @@ export class Room extends Component {
             user.color = userColors.pop();
         return users;
     }
+    enterTimeout = () => {
+        if (this.state.delayTimer > 1)
+            this.setState({ delayTimer: this.state.delayTimer - 1 },
+                () => setTimeout(this.enterTimeout, 1000));
+        else this.setState({ delayTimer: 0 });
+    }
     processEnter = data => {
         switch (data.code) {
             case "ok":
@@ -436,6 +444,7 @@ export class Room extends Component {
                     this.fillMessages(data.payload.messages);
                     window.scrollTo(0, document.body.scrollHeight);
                     this.windowScrolled();
+                    setTimeout(this.enterTimeout, 1000);
                 });
                 break;
             case "password":
@@ -643,7 +652,7 @@ export class Room extends Component {
         return text;
     }
     questionReplacer = (match, p1) => {
-        if(p1) return match;
+        if (p1) return match;
         else return '❔';
     }
     replaceWithEmojis = text => {
@@ -863,6 +872,9 @@ export class Room extends Component {
             </div>
         </div>
         else return <div id="room">
+            {
+                this.state.delayTimer && <Delayer sec={this.state.delayTimer} />
+            }
             <div id="toasts" ref={this.toastsRef} style={{ visibility: this.state.toasts.length ? "visible" : "hidden" }}>
                 {this.fillToasts()}
             </div>

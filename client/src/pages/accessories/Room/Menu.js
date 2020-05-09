@@ -128,7 +128,6 @@ export function Menu(props) {
             setShowModal(false);
         }
     }
-    const timeNow = new Date();
     text.setLanguage(props.lang);
     return <div id="roommenu" ref={props.menu} tabIndex={-1} className={`bg-dark${props.open ? " menuopen" : ""}`} onBlur={props.closemenu}>
         <nav className="navbar navbar-expand bg-dark navbar-dark">

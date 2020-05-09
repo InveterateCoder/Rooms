@@ -113,9 +113,15 @@ namespace Rooms.Models
         }
         public IEnumerable<string> GetUserConnections(long userId, string guid)
         {
-            if (userId != 0) return _registered_users.GetValueOrDefault(userId)?.connectionIds;
-            else if (guid != null) return _guest_users.GetValueOrDefault(guid)?.connectionIds;
-            else throw new ArgumentException("Either id or guid must be provided.");
+            if (userId != 0) {
+                var result = _registered_users.GetValueOrDefault(userId);
+                if(result != null) return result.connectionIds;
+            }
+            else if (guid != null) {
+                var result = _guest_users.GetValueOrDefault(guid);
+                if(result != null) return result.connectionIds;
+            }
+            return Enumerable.Empty<string>();
         }
         public IEnumerable<RoomsUser> Users(long id = 0, string guid = null)
         {
