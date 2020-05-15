@@ -35,7 +35,7 @@ namespace Rooms
             });
             services.AddControllers();
             services.AddSpaStaticFiles(config => config.RootPath = "client/build");
-            services.AddSignalR().AddAzureSignalR(settings.SignalREndpoint);
+            services.AddSignalR();//.AddAzureSignalR(settings.SignalREndpoint);
             services.AddDbContext<RoomsDBContext>(opts => opts.UseMySql(settings.DBString));
             services.AddCors();
             var key = Encoding.ASCII.GetBytes(settings.Secret);
