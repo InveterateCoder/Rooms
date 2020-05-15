@@ -655,10 +655,50 @@ export class Room extends Component {
         if (p1) return match;
         else return '❔';
     }
+    uniqueReplacer = (_m, _p, p2) => {
+        switch (p2) {
+            case 'y':
+                return "👍";
+            case 'n':
+                return "👎";
+            case 'r':
+                return "🌹";
+            case 'h':
+                return "💖";
+        }
+        return _m;
+    }
+    columnReplacer = (_m, p, p2) => {
+        switch (p[0]) {
+            case ';':
+                if (p2 == ')')
+                    return '😉';
+                break;
+            case ':':
+                switch (p2) {
+                    case ')':
+                        return '🙂';
+                    case 'P':
+                        return '👅';
+                    case 'p':
+                        return '👅';
+                    case '(':
+                        return '😟';
+                    case 'D':
+                        return '😄';
+                    case 'd':
+                        return '😄';
+                    case 'O':
+                        return '😮';
+                    case 'o':
+                        return '😮';
+                }
+        }
+        return _m;
+    }
     replaceWithEmojis = text => {
-        return text.replace(/(https?:\/\/[^\s]+)?\?/g, this.questionReplacer).replace(/!/g, '❕').replace(/:\)/g, '🙂').replace(/:P/g, '😜')
-            .replace(/;\)/g, '😉').replace(/:\(/g, '😟').replace(/:D/g, '😄').replace(/:O/g, '😮')
-            .replace(/\(y\)/g, "👍").replace(/\(n\)/g, "👎").replace(/\(f\)/g, "🌹");
+        return text.replace(/(https?:\/\/[^\s]+)?\?/g, this.questionReplacer).replace(/!/g, '❕')
+            .replace(/([:;]([\)Pp\(DdOo]))/g, this.columnReplacer).replace(/(\(([ynrh])\))/g, this.uniqueReplacer);
     }
     sendMsg = ev => {
         if (!ev.isTrusted) {
@@ -929,7 +969,7 @@ export class Room extends Component {
         try {
             await this.connection.start();
             let data = await this.connection.invoke("Enter", this.props.match.params["room"],
-                this.state.icon, null, this.msgsCount);
+                this.state.icon, null, this.msgsCount).catch(err => alert(err.message));
             this.processEnter(data);
         }
         catch (err) {
