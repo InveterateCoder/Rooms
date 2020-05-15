@@ -665,6 +665,10 @@ export class Room extends Component {
                 return "🌹";
             case 'h':
                 return "💖";
+            case 'lol':
+                return "😂";
+            case 'rofl':
+                return "🤣";
         }
         return _m;
     }
@@ -697,8 +701,8 @@ export class Room extends Component {
         return _m;
     }
     replaceWithEmojis = text => {
-        return text.replace(/(https?:\/\/[^\s]+)?\?/g, this.questionReplacer).replace(/!/g, '❕')
-            .replace(/([:;]([\)Pp\(DdOo]))/g, this.columnReplacer).replace(/(\(([ynrh])\))/g, this.uniqueReplacer);
+        return text.replace(/(https?:\/\/[^\s]+)?\?/g, this.questionReplacer).replace(/!/g, '❕').replace(/\^\^/g, "😁")
+            .replace(/([:;]([\)Pp\(DdOo]))/g, this.columnReplacer).replace(/(\(([ynrhlorf]+)\))/g, this.uniqueReplacer);
     }
     sendMsg = ev => {
         if (!ev.isTrusted) {
